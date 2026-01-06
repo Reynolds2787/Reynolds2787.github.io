@@ -5,53 +5,70 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-  (function () {
-    function parseJwt(token) {
-      try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        return JSON.parse(atob(base64));
-      } catch (e) { return null; }
-    }
+  function parseJwt(token) {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      return JSON.parse(atob(base64));
+    } catch { return null; }
+  }
 
+  document.addEventListener("DOMContentLoaded", () => {
     const token = localStorage.getItem("id_token");
-    if (!token) {
-      window.location.href = "index.html";
-      return;
-    }
+    if (!token) return location.href = "index.html";
 
-    document.addEventListener("DOMContentLoaded", function () {
-      const payload = parseJwt(token);
-      if (!payload) return;
+    const payload = parseJwt(token);
+    document.getElementById("name").value = payload.name || "";
+    document.getElementById("email").value = payload.email || "";
+    document.getElementById("username").value = payload["cognito:username"] || "";
+    document.getElementById("sub").value = payload.sub || "";
+    document.getElementById("exp").value =
+      new Date(payload.exp * 1000).toLocaleString();
+  });
 
-      document.getElementById("p_name").textContent = payload.name || "-";
-      document.getElementById("p_email").textContent = payload.email || "-";
-      document.getElementById("p_username").textContent = payload["cognito:username"] || "-";
-      document.getElementById("p_sub").textContent = payload.sub || "-";
-      document.getElementById("p_issuer").textContent = payload.iss || "-";
-      document.getElementById("p_expires").textContent =
-        new Date(payload.exp * 1000).toLocaleString();
-    });
-  })();
+  function saveProfile() {
+    alert("Profile updates require backend support (Cognito AdminUpdateUserAttributes). Ready to wire when you are.");
+  }
   </script>
 </head>
 
-<body>
-<div class="container mt-5">
-  <h2>User Profile</h2>
-  <table class="table table-bordered mt-3">
-    <tr><th>Name</th><td id="p_name"></td></tr>
-    <tr><th>Email</th><td id="p_email"></td></tr>
-    <tr><th>Username</th><td id="p_username"></td></tr>
-    <tr><th>User ID (sub)</th><td id="p_sub"></td></tr>
-    <tr><th>Issuer</th><td id="p_issuer"></td></tr>
-    <tr><th>Token Expires</th><td id="p_expires"></td></tr>
-  </table>
+<body class="bg-light">
+<div class="container py-4">
+  <div class="card shadow-sm mx-auto" style="max-width: 500px;">
+    <div class="card-body">
+      <h4 class="card-title mb-3 text-center">👤 My Profile</h4>
 
-  <a href="index.html" class="btn btn-secondary">Back</a>
+      <div class="mb-3">
+        <label class="form-label">Name</label>
+        <input id="name" class="form-control">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input id="email" class="form-control">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Username</label>
+        <input id="username" class="form-control" disabled>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">User ID</label>
+        <input id="sub" class="form-control" disabled>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Token Expires</label>
+        <input id="exp" class="form-control" disabled>
+      </div>
+
+      <button class="btn btn-primary w-100" onclick="saveProfile()">Save Changes</button>
+      <a href="index.html" class="btn btn-link w-100 mt-2">← Back</a>
+    </div>
+  </div>
 </div>
 </body>
 </html>
