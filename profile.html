@@ -1,74 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>User Profile</title>
+  <title>My Profile</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
   <script>
-  function parseJwt(token) {
-    try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      return JSON.parse(atob(base64));
-    } catch { return null; }
-  }
+    const API_BASE_URL = "https://2e5urwmof6.execute-api.eu-west-2.amazonaws.com"; // <-- CHANGE THIS
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const token = localStorage.getItem("id_token");
-    if (!token) return location.href = "index.html";
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        return JSON.parse(atob(base64));
+      } catch {
+        return null;
+      }
+    }
 
-    const payload = parseJwt(token);
-    document.getElementById("name").value = payload.name || "";
-    document.getElementById("email").value = payload.email || "";
-    document.getElementById("username").value = payload["cognito:username"] || "";
-    document.getElementById("sub").value = payload.sub || "";
-    document.getElementById("exp").value =
-      new Date(payload.exp * 1000).toLocaleString();
-  });
+    document.addEventListener("DOMContentLoaded", () => {
+      const idToken = localStorage.getItem("id_token");
+      const accessToken = localStorage.getItem("access_token");
 
-  function saveProfile() {
-    alert("Profile updates require backend support (Cognito AdminUpdateUserAttributes). Ready to wire when you are.");
-  }
+      if (!idToken || !accessToken) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      const payload = parseJwt(idToken);
+      if (!payload) {
+        alert("Invalid session. Please log in again.");
+        localStorage.clear();
+        window.location.href = "index.html";
+        return;
+      }
+
+      document.getElementById("name").value = payload.name || "";
+      document.getElementById("email").value = payload.email || "";
+      document.getElementById("username").value = payload["cognito:username"] || "";
+      document.getElementById("sub").value = payload.sub || "";
+      document.getElementById("expires").value =
+        new Date(payload.exp * 1000).toLocaleString();
+    });
+
+    async function saveProfile() {
+      const accessToken = localStorage.getItem("access_token");
+
+      const payload = {
+        name: document.getElementById("name").value,
+        email: document.getElementById("email").value
+      };
+
+      const status = document.getElementById("status");
+      status.textContent = "Saving...";
+      status.className = "text-muted text-center mt-2";
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/profile`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + accessToken
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || "Update failed");
+        }
+
+        status.textContent = "✅ Profile updated successfully";
+        status.className = "text-success text-center mt-2";
+      } catch (err) {
+        status.textContent = "❌ " + err.message;
+        status.className = "text-danger text-center mt-2";
+      }
+    }
   </script>
 </head>
 
 <body class="bg-light">
-<div class="container py-4">
-  <div class="card shadow-sm mx-auto" style="max-width: 500px;">
-    <div class="card-body">
-      <h4 class="card-title mb-3 text-center">👤 My Profile</h4>
+  <div class="container py-4">
+    <div class="card shadow-sm mx-auto" style="max-width: 520px;">
+      <div class="card-body">
+        <h4 class="text-center mb-4">👤 My Profile</h4>
 
-      <div class="mb-3">
-        <label class="form-label">Name</label>
-        <input id="name" class="form-control">
+        <div class="mb-3">
+          <label class="form-label">Name</label>
+          <input id="name" class="form-control">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input id="email" type="email" class="form-control">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <input id="username" class="form-control" disabled>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">User ID</label>
+          <input id="sub" class="form-control" disabled>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Session Expires</label>
+          <input id="expires" class="form-control" disabled>
+        </div>
+
+        <button class="btn btn-primary w-100" onclick="saveProfile()">
+          Save Changes
+        </button>
+
+        <div id="status"></div>
+
+        <a href="index.html" class="btn btn-link w-100 mt-3">
+          ← Back to App
+        </a>
       </div>
-
-      <div class="mb-3">
-        <label class="form-label">Email</label>
-        <input id="email" class="form-control">
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label">Username</label>
-        <input id="username" class="form-control" disabled>
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label">User ID</label>
-        <input id="sub" class="form-control" disabled>
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label">Token Expires</label>
-        <input id="exp" class="form-control" disabled>
-      </div>
-
-      <button class="btn btn-primary w-100" onclick="saveProfile()">Save Changes</button>
-      <a href="index.html" class="btn btn-link w-100 mt-2">← Back</a>
     </div>
   </div>
-</div>
 </body>
 </html>
