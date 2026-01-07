@@ -141,27 +141,6 @@
 </div>
 
 
-<div class="container-fluid bg-light border-bottom">
-  <div class="container py-2">
-    <div class="d-flex justify-content-center align-items-center gap-2"
-         id="qnhDisplay"
-         data-bs-toggle="tooltip"
-         data-bs-placement="bottom"
-         title="Loading METAR…"
-         style="cursor: default;">
-
-      <span class="badge bg-primary">QNH</span>
-      <span class="fw-semibold">Kemble</span>
-
-      <span id="qnhValue" class="fs-5 fw-bold text-primary">
-        <span class="spinner-border spinner-border-sm"></span>
-      </span>
-
-      <span class="text-muted small">hPa</span>
-    </div>
-  </div>
-</div>
-
 <script>
 const apiUrl = "https://q97yj6cmpe.execute-api.eu-west-2.amazonaws.com/EFM_API/get_all_flights";
 const tableBody = document.getElementById("flightsTableBody");
@@ -229,8 +208,11 @@ async function fetchKembleQNH() {
       // CORS-safe proxy
       const metarUrl = `https://aviationweather.gov/api/data/metar?ids=${station.id}&format=json`;
       const response = await fetch(
-        "https://api.allorigins.win/raw?url=" + encodeURIComponent(metarUrl)
-      );
+        `https://api.allorigins.win/raw?url=` +
+        encodeURIComponent(
+        `https://aviationweather.gov/api/data/metar?ids=${station.id}&format=json`
+  )
+);
 
       const data = await response.json();
 
@@ -239,7 +221,7 @@ async function fetchKembleQNH() {
       }
 
       // Convert inHg → hPa
-      const qnh = Math.round(parseFloat(data[0].altim) * 33.8639);
+      const qnh = Math.round(parseFloat(data[0].altim) * 1);
 
       // Update display
       qnhValueEl.textContent = qnh;
