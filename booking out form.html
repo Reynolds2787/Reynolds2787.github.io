@@ -30,6 +30,8 @@
   </div>
 </nav>
 
+<!-- Page Title -->
+
 
 <div class="container">
 
@@ -37,8 +39,9 @@
   <p>Use this form to submit pre-flight details </p>
 
 
-
 <form>
+
+  <!-- Select Aircraft -->
     
   <div class="form-group col-md-2">
       <label for="inputState">Aircraft</label>
@@ -53,13 +56,55 @@
   </div>
 
   
-  <div class="form-group col-md-3 pt-3">
+  <!-- PIC Name -->
+  
+  <div class="form-group col-md-2 pt-3 ">
     <label for="usr">PIC Name:</label>
     <input type="text" class="form-control" id="usr">
   </div>
 
+
+  <!-- Reason For Flight -->
+
+  <div class="form-group col-md-2 pt-3">
+      <label for="reason">Reason For Flight</label>
+      <select id="reason" class="form-control">
+        <option selected>Choose...</option>
+        <option>Currency</option>
+        <option>Circuits</option>
+        <option>Landaway</option>
+        <option>Nav</option>
+        <option>PPL Training</option>
+        <option>EFIS Checkout</option>
+        <option>Skills Test</option>
+        <option>Revalidation</option>
+        <option>Maintenance</option>
+        <option>RTB</option>
+      </select>
+  </div>
+
+
+  <!-- Authorised By -->
+
+
+
   <div class ="row align-items-center pt-3">
-    <div class ="col-md-3">
+    <div class ="col-md-2">
+    <label for="auth">Authorised By:</label>
+    <input type="text" class="form-control" id="auth">
+    </div>
+
+    <div class ="col pt-4">
+    <input class="form-check-input" type="checkbox" id="self" name="self" value="self" checked>
+    <label class="form-check-label">Self</label>
+    </div>
+  
+  </div>
+  
+  <!-- From -->
+  
+  <div class ="row align-items-center pt-3">
+    <div class ="col col-md-2">
     <label for="from">From:</label>
     <input type="text" class="form-control" id="from">
     </div>
@@ -68,11 +113,15 @@
     <input class="form-check-input" type="checkbox" id="check1" name="option1" value="Kemble" checked>
     <label class="form-check-label">Kemble</label>
     </div>
-
+  
   </div>
 
+
+
+  <!-- To --> 
+
    <div class ="row align-items-center pt-3">
-    <div class ="col col-md-3">
+    <div class ="col col-md-2">
     <label for="to">To:</label>
     <input type="text" class="form-control" id="to">
     </div>
@@ -84,19 +133,149 @@
 
   </div>
   
+
+  <!-- ETA -->
   
-  <div class="form-group col-md-4 pb-3">
-    <label for="To">To:</label>
-    <input type="text" class="form-control" id="To">
+   <div class="form-group col-md-2 pt-3">
+    <label for="ETA">ETA:</label>
+    <input type="datetime-local" class="form-control" id="ETA">
+  </div>
+
+  
+  
+  <!-- Additional Passengers-->
+
+   <div class="form-group col-md-2 pt-3">
+      <label for="occupants">Additional Passengers</label>
+      <select id="occupants" class="form-control">
+        <option selected>Choose...</option>
+        <option>0</option>
+        <option>1</option>
+        <option>2</option>
+        <option>3</option>
+      </select>
+  </div>
+  
+
+  <!-- P2 -->
+  <div class="row align-items-center pt-3 passenger collapse" data-index="1">
+    <div class="col-md-2">
+      <label>P2 Name</label>
+      <input type="text" class="form-control" id="p2_name">
+    </div>
+    <div class="col-md-2">
+      <label>P2 Number</label>
+      <input type="tel" class="form-control" id="p2_number"
+             pattern="^[0-9 +]{10,15}$" placeholder="">
+    </div>
+    <div class="col pt-4">
+      <input type="checkbox" id="p2_club_member" checked>
+      <label>Club Member</label>
+    </div>
+  </div>
+
+  <!-- P3 -->
+  <div class="row align-items-center pt-3 passenger collapse" data-index="2">
+    <div class="col-md-2">
+      <label>P3 Name</label>
+      <input type="text" class="form-control" id="p3_name">
+    </div>
+    <div class="col-md-2">
+      <label>P3 Number</label>
+      <input type="tel" class="form-control" id="p3_number"
+             pattern="^[0-9 +]{10,15}$" placeholder="">
+    </div>
+    <div class="col pt-4">
+      <input type="checkbox" id="p3_club_member" checked>
+      <label>Club Member</label>
+    </div>
+  </div>
+
+  <!-- P4 -->
+  <div class="row align-items-center pt-3 passenger collapse" data-index="3">
+    <div class="col-md-2">
+      <label>P4 Name</label>
+      <input type="text" class="form-control" id="p4_name">
+    </div>
+    <div class="col-md-2">
+      <label>P4 Number</label>
+      <input type="tel" class="form-control" id="p4_number"
+             pattern="^[0-9 +]{10,15}$" placeholder="">
+    </div>
+    <div class="col pt-4">
+      <input type="checkbox" id="p4_club_member" checked>
+      <label>Club Member</label>
+    </div>
+  </div>
+
+  <div class="form-group col-md-2 pt-3 pb-3">
+      <label for="reason">Cost Sharing</label>
+      <select id="reason" class="form-control">
+        <option selected>Choose...</option>
+        <option>No</option>
+        <option>Yes</option>
+      </select>
   </div>
 
 
+ <!-- Submit!! -->
 
-  <button type="submit" class="btn btn-primary ">Submit</button>
+  <div>
+  <button type="submit" class="btn btn-primary">Submit</button>
+  </div>
 
-</form>    
+</form>
 
 </div>
+
+  
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const occupants = document.getElementById("occupants");
+  const passengerRows = document.querySelectorAll(".passenger");
+
+  function toggleInputs(row, enabled) {
+    row.querySelectorAll("input").forEach(input => {
+      input.disabled = !enabled;
+      if (!enabled) {
+        input.required = false;
+        input.value = "";
+      }
+    });
+  }
+
+  function updatePhoneRequirement(row) {
+    const club = row.querySelector("[id$='_club_member']");
+    const phone = row.querySelector("[id$='_number']");
+    phone.required = !club.checked;
+  }
+
+  function updatePassengers() {
+    const count = parseInt(occupants.value);
+
+    passengerRows.forEach(row => {
+      const index = parseInt(row.dataset.index);
+      const name = row.querySelector("[id$='_name']");
+      const club = row.querySelector("[id$='_club_member']");
+
+      if (index <= count) {
+        row.classList.add("show");
+        toggleInputs(row, true);
+        name.required = true;
+        updatePhoneRequirement(row);
+      } else {
+        row.classList.remove("show");
+        toggleInputs(row, false);
+      }
+
+      club.onchange = () => updatePhoneRequirement(row);
+    });
+  }
+
+  occupants.addEventListener("change", updatePassengers);
+  updatePassengers();
+});
+</script>
 
 </body>
 </html>
