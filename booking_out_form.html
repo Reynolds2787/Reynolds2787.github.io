@@ -321,6 +321,13 @@ function resetETATimeOnly() {
   ETA.value = datePart ? `${datePart}T` : "";
 }
 
+// auto-fill PIC based on logged in user
+const loggedInUser = localStorage.getItem("username");
+
+if (loggedInUser) {
+  pic_name.value = loggedInUser;
+}
+
 // Clear all data button
 clearAll.addEventListener("click", () => {
   if (!confirm("Clear all saved and current form data?")) return;
