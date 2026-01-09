@@ -175,6 +175,21 @@
 </div>
 
 <script>
+
+/* ========= Cognito Configuration ========= */
+
+const cognitoConfig = {
+  domain: "YOUR_DOMAIN.auth.eu-west-2.amazoncognito.com",
+  clientId: "YOUR_APP_CLIENT_ID",
+  redirectUri: window.location.origin + window.location.pathname,
+  responseType: "token",
+  scope: "openid email profile"
+};
+
+
+
+
+
 document.addEventListener("DOMContentLoaded", () => {
 
 const API_URL = "https://jhsinci6j9.execute-api.eu-west-2.amazonaws.com/development/book-flight";
