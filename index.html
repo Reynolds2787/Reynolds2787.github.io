@@ -70,51 +70,80 @@
 
 </head>
 
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".nav-link").forEach(link => {
+    if (link.href === window.location.href) {
+      link.classList.add("active");
+      link.setAttribute("aria-current", "page");
+    }
+  });
+});
+</script>
+
 <body>
 
-<div class="container-fluid p-2 bg-primary text-white text-center bg-gradient">
+<div class="container-fluid p-2 bg-primary text-white text-center">
   <h1>EFM WEB APP</h1>
 </div>
 
-<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+<div class="container-fluid p-2 bg-alert text-white text-center">
+  <h2>In Development - Active Flight Might Not Accurate Right Now</h2>
+</div>
+
+<nav class="navbar navbar-expand-sm navbar-dark bg-dark sticky-top shadow-sm py-1">
   <div class="container-fluid">
-    <ul class="navbar-nav">
-      <li class="nav-item">
-        <a class="nav-link active" href="index.html">Home</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="stats.html">Stats</a>
-      </li>
-    <li class="nav-item"><a class="nav-link" href="profile.html">Profile</a></li>
-</ul>
-<li class="nav-item ms-auto d-flex align-items-center text-white">
-  <span class="me-3">👤 <span id="loggedInUser"></span></span>
-  <button class="btn btn-sm btn-outline-light" id="logoutBtn">Logout</button>
-</li>
 
-  </div>
-</nav>
+    <!-- Brand (optional but recommended) -->
+    <a class="navbar-brand fw-semibold" href="index.html">EFM</a>
 
-<div class="container-fluid bg-light border-bottom">
-  <div class="container py-2">
-    <div class="d-flex justify-content-center align-items-center gap-2"
-         id="qnhDisplay"
-         data-bs-toggle="tooltip"
-         data-bs-placement="bottom"
-         title="Loading METAR…"
-         style="cursor: default;">
+    <!-- Mobile toggle -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#efmNavbar">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-      <span class="badge bg-primary">QNH</span>
-      <span class="fw-semibold">Kemble</span>
+    <div class="collapse navbar-collapse" id="efmNavbar">
 
-      <span id="qnhValue" class="fs-5 fw-bold text-primary">
-        <span class="spinner-border spinner-border-sm"></span>
-      </span>
+      <!-- Left nav -->
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="index.html">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="stats.html">Stats</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="book_out_form.html">BookOut</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="profile.html">Profile</a>
+        </li>
+      </ul>
 
-      <span class="text-muted small">hPa</span>
+      <!-- Right nav / user -->
+      <ul class="navbar-nav">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle d-flex align-items-center gap-1"
+             href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            👤 <span id="loggedInUser">User</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+              <a class="dropdown-item" href="profile.html">Profile</a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <button class="dropdown-item text-danger" id="logoutBtn">
+                Logout
+              </button>
+            </li>
+          </ul>
+        </li>
+      </ul>
+
     </div>
   </div>
-</div>
+</nav>
 
 <div class="container-fluid pt-2 pb-2 ps-2 bg-light bg-gradient">
   <h2>Active Flights</h2>
@@ -139,7 +168,6 @@
     <tbody id="flightsTableBody"></tbody>
   </table>
 </div>
-
 
 <script>
 const apiUrl = "https://q97yj6cmpe.execute-api.eu-west-2.amazonaws.com/EFM_API/get_all_flights";
@@ -183,77 +211,6 @@ function fetchFlights() {
 
 fetchFlights();
 setInterval(fetchFlights, 30000);
-</script>
-
-<script>
-let qnhTooltip;
-
-async function fetchKembleQNH() {
-  const qnhValueEl = document.getElementById("qnhValue");
-  const qnhDisplayEl = document.getElementById("qnhDisplay");
-
-  if (!qnhValueEl || !qnhDisplayEl) {
-    console.warn("QNH elements not found in DOM");
-    return;
-  }
-
-  // Nearest METAR stations to Kemble (priority order)
-  const stations = [
-    { id: "EGVA", label: "EGVA (Fairford)" },
-    { id: "EGBJ", label: "EGBJ (Gloucester)" }
-  ];
-
-  for (const station of stations) {
-    try {
-      // CORS-safe proxy
-      const metarUrl = `https://aviationweather.gov/api/data/metar?ids=${station.id}&format=json`;
-      const response = await fetch(
-        `https://api.allorigins.win/raw?url=` +
-        encodeURIComponent(
-        `https://aviationweather.gov/api/data/metar?ids=${station.id}&format=json`
-  )
-);
-
-      const data = await response.json();
-
-      if (!data || !data.length || !data[0].altim || !data[0].rawOb) {
-        throw new Error("Incomplete METAR data");
-      }
-
-      // Convert inHg → hPa
-      const qnh = Math.round(parseFloat(data[0].altim) * 1);
-
-      // Update display
-      qnhValueEl.textContent = qnh;
-
-      // Tooltip text (full METAR + source)
-      qnhDisplayEl.setAttribute(
-        "title",
-        `${data[0].rawOb}\n— Source: ${station.label}`
-      );
-
-      // Refresh tooltip instance
-      if (qnhTooltip) qnhTooltip.dispose();
-      qnhTooltip = new bootstrap.Tooltip(qnhDisplayEl);
-
-      return; // stop after first valid station
-    } catch (err) {
-      console.warn(`METAR fetch failed for ${station.id}`, err);
-    }
-  }
-
-  // All stations failed
-  qnhValueEl.textContent = "—";
-  qnhDisplayEl.setAttribute(
-    "title",
-    "METAR unavailable from EGVA / EGBJ"
-  );
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  fetchKembleQNH();
-  setInterval(fetchKembleQNH, 600000); // every 10 minutes
-});
 </script>
 
 </body>
