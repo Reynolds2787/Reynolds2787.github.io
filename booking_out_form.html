@@ -414,11 +414,22 @@ bookingForm.addEventListener("submit", async e => {
   });
 
   try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    const token = localStorage.getItem("id_token");
+
+  if (!token) {
+  alert("You are not authenticated. Please log in again.");
+  return;
+  } 
+
+  const res = await fetch(API_URL, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${token}`
+  },
+  body: JSON.stringify(payload)
+  });
+
     if (!res.ok) throw new Error();
 
     new bootstrap.Toast(successToast).show();
