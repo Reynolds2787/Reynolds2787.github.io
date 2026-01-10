@@ -194,5 +194,38 @@ fetchFlights();
 setInterval(fetchFlights, 30000);
 </script>
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const logoutBtn = document.getElementById("logoutBtn");
+  const userEl = document.getElementById("loggedInUser");
+
+  if (userEl) {
+    userEl.textContent = localStorage.getItem("username") || "User";
+  }
+
+  if (!logoutBtn) {
+    console.warn("Logout button not found");
+    return;
+  }
+
+  logoutBtn.addEventListener("click", function (e) {
+    e.preventDefault();
+
+    // Remove ONLY auth-related keys
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("id_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("username");
+
+    // Redirect through Cognito logout
+    window.location.href =
+      "https://eu-west-2gytf1n6yk.auth.eu-west-2.amazoncognito.com/logout" +
+      "?client_id=r3kibut2khk4blk1mj7ti9c6p" +
+      "&logout_uri=" + encodeURIComponent("https://efmapp.co.uk/");
+  });
+});
+</script>
+
+
 </body>
 </html>
