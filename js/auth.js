@@ -1,7 +1,8 @@
 (async function () {
   const COGNITO_DOMAIN = "https://eu-west-2gytf1n6yk.auth.eu-west-2.amazoncognito.com";
   const CLIENT_ID = "r3kibut2khk4blk1mj7ti9c6p";
-  const REDIRECT_URI = "https://efmapp.co.uk/";
+  const REDIRECT_URI = window.location.origin + "/";
+
 
   const params = new URLSearchParams(window.location.search);
   const code = params.get("code");
@@ -49,3 +50,4 @@
       `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
   }
 })();
+
