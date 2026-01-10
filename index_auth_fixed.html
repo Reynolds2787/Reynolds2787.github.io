@@ -64,7 +64,6 @@
   </script>
 </head>
 
-
 <body>
 
 <div class="container-fluid p-2 bg-primary text-white text-center">
@@ -77,122 +76,58 @@
 
 <nav class="navbar navbar-expand-sm navbar-dark bg-dark sticky-top shadow-sm py-1">
   <div class="container-fluid">
-
-    <!-- Brand (optional but recommended) -->
     <a class="navbar-brand fw-semibold" href="index.html">WELCOME TO LFC!</a>
-
-    <!-- Mobile toggle -->
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#efmNavbar">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="efmNavbar">
-
-      <!-- Left nav -->
       <ul class="navbar-nav me-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="index.html">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="stats.html">Stats</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="booking_out_form.html">Book Out</a>
-        </li>
+        <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="stats.html">Stats</a></li>
+        <li class="nav-item"><a class="nav-link" href="booking_out_form.html">Book Out</a></li>
       </ul>
 
-      <!-- Right nav / user -->
       <ul class="navbar-nav">
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle d-flex align-items-center gap-1"
-             href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#" role="button" data-bs-toggle="dropdown">
             👤 <span id="loggedInUser">User</span>
           </a>
           <ul class="dropdown-menu dropdown-menu-end">
-            <li>
-              <a class="dropdown-item" href="profile.html">Profile</a>
-            </li>
+            <li><a class="dropdown-item" href="profile.html">Profile</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li>
-              <button class="dropdown-item text-danger" id="logoutBtn">
-                Logout
-              </button>
-            </li>
+            <li><button class="dropdown-item text-danger" id="logoutBtn">Logout</button></li>
           </ul>
         </li>
       </ul>
-
     </div>
   </div>
 </nav>
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const userEl = document.getElementById("loggedInUser");
+  const logoutEl = document.getElementById("logoutBtn");
+
+  if (userEl) {
+    userEl.textContent = localStorage.getItem("username") || "User";
+  }
+
+  if (logoutEl) {
+    logoutEl.onclick = function () {
+      localStorage.clear();
+      window.location.href =
+        "https://eu-west-2gytf1n6yk.auth.eu-west-2.amazoncognito.com/logout" +
+        "?client_id=r3kibut2khk4blk1mj7ti9c6p" +
+        "&logout_uri=https%3A%2F%2Fefmapp.co.uk%2F";
+    };
+  }
+});
+</script>
+
 <div class="container-fluid pt-2 pb-2 ps-2 bg-light bg-gradient">
   <h2>Active Flights</h2>
 </div>
-
-<div class="container mt-2">
-  <div class="alert alert-info py-2 mb-2">
-    Auto-refreshing every <strong>30 seconds</strong>
-  </div>
-
-  <div id="loadingSpinner" class="text-center my-3">
-    <div class="spinner-border text-primary"></div>
-    <div>Loading flights...</div>
-  </div>
-
-  <div id="flightCards" class="d-block d-md-none"></div>
-
-  <table class="table table-striped table-bordered d-none d-md-table">
-    <thead class="table-dark">
-      <tr><th>AIRCRAFT</th><th>FROM</th><th>TO</th><th>ETA</th></tr>
-    </thead>
-    <tbody id="flightsTableBody"></tbody>
-  </table>
-</div>
-
-<script>
-const apiUrl = "https://q97yj6cmpe.execute-api.eu-west-2.amazonaws.com/EFM_API/get_all_flights";
-const tableBody = document.getElementById("flightsTableBody");
-const cardsContainer = document.getElementById("flightCards");
-const spinner = document.getElementById("loadingSpinner");
-
-function fetchFlights() {
-  spinner.style.display = "block";
-  fetch(apiUrl).then(r => r.json()).then(data => {
-    tableBody.innerHTML = "";
-    cardsContainer.innerHTML = "";
-    data.sort((a,b) => new Date(a["ETA FULL"]) - new Date(b["ETA FULL"]));
-    const now = new Date();
-
-    data.forEach(f => {
-      const eta = new Date(f["ETA FULL"]);
-      const overdue = eta < now;
-
-      const tr = document.createElement("tr");
-      if (overdue) tr.classList.add("table-danger");
-      tr.innerHTML = `<td>${f["Aircraft"]}</td><td>${f["From"]}</td><td>${f["To"]}</td><td>${f["ETA Abbreviated"]}${overdue ? ' <span class="badge bg-danger">OVERDUE</span>' : ''}</td>`;
-      tableBody.appendChild(tr);
-
-      const card = document.createElement("div");
-      card.className = `card mb-2 ${overdue ? 'border-danger' : ''}`;
-      card.innerHTML = `<div class="card-body">
-        <h5>${f["Aircraft"]}</h5>
-        <p><strong>From:</strong> ${f["From"]}</p>
-        <p><strong>To:</strong> ${f["To"]}</p>
-        <p><strong>ETA:</strong> ${f["ETA Abbreviated"]}</p>
-        <p><strong>PIC:</strong> ${f["PIC"]}</p>
-        <p><strong>Reason:</strong> ${f["Reason For Flight"]}</p>
-        ${overdue ? '<span class="badge bg-danger">OVERDUE</span>' : ''}
-      </div>`;
-      cardsContainer.appendChild(card);
-    });
-    spinner.style.display = "none";
-  }).catch(() => spinner.style.display = "none");
-}
-
-fetchFlights();
-setInterval(fetchFlights, 30000);
-</script>
 
 </body>
 </html>
