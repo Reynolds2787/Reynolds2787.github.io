@@ -46,14 +46,15 @@
     }
   }
 
-  // 🔒 Enforce login
-  if (!localStorage.getItem("access_token")) {
-    window.location.href =
-      `${COGNITO_DOMAIN}/login` +
-      `?client_id=${CLIENT_ID}` +
-      `&response_type=code` +
-      `&scope=openid+email+profile` +
-      `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
-  }
+      // 🔒 Enforce login (ONLY if no code AND no token)
+      if (!code && !localStorage.getItem("access_token")) {
+        window.location.href =
+          `${COGNITO_DOMAIN}/login` +
+          `?client_id=${CLIENT_ID}` +
+          `&response_type=code` +
+          `&scope=openid+email+profile` +
+          `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+      }
+
 })();
 
