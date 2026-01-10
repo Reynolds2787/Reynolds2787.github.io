@@ -21,7 +21,13 @@
         })
       });
 
+
       const tokens = await res.json();
+
+      if (!tokens.access_token) {
+      console.error("Token response invalid", tokens);
+      return;
+        }
 
       localStorage.setItem("access_token", tokens.access_token);
       localStorage.setItem("id_token", tokens.id_token);
