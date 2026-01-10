@@ -20,86 +20,58 @@
 })();
 </script>
 
-
 <script>
-(function () {
-  function parseJwt(token) {
-    try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      return JSON.parse(atob(base64));
-    } catch (e) {
-      return null;
-    }
-  }
+(async function () {
+  const COGNITO_DOMAIN = "https://eu-west-2gytf1n6yk.auth.eu-west-2.amazoncognito.com";
+  const CLIENT_ID = "r3kibut2khk4blk1mj7ti9c6p";
+  const REDIRECT_URI = "https://efmapp.co.uk/";
 
-  (async function () {
   const params = new URLSearchParams(window.location.search);
   const code = params.get("code");
 
-  if (!code) return;
-
-  try {
-    const response = await fetch(
-      "https://eu-west-2gytf1n6yk.auth.eu-west-2.amazoncognito.com/oauth2/token",
-      {
+  // STEP 1: Exchange code for tokens
+  if (code) {
+    try {
+      const res = await fetch(`${COGNITO_DOMAIN}/oauth2/token`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        },
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({
           grant_type: "authorization_code",
-          client_id: "r3kibut2khk4blk1mj7ti9c6p",
-          redirect_uri: "https://efmapp.co.uk/",
+          client_id: CLIENT_ID,
+          redirect_uri: REDIRECT_URI,
           code
         })
-      }
-    );
+      });
 
-    const tokens = await response.json();
+      const tokens = await res.json();
 
-    // 🔑 STORE ALL TOKENS
-    localStorage.setItem("access_token", tokens.access_token);
-    localStorage.setItem("id_token", tokens.id_token);
-    localStorage.setItem("refresh_token", tokens.refresh_token);
+      localStorage.setItem("access_token", tokens.access_token);
+      localStorage.setItem("id_token", tokens.id_token);
+      localStorage.setItem("refresh_token", tokens.refresh_token);
 
-    // Decode ID token for UI display
-    const payload = JSON.parse(atob(tokens.id_token.split('.')[1]));
-    localStorage.setItem(
-      "username",
-      payload.name || payload.email || "User"
-    );
+      const payload = JSON.parse(atob(tokens.id_token.split(".")[1]));
+      localStorage.setItem(
+        "username",
+        payload.name || payload.email || "User"
+      );
 
-    localStorage.setItem("efm_logged_in", "true");
-
-    // Clean URL
-    window.history.replaceState({}, document.title, window.location.pathname);
-
-  } catch (err) {
-    console.error("Token exchange failed", err);
-  }
-})();
-
-
-  const token = localStorage.getItem("access_token");
-  if (!token) {
-    window.location.href = "https://eu-west-2gytf1n6yk.auth.eu-west-2.amazoncognito.com/login?client_id=r3kibut2khk4blk1mj7ti9c6p&response_type=token&scope=openid+email+profile&redirect_uri=https%3A%2F%2Fefmapp.co.uk%2F";
-    return;
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } catch (e) {
+      console.error("Token exchange failed", e);
+    }
   }
 
-  document.addEventListener("DOMContentLoaded", function () {
-    const userEl = document.getElementById("loggedInUser");
-    const logoutEl = document.getElementById("logoutBtn");
-    if (userEl) {
-      userEl.textContent = localStorage.getItem("username") || "Logged in";
-    }
-    if (logoutEl) {
-      logoutEl.onclick = function () {
-        localStorage.clear();
-        window.location.href = "https://eu-west-2gytf1n6yk.auth.eu-west-2.amazoncognito.com/logout?client_id=r3kibut2khk4blk1mj7ti9c6p&logout_uri=https%3A%2F%2Fefmapp.co.uk%2F";
-      };
-    }
-  });
+  // STEP 2: Enforce login (ONLY after exchange attempt)
+  const accessToken = localStorage.getItem("access_token");
+  if (!accessToken) {
+    window.location.href =
+      `${COGNITO_DOMAIN}/login` +
+      `?client_id=${CLIENT_ID}` +
+      `&response_type=code` +
+      `&scope=openid+email+profile` +
+      `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+  }
 })();
 </script>
 
