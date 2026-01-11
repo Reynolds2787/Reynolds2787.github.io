@@ -1,6 +1,5 @@
 (async function () {
-  const COGNITO_DOMAIN =
-    "https://cognito-idp.eu-west-2.amazonaws.com/eu-west-2_6tjf0zBnC";
+  const COGNITO_DOMAIN = "https://eu-west-26tjf0zbnc.auth.eu-west-2.amazoncognito.com";
   const CLIENT_ID = "63ag0fj4bpqi4ouvat8bsc0890";
 
   // ✅ Works on GitHub Pages, custom domain, localhost
