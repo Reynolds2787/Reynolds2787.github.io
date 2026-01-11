@@ -227,6 +227,7 @@ function fetchStats() {
       aircraft.sort((a,b) => parseFloat(a["Remaining Time"]) - parseFloat(b["Remaining Time"]));
 
       aircraft.forEach(a => {
+
         const t = parseFloat(a["Remaining Time"]);
         const urgent = !isNaN(t) && t < LOW_TIME;
 
