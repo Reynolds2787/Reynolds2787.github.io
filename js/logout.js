@@ -17,8 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.removeItem("username");
 
     window.location.href =
-      "https://eu-west-2gytf1n6yk.auth.eu-west-2.amazoncognito.com/logout" +
-      "?client_id=r3kibut2khk4blk1mj7ti9c6p" +
+      "https://cognito-idp.eu-west-2.amazonaws.com/eu-west-2_6tjf0zBnC" +
+      "?client_id=63ag0fj4bpqi4ouvat8bsc0890" +
       "&logout_uri=" + encodeURIComponent("https://efmapp.co.uk/");
   });
 });
