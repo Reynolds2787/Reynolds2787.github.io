@@ -8,67 +8,8 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 
+<script src="js/auth.js"></script>
 
-
-<script>
-(function() {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get("code")) {
-    localStorage.setItem("efm_logged_in", "true");
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }
-  if (!localStorage.getItem("efm_logged_in")) {
-    window.location.href = "https://eu-west-2gytf1n6yk.auth.eu-west-2.amazoncognito.com/login?client_id=r3kibut2khk4blk1mj7ti9c6p&response_type=code&scope=aws.cognito.signin.user.admin+email+openid+profile&redirect_uri=https%3A%2F%2Fefmapp.co.uk%2F";
-  }
-})();
-</script>
-
-<script>
-(function () {
-  function parseJwt(token) {
-    try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      return JSON.parse(atob(base64));
-    } catch (e) {
-      return null;
-    }
-  }
-
-  if (window.location.hash.includes("id_token")) {
-    const hash = new URLSearchParams(window.location.hash.substring(1));
-    const idToken = hash.get("id_token");
-    localStorage.setItem("id_token", idToken);
-    const payload = parseJwt(idToken);
-    if (payload && payload.name) {
-      localStorage.setItem("username", payload.name);
-    } else if (payload && payload.email) {
-      localStorage.setItem("username", payload.email);
-    }
-    window.location.hash = "";
-  }
-
-  const token = localStorage.getItem("id_token");
-  if (!token) {
-    window.location.href = "https://eu-west-2gytf1n6yk.auth.eu-west-2.amazoncognito.com/login?client_id=r3kibut2khk4blk1mj7ti9c6p&response_type=token&scope=openid+email+profile&redirect_uri=https%3A%2F%2Fefmapp.co.uk%2F";
-    return;
-  }
-
-  document.addEventListener("DOMContentLoaded", function () {
-    const userEl = document.getElementById("loggedInUser");
-    const logoutEl = document.getElementById("logoutBtn");
-    if (userEl) {
-      userEl.textContent = localStorage.getItem("username") || "Logged in";
-    }
-    if (logoutEl) {
-      logoutEl.onclick = function () {
-        localStorage.clear();
-        window.location.href = "https://eu-west-2gytf1n6yk.auth.eu-west-2.amazoncognito.com/logout?client_id=r3kibut2khk4blk1mj7ti9c6p&logout_uri=https%3A%2F%2Fefmapp.co.uk%2F";
-      };
-    }
-  });
-})();
-</script>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
