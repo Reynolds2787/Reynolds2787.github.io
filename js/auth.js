@@ -1,7 +1,7 @@
 (async function () {
   const COGNITO_DOMAIN =
     "https://eu-west-2gytf1n6yk.auth.eu-west-2.amazoncognito.com";
-  const CLIENT_ID = "r3kibut2khk4blk1mj7ti9c6p";
+  const CLIENT_ID = "35v7pm264qqgag5n7l759v6a8k";
 
   // ✅ Works on GitHub Pages, custom domain, localhost
   const REDIRECT_URI = window.location.origin + "/";
