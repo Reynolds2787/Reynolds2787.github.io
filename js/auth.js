@@ -1,5 +1,6 @@
 (async function () {
   const COGNITO_DOMAIN = "https://eu-west-26tjf0zbnc.auth.eu-west-2.amazoncognito.com";
+
   const CLIENT_ID = "63ag0fj4bpqi4ouvat8bsc0890";
 
   // ✅ Works on GitHub Pages, custom domain, localhost
@@ -78,4 +79,38 @@
       `&scope=openid+email+profile` +
       `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
   }
+
+
+function updateNavbarUser() {
+  const userSpan = document.getElementById("loggedInUser");
+  if (!userSpan) return;
+
+  const idToken = localStorage.getItem("id_token");
+  if (!idToken) {
+    userSpan.textContent = "Guest";
+    return;
+  }
+
+  try {
+    const payloadBase64 = idToken.split(".")[1];
+    const payloadJson = atob(payloadBase64);
+    const payload = JSON.parse(payloadJson);
+
+    // Pick the best available display name
+    const displayName =
+      payload.name ||
+      payload.given_name ||
+      payload.email ||
+      payload["cognito:username"] ||
+      "User";
+
+    userSpan.textContent = displayName;
+  } catch (err) {
+    console.error("Failed to decode ID token", err);
+    userSpan.textContent = "User";
+  }
+}
+
+document.addEventListener("DOMContentLoaded", updateNavbarUser);
+
 })();
