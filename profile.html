@@ -23,15 +23,17 @@
     document.getElementById("name").value = payload.name || "";
     document.getElementById("email").value = payload.email || "";
     document.getElementById("username").value = payload["cognito:username"] || "";
-    document.getElementById("sub").value = payload.sub || "";
-    document.getElementById("exp").value =
+    
       new Date(payload.exp * 1000).toLocaleString();
+
+    loadExtendedProfile();
+
   });
 
     </script>
   
     <script>
-    const API_BASE = "https://hwjx5fihi5.execute-api.eu-west-2.amazonaws.com/profile";
+    const API_BASE = "https://hwjx5fihi5.execute-api.eu-west-2.amazonaws.com";
 
     async function loadExtendedProfile() {
     const token = localStorage.getItem("access_token");
