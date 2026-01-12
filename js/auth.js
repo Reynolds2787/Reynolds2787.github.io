@@ -81,7 +81,7 @@
   }
 
 
-function updateNavbarUser() {
+  function updateNavbarUser() {
   const userSpan = document.getElementById("loggedInUser");
   if (!userSpan) return;
 
@@ -112,5 +112,6 @@ function updateNavbarUser() {
 }
 
 document.addEventListener("DOMContentLoaded", updateNavbarUser);
+
 
 })();
