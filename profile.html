@@ -28,9 +28,32 @@
       new Date(payload.exp * 1000).toLocaleString();
   });
 
+    </script>
+  
+    <script>
+    const API_BASE = "https://hwjx5fihi5.execute-api.eu-west-2.amazonaws.com/profile";
 
-  loadExtendedProfile();
+    async function loadExtendedProfile() {
+    const token = localStorage.getItem("access_token");
+    if (!token) return;
 
+    const res = await fetch(`${API_BASE}/profile`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (!res.ok) return;
+
+    const profile = await res.json();
+
+    document.getElementById("role").value = profile.role || "";
+    document.getElementById("base").value = profile.base || "";
+    document.getElementById("phone").value = profile.phone || "";
+  }
+  </script>
+
+  <script>
   async function saveProfile() {
   const token = localStorage.getItem("access_token");
   if (!token) return alert("Not logged in");
@@ -56,59 +79,9 @@
     alert("Failed to save profile");
   }
 } 
-  
-  </script>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  <script>
-  const API_BASE = "https://hwjx5fihi5.execute-api.eu-west-2.amazonaws.com/profile";
-
-  async function loadExtendedProfile() {
-  const token = localStorage.getItem("access_token");
-  if (!token) return;
-
-  const res = await fetch(`${API_BASE}/profile`, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
-
-  if (!res.ok) return;
-
-  const profile = await res.json();
-
-  document.getElementById("role").value = profile.role || "";
-  document.getElementById("base").value = profile.base || "";
-  document.getElementById("phone").value = profile.phone || "";
-}
 </script>
-
-
+  
 
 </head>
 
