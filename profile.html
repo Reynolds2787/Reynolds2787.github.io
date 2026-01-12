@@ -31,10 +31,58 @@
 
   loadExtendedProfile();
 
-  function saveProfile() {
-    alert("Profile updates require backend support (Cognito AdminUpdateUserAttributes). Ready to wire when you are.");
+  async function saveProfile() {
+  const token = localStorage.getItem("access_token");
+  if (!token) return alert("Not logged in");
+
+  const body = {
+    role: document.getElementById("role").value,
+    base: document.getElementById("base").value,
+    phone: document.getElementById("phone").value
+  };
+
+  const res = await fetch(`${API_BASE}/profile`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (res.ok) {
+    alert("Profile updated");
+  } else {
+    alert("Failed to save profile");
   }
+} 
+  
   </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   
   <script>
