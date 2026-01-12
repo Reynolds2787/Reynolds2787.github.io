@@ -28,12 +28,15 @@
       new Date(payload.exp * 1000).toLocaleString();
   });
 
+
+  loadExtendedProfile();
+
   function saveProfile() {
     alert("Profile updates require backend support (Cognito AdminUpdateUserAttributes). Ready to wire when you are.");
   }
   </script>
 
-
+  
   <script>
   const API_BASE = "https://hwjx5fihi5.execute-api.eu-west-2.amazonaws.com/profile";
 
