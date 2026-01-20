@@ -39,7 +39,7 @@
     const token = localStorage.getItem("access_token");
     if (!token) return;
 
-    const res = await fetch(`${API_BASE}/profile`, {
+    const res = await fetch(`${API_BASE}/update-profile`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
