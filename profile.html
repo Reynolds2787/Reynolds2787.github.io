@@ -50,8 +50,10 @@
     const profile = await res.json();
 
     document.getElementById("role").value = profile.role || "";
-    document.getElementById("sign_off").value = profile.sign_off || "";
+    document.getElementById("self_auth").value = profile.self_auth || ""; 
     document.getElementById("phone").value = profile.phone || "";
+    document.getElementById("efis").value = profile.efis || "";
+
   }
   </script>
 
@@ -111,17 +113,37 @@
       
       <div class="mb-3">
         <label class="form-label">Role</label>
-        <input id="role" class="form-control" placeholder="e.g. Pilot">
+        <input id="role" class="form-control">
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Sign Offs</label>
-        <input id="sign_off" class="form-control" placeholder="e.g. EFIS">
+        <label class="form-label">Self Auth</label>
+        <input id="self_auth" class="form-control">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Complex</label>
+        <input id="complex" class="form-control">
+      </div>
+
+       <div class="mb-3">
+        <label class="form-label">Bulldog</label>
+        <input id="bulldog" class="form-control">
+      </div>
+
+       <div class="mb-3">
+        <label class="form-label">EFIS</label>
+        <input id="efis" class="form-control">
+      </div>
+
+       <div class="mb-3">
+        <label class="form-label">Aeros</label>
+        <input id="efis" class="form-control">
       </div>
 
       <div class="mb-3">
         <label class="form-label">Phone</label>
-        <input id="phone" class="form-control" placeholder="+44...">
+        <input id="phone" class="form-control">
       </div>
 
       <button class="btn btn-primary w-100" onclick="saveProfile()">Save Changes</button>
