@@ -66,9 +66,13 @@
   if (!token) return alert("Not logged in");
 
   const body = {
-    //role: document.getElementById("role").value,
-    //base: document.getElementById("sign_off").value,
-    phone: document.getElementById("phone").valu,
+    role: document.getElementById("role").value,
+    base: document.getElementById("self_auth").value,
+    phone: document.getElementById("phone").value,
+    phone: document.getElementById("efis").value,
+    phone: document.getElementById("bulldog").value,
+    phone: document.getElementById("complex").value,
+    name:  document.getElementById("aeros").value, 
     name:  document.getElementById("name").value 
   };
 
@@ -145,7 +149,7 @@
 
        <div class="mb-3">
         <label class="form-label">Aeros</label>
-        <input id="efis" class="form-control" disabled>
+        <input id="aeros" class="form-control" disabled>
       </div>
 
 
