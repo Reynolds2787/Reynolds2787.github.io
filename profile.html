@@ -66,10 +66,11 @@
   if (!token) return alert("Not logged in");
 
   const body = {
+    user_name: document.getElementById("name").value,
     role: document.getElementById("role").value,
     phone: document.getElementById("phone").value,
-    name: document.getElementById("role").value,
-    
+
+  
   };
 
   const res = await fetch(`${API_BASE}/profile`, {
