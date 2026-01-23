@@ -25,14 +25,14 @@
 </div>
 
 <script>
-const API_BASE = "https://jhsinci6j9.execute-api.eu-west-2.amazonaws.com/development";
+const API_BASE = "https://rj7w2wkpgj.execute-api.eu-west-2.amazonaws.com";
 
 async function getToken() {
   return localStorage.getItem("access_token");
 }
 
 async function loadBookings() {
-  const res = await fetch(`${API_BASE}/bookings`, {
+  const res = await fetch(`${API_BASE}/get_bookings_all`, {
     headers: {
       "Authorization": `Bearer ${await getToken()}`
     }
