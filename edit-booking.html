@@ -60,7 +60,7 @@
 </div>
 
 <script>
-const API_BASE = "https://jhsinci6j9.execute-api.eu-west-2.amazonaws.com/development";
+const API_BASE = "https://rj7w2wkpgj.execute-api.eu-west-2.amazonaws.com";
 const bookingId = new URLSearchParams(window.location.search).get("id");
 
 async function getToken() {
@@ -68,7 +68,7 @@ async function getToken() {
 }
 
 async function loadBooking() {
-  const res = await fetch(`${API_BASE}/bookings/${bookingId}`, {
+  const res = await fetch(`${API_BASE}/get_booking/${bookingId}`, {
     headers: { "Authorization": `Bearer ${await getToken()}` }
   });
 
