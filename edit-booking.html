@@ -63,23 +63,30 @@
 const API_BASE = "https://rj7w2wkpgj.execute-api.eu-west-2.amazonaws.com";
 const bookingId = new URLSearchParams(window.location.search).get("id");
 
-async function getToken() {
-  return localStorage.getItem("access_token");
+function getToken() {
+  return localStorage.getItem("id_token");
 }
 
 async function loadBooking() {
   const res = await fetch(`${API_BASE}/get_booking/${bookingId}`, {
-    headers: { "Authorization": `Bearer ${await getToken()}` }
+    headers: {
+      "Authorization": `Bearer ${getToken()}`
+    }
   });
+
+  if (!res.ok) {
+    alert("Failed to load booking");
+    return;
+  }
 
   const b = await res.json();
 
-  document.getElementById("aircraft").value = b.aircraft;
-  document.getElementById("eta").value = b.eta.replace(" ", "T");
-  document.getElementById("from").value = b.from;
-  document.getElementById("to").value = b.to;
-  document.getElementById("reason").value = b.reason;
-  document.getElementById("costSharing").value = b.costSharing;
+  aircraft.value = b.aircraft;
+  eta.value = b.eta.replace(" ", "T");
+  from.value = b.from;
+  to.value = b.to;
+  reason.value = b.reason;
+  costSharing.value = b.costSharing;
 }
 
 document.getElementById("editForm").addEventListener("submit", async e => {
@@ -94,19 +101,31 @@ document.getElementById("editForm").addEventListener("submit", async e => {
     costSharing: costSharing.value
   };
 
-  await fetch(`${API_BASE}/get_booking/${bookingId}`, {
+  const res = await fetch(`${API_BASE}/get_booking/${bookingId}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${await getToken()}`
+      "Authorization": `Bearer ${getToken()}`
     },
     body: JSON.stringify(payload)
   });
+
+  if (!res.ok) {
+    alert("Failed to save changes");
+    return;
+  }
 
   window.location.href = "my-bookings.html";
 });
 
 loadBooking();
 </script>
+
+
+
+
+
+
+
 </body>
 </html>
