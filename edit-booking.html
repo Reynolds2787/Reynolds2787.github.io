@@ -101,7 +101,7 @@ document.getElementById("editForm").addEventListener("submit", async e => {
     costSharing: costSharing.value
   };
 
-  const res = await fetch(`${API_BASE}/get_booking/${bookingId}`, {
+  const res = await fetch(`${API_BASE}/update-booking/${bookingId}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
