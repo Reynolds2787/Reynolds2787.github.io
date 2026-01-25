@@ -1,13 +1,22 @@
 (async function () {
   const COGNITO_DOMAIN = "https://eu-west-26tjf0zbnc.auth.eu-west-2.amazoncognito.com";
-
   const CLIENT_ID = "63ag0fj4bpqi4ouvat8bsc0890";
-
-  // ✅ Works on GitHub Pages, custom domain, localhost
   const REDIRECT_URI = window.location.origin + "/";
 
   const params = new URLSearchParams(window.location.search);
   const code = params.get("code");
+
+  // ===============================
+  // Helpers
+  // ===============================
+  function nowSeconds() {
+    return Math.floor(Date.now() / 1000);
+  }
+
+  function isTokenExpired() {
+    const expiry = parseInt(localStorage.getItem("token_expiry"), 10);
+    return !expiry || expiry <= nowSeconds();
+  }
 
   // ===============================
   // 1️⃣ Exchange authorization code
@@ -16,51 +25,40 @@
     try {
       const res = await fetch(`${COGNITO_DOMAIN}/oauth2/token`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        },
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({
           grant_type: "authorization_code",
           client_id: CLIENT_ID,
           redirect_uri: REDIRECT_URI,
-          code: code
+          code
         })
       });
 
       const tokens = await res.json();
 
-      // ❗ SAFETY CHECKS (critical)
       if (!res.ok) {
         console.error("Token endpoint error:", tokens);
         return;
       }
 
-      if (!tokens.access_token || !tokens.id_token) {
-        console.error("Missing tokens in response:", tokens);
-        return;
-      }
-
-      // ✅ Store tokens
       localStorage.setItem("access_token", tokens.access_token);
       localStorage.setItem("id_token", tokens.id_token);
       localStorage.setItem("refresh_token", tokens.refresh_token || "");
 
-      // ✅ Decode ID token safely
-      const payloadBase64 = tokens.id_token.split(".")[1];
-      const payloadJson = atob(payloadBase64);
-      const payload = JSON.parse(payloadJson);
+      // ⏱ Track expiry
+      localStorage.setItem(
+        "token_expiry",
+        nowSeconds() + tokens.expires_in
+      );
 
+      // Decode ID token for username
+      const payload = JSON.parse(atob(tokens.id_token.split(".")[1]));
       localStorage.setItem(
         "username",
         payload.name || payload.email || "User"
       );
 
-      // ✅ Clean URL (?code=...)
-      window.history.replaceState(
-        {},
-        document.title,
-        window.location.pathname
-      );
+      window.history.replaceState({}, document.title, window.location.pathname);
 
     } catch (err) {
       console.error("Token exchange failed:", err);
@@ -69,7 +67,7 @@
   }
 
   // ===============================
-  // 2️⃣ Enforce login (IMPORTANT)
+  // 2️⃣ Enforce login
   // ===============================
   if (!code && !localStorage.getItem("access_token")) {
     window.location.href =
@@ -80,38 +78,102 @@
       `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
   }
 
+  // ===============================
+  // 3️⃣ Refresh session
+  // ===============================
+  async function refreshSession() {
+    const refreshToken = localStorage.getItem("refresh_token");
+    if (!refreshToken) throw new Error("No refresh token");
 
+    const res = await fetch(`${COGNITO_DOMAIN}/oauth2/token`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        grant_type: "refresh_token",
+        client_id: CLIENT_ID,
+        refresh_token: refreshToken
+      })
+    });
+
+    const tokens = await res.json();
+    if (!res.ok) throw new Error("Refresh failed");
+
+    localStorage.setItem("access_token", tokens.access_token);
+    if (tokens.id_token) {
+      localStorage.setItem("id_token", tokens.id_token);
+    }
+
+    localStorage.setItem(
+      "token_expiry",
+      nowSeconds() + tokens.expires_in
+    );
+  }
+
+  // ===============================
+  // 4️⃣ Safe fetch wrapper (IMPORTANT)
+  // ===============================
+  window.authFetch = async function (url, options = {}) {
+    if (isTokenExpired()) {
+      try {
+        await refreshSession();
+      } catch {
+        window.location.href = "login.html";
+        return;
+      }
+    }
+
+    const token = localStorage.getItem("access_token");
+
+    let res = await fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (res.status === 401) {
+      await refreshSession();
+
+      const newToken = localStorage.getItem("access_token");
+      res = await fetch(url, {
+        ...options,
+        headers: {
+          ...options.headers,
+          Authorization: `Bearer ${newToken}`
+        }
+      });
+    }
+
+    return res;
+  };
+
+  // ===============================
+  // 5️⃣ Navbar user display
+  // ===============================
   function updateNavbarUser() {
-  const userSpan = document.getElementById("loggedInUser");
-  if (!userSpan) return;
+    const userSpan = document.getElementById("loggedInUser");
+    if (!userSpan) return;
 
-  const idToken = localStorage.getItem("id_token");
-  if (!idToken) {
-    userSpan.textContent = "Guest";
-    return;
+    const idToken = localStorage.getItem("id_token");
+    if (!idToken) {
+      userSpan.textContent = "Guest";
+      return;
+    }
+
+    try {
+      const payload = JSON.parse(atob(idToken.split(".")[1]));
+      userSpan.textContent =
+        payload.name ||
+        payload.given_name ||
+        payload.email ||
+        payload["cognito:username"] ||
+        "User";
+    } catch {
+      userSpan.textContent = "User";
+    }
   }
 
-  try {
-    const payloadBase64 = idToken.split(".")[1];
-    const payloadJson = atob(payloadBase64);
-    const payload = JSON.parse(payloadJson);
-
-    // Pick the best available display name
-    const displayName =
-      payload.name ||
-      payload.given_name ||
-      payload.email ||
-      payload["cognito:username"] ||
-      "User";
-
-    userSpan.textContent = displayName;
-  } catch (err) {
-    console.error("Failed to decode ID token", err);
-    userSpan.textContent = "User";
-  }
-}
-
-document.addEventListener("DOMContentLoaded", updateNavbarUser);
-
+  document.addEventListener("DOMContentLoaded", updateNavbarUser);
 
 })();
