@@ -35,7 +35,10 @@
     <script>
     const API_BASE = "https://hwjx5fihi5.execute-api.eu-west-2.amazonaws.com";
 
-    async function loadExtendedProfile() {
+    
+    
+    function loadExtendedProfile() {
+    return withLoading(async () => {
     const token = localStorage.getItem("access_token");
     if (!token) return;
 
@@ -56,9 +59,13 @@
     document.getElementById("bulldog").value = profile.bulldog || "";
     document.getElementById("complex").value = profile.complex || "";
     document.getElementById("aeros").value = profile.aeros || "";
-
-  }
+  });
+}
+    
+    
+  
   </script>
+
 
   <script>
   async function saveProfile() {
@@ -90,6 +97,62 @@
 } 
 
 </script>
+
+<style>
+  body.loading {
+    cursor: wait;
+  }
+
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      #e9ecef 25%,
+      #f8f9fa 37%,
+      #e9ecef 63%
+    );
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+    border-radius: 0.375rem;
+    height: 38px;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+  }
+
+  .loading .real-input {
+    display: none;
+  }
+
+  .loading .skeleton {
+    display: block;
+  }
+
+  .skeleton {
+    display: none;
+  }
+</style>
+
+<script>
+  function showLoading() {
+    document.body.classList.add("loading");
+  }
+
+  function hideLoading() {
+    document.body.classList.remove("loading");
+  }
+
+  async function withLoading(asyncFn) {
+    showLoading();
+    try {
+      await asyncFn();
+    } finally {
+      hideLoading();
+    }
+  }
+</script>
+
   
 </head>
 
@@ -101,52 +164,72 @@
 
       <div class="mb-3">
         <label class="form-label">Username</label>
+        <div class="skeleton"></div>
         <input id="username" class="form-control" disabled>
+        
       </div>
 
       <div class="mb-3">
         <label class="form-label">Name</label>
+        <div class="skeleton"></div>
         <input id="name" class="form-control">
+        
       </div>
 
       <div class="mb-3">
         <label class="form-label">Email</label>
+        <div class="skeleton"></div>
         <input id="email" class="form-control">
+        
       </div>
 
         <div class="mb-3">
         <label class="form-label">Phone</label>
+        <div class="skeleton"></div>
         <input id="phone" class="form-control">
+        
       </div>
   
       <div class="mb-3">
         <label class="form-label">Role</label>
+        <div class="skeleton"></div>
         <input id="role" class="form-control" disabled>
+        
       </div>
 
       <div class="mb-3">
         <label class="form-label">Self Auth</label>
+        <div class="skeleton"></div>
         <input id="self_auth" class="form-control" disabled>
+        
       </div>
 
       <div class="mb-3">
         <label class="form-label">Complex</label>
+        <div class="skeleton"></div>
         <input id="complex" class="form-control" disabled>
+        
       </div>
 
        <div class="mb-3">
         <label class="form-label">Bulldog</label>
+        <div class="skeleton"></div>
         <input id="bulldog" class="form-control" disabled >
+        
       </div>
 
        <div class="mb-3">
         <label class="form-label">EFIS</label>
+        <div class="skeleton"></div>
         <input id="efis" class="form-control" disabled>
+        
       </div>
 
        <div class="mb-3">
         <label class="form-label">Aeros</label>
+        <div class="skeleton"></div>
         <input id="aeros" class="form-control" disabled>
+        
       </div>
 
 
