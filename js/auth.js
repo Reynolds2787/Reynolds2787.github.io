@@ -122,8 +122,8 @@
       }
     }
 
-    const token = localStorage.getItem("access_token");
-    //const token = localStorage.getItem("idToken");
+    //const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem("id_token");
 
 
     let res = await fetch(url, {
@@ -137,7 +137,7 @@
     if (res.status === 401) {
       await refreshSession();
 
-      const newToken = localStorage.getItem("access_token");
+      const newToken = localStorage.getItem("id_token");
       res = await fetch(url, {
         ...options,
         headers: {
