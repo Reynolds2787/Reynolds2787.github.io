@@ -18,6 +18,65 @@
     return !expiry || expiry <= nowSeconds();
   }
 
+  // URL-safe base64 decode for JWT payloads
+  function decodeJwtPayload(token) {
+    if (!token) return null;
+    try {
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const json = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
+      );
+      return JSON.parse(json);
+    } catch {
+      return null;
+    }
+  }
+
+  function getDisplayNameFromIdToken() {
+    const idToken = localStorage.getItem("id_token");
+    const payload = decodeJwtPayload(idToken);
+    if (!payload) return null;
+
+    return (
+      payload.name ||
+      payload.given_name ||
+      payload.email ||
+      payload["cognito:username"] ||
+      null
+    );
+  }
+
+  function setStoredUsernameFromIdToken() {
+    const name = getDisplayNameFromIdToken();
+    if (name) localStorage.setItem("username", name);
+  }
+
+  function renderLoggedInUser() {
+    const el = document.getElementById("loggedInUser");
+    if (!el) return;
+
+    // Prefer fresh token-derived name, fallback to stored, then default.
+    const name =
+      getDisplayNameFromIdToken() ||
+      localStorage.getItem("username") ||
+      "User";
+
+    el.textContent = name;
+  }
+
+  function redirectToHostedLogin() {
+    window.location.href =
+      `${COGNITO_DOMAIN}/login` +
+      `?client_id=${CLIENT_ID}` +
+      `&response_type=code` +
+      `&scope=openid+email+profile` +
+      `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+  }
+
   // ===============================
   // 1️⃣ Exchange authorization code
   // ===============================
@@ -46,20 +105,14 @@
       localStorage.setItem("refresh_token", tokens.refresh_token || "");
 
       // ⏱ Track expiry
-      localStorage.setItem(
-        "token_expiry",
-        nowSeconds() + tokens.expires_in
-      );
+      localStorage.setItem("token_expiry", nowSeconds() + tokens.expires_in);
 
-      // Decode ID token for username
-      const payload = JSON.parse(atob(tokens.id_token.split(".")[1]));
-      localStorage.setItem(
-        "username",
-        payload.name || payload.email || "User"
-      );
+      // Store & render username
+      setStoredUsernameFromIdToken();
+      renderLoggedInUser();
 
+      // Clean URL
       window.history.replaceState({}, document.title, window.location.pathname);
-
     } catch (err) {
       console.error("Token exchange failed:", err);
       return;
@@ -70,12 +123,8 @@
   // 2️⃣ Enforce login
   // ===============================
   if (!code && !localStorage.getItem("access_token")) {
-    window.location.href =
-      `${COGNITO_DOMAIN}/login` +
-      `?client_id=${CLIENT_ID}` +
-      `&response_type=code` +
-      `&scope=openid+email+profile` +
-      `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+    redirectToHostedLogin();
+    return;
   }
 
   // ===============================
@@ -99,14 +148,17 @@
     if (!res.ok) throw new Error("Refresh failed");
 
     localStorage.setItem("access_token", tokens.access_token);
+
+    // If Cognito returns a new id_token, store it and refresh displayed name
     if (tokens.id_token) {
       localStorage.setItem("id_token", tokens.id_token);
+      setStoredUsernameFromIdToken();
     }
 
-    localStorage.setItem(
-      "token_expiry",
-      nowSeconds() + tokens.expires_in
-    );
+    localStorage.setItem("token_expiry", nowSeconds() + tokens.expires_in);
+
+    // In case navbar is present, update it
+    renderLoggedInUser();
   }
 
   // ===============================
@@ -116,15 +168,14 @@
     if (isTokenExpired()) {
       try {
         await refreshSession();
-      } catch {
-        window.location.href = "login.html";
+      } catch (e) {
+        console.warn("Session refresh failed:", e);
+        redirectToHostedLogin();
         return;
       }
     }
 
     const token = localStorage.getItem("access_token");
-    //const token = localStorage.getItem("id_token");
-
 
     let res = await fetch(url, {
       ...options,
@@ -135,7 +186,13 @@
     });
 
     if (res.status === 401) {
-      await refreshSession();
+      try {
+        await refreshSession();
+      } catch (e) {
+        console.warn("401 then refresh failed:", e);
+        redirectToHostedLogin();
+        return res;
+      }
 
       const newToken = localStorage.getItem("access_token");
       res = await fetch(url, {
@@ -150,26 +207,9 @@
     return res;
   };
 
-function renderLoggedInUser() {
-  const el = document.getElementById("loggedInUser");
-  if (!el) return;
-
-  // Use whatever you already store (examples below)
-  const name =
-    localStorage.getItem("username") ||
-    "User";
-
-  el.textContent = name;
-}
-
-// run normally
-document.addEventListener("DOMContentLoaded", renderLoggedInUser);
-
-// run again after navbar is injected
-window.addEventListener("navbar:loaded", renderLoggedInUser);
-
-
+  // ===============================
+  // 5️⃣ Navbar user display hooks
+  // ===============================
+  document.addEventListener("DOMContentLoaded", renderLoggedInUser);
+  window.addEventListener("navbar:loaded", renderLoggedInUser);
 })();
-
-
-
