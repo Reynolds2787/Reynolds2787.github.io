@@ -82,7 +82,7 @@ function renderBookings(bookings) {
           Complete Flight
         </button>
          
-        <a class="btn btn-sm btn-warning"
+        <a class="btn btn-sm btn-primary"
           href="edit-booking.html?id=${b.bookingId}">
           Edit
         </a>
@@ -119,11 +119,11 @@ function renderBookings(bookings) {
           </button>
 
           
-          <a class="btn btn-warning w-100" href="edit-booking.html?id=${b.bookingId}">
+          <a class="btn btn-warning w-100 mt-2" href="edit-booking.html?id=${b.bookingId}">
             Edit Booking
           </a>
 
-          <button class="btn btn-danger w-100 mt-2"
+          <button class="btn btn-primary w-100 mt-2"
           onclick="deleteBooking('${b.bookingId}')">
           Delete Booking
       
