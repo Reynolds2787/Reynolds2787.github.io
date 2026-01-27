@@ -38,6 +38,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
 <div id="navbar-placeholder"></div>
 
+<div class="container-fluid bg-light border-bottom">
+  <div class="container py-2">
+    <div class="d-flex justify-content-center align-items-center gap-2"
+         id="qnhDisplay"
+         data-bs-toggle="tooltip"
+         data-bs-placement="bottom"
+         title="Loading METAR…"
+         style="cursor: default;">
+
+      <span class="badge bg-primary">QNH</span>
+      <span class="fw-semibold">Kemble</span>
+
+      <span id="qnhValue" class="fs-5 fw-bold text-primary">
+        <span class="spinner-border spinner-border-sm"></span>
+      </span>
+
+      <span class="text-muted small">hPa</span>
+    </div>
+  </div>
+</div>
 
 <div class="container-fluid pt-2 pb-2 ps-2 bg-light bg-gradient">
   <h2>Active Flights</h2>
@@ -133,6 +153,77 @@ fetch("/partials/navbar.html")
     window.dispatchEvent(new Event("navbar:loaded"));
   })
   .catch(err => console.error(err));
+</script>
+
+<script>
+let qnhTooltip;
+
+async function fetchKembleQNH() {
+  const qnhValueEl = document.getElementById("qnhValue");
+  const qnhDisplayEl = document.getElementById("qnhDisplay");
+
+  if (!qnhValueEl || !qnhDisplayEl) {
+    console.warn("QNH elements not found in DOM");
+    return;
+  }
+
+  // Nearest METAR stations to Kemble (priority order)
+  const stations = [
+    { id: "EGVA", label: "EGVA (Fairford)" },
+    { id: "EGBJ", label: "EGBJ (Gloucester)" }
+  ];
+
+  for (const station of stations) {
+    try {
+      // CORS-safe proxy
+      const metarUrl = `https://aviationweather.gov/api/data/metar?ids=${station.id}&format=json`;
+      const response = await fetch(
+        `https://api.allorigins.win/raw?url=` +
+        encodeURIComponent(
+        `https://aviationweather.gov/api/data/metar?ids=${station.id}&format=json`
+  )
+);
+
+      const data = await response.json();
+
+      if (!data || !data.length || !data[0].altim || !data[0].rawOb) {
+        throw new Error("Incomplete METAR data");
+      }
+
+      // Convert inHg → hPa
+      const qnh = Math.round(parseFloat(data[0].altim) * 1);
+
+      // Update display
+      qnhValueEl.textContent = qnh;
+
+      // Tooltip text (full METAR + source)
+      qnhDisplayEl.setAttribute(
+        "title",
+        `${data[0].rawOb}\n— Source: ${station.label}`
+      );
+
+      // Refresh tooltip instance
+      if (qnhTooltip) qnhTooltip.dispose();
+      qnhTooltip = new bootstrap.Tooltip(qnhDisplayEl);
+
+      return; // stop after first valid station
+    } catch (err) {
+      console.warn(`METAR fetch failed for ${station.id}`, err);
+    }
+  }
+
+  // All stations failed
+  qnhValueEl.textContent = "—";
+  qnhDisplayEl.setAttribute(
+    "title",
+    "METAR unavailable from EGVA / EGBJ"
+  );
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  fetchKembleQNH();
+  setInterval(fetchKembleQNH, 600000); // every 10 minutes
+});
 </script>
 
 
