@@ -157,59 +157,7 @@
 
 </head>
 
-
-<nav class="navbar navbar-expand-sm navbar-dark bg-dark sticky-top shadow-sm py-1">
-  <div class="container-fluid">
-
-    <!-- Brand (optional but recommended) -->
-    <a class="navbar-brand fw-semibold" href="index.html"></a>
-
-    <!-- Mobile toggle -->
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#efmNavbar">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse" id="efmNavbar">
-
-      <!-- Left nav -->
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="index.html">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="stats.html">Stats</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="booking_out_form.html">Book Out</a>
-        </li>
-      </ul>
-
-      <!-- Right nav / user -->
-      <ul class="navbar-nav">
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle d-flex align-items-center gap-1"
-             href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            👤 <span id="loggedInUser">User</span>
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end">
-            <li>
-              <a class="dropdown-item" href="profile.html">Profile</a>
-            </li>
-            <li><hr class="dropdown-divider"></li>
-            <li>
-              <button class="dropdown-item text-danger" id="logoutBtn">
-                Logout
-              </button>
-            </li>
-          </ul>
-        </li>
-      </ul>
-
-    </div>
-
-
-  </div>
-</nav>
+<div id="navbar-placeholder"></div>
 
 <body class="bg-light">
 
@@ -294,5 +242,23 @@
     </div>
   </div>
 </div>
+
+
+
+<script>
+fetch("/partials/navbar.html")
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById("navbar-placeholder").innerHTML = html;
+
+    // 🔹 re-run active link logic after navbar loads
+    document.querySelectorAll(".nav-link").forEach(link => {
+      if (link.href === window.location.href) {
+        link.classList.add("active");
+        link.setAttribute("aria-current", "page");
+      }
+    });
+  });
+</script>
 </body>
 </html>
