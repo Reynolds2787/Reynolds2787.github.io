@@ -122,7 +122,9 @@
       }
     }
 
-    const token = localStorage.getItem("access_token");
+    //const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem("idToken");
+
 
     let res = await fetch(url, {
       ...options,
