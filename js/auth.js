@@ -150,32 +150,26 @@
     return res;
   };
 
-  // ===============================
-  // 5️⃣ Navbar user display
-  // ===============================
-  function updateNavbarUser() {
-    const userSpan = document.getElementById("loggedInUser");
-    if (!userSpan) return;
+function renderLoggedInUser() {
+  const el = document.getElementById("loggedInUser");
+  if (!el) return;
 
-    const idToken = localStorage.getItem("id_token");
-    if (!idToken) {
-      userSpan.textContent = "Guest";
-      return;
-    }
+  // Use whatever you already store (examples below)
+  const name =
+    localStorage.getItem("username") ||
+    "User";
 
-    try {
-      const payload = JSON.parse(atob(idToken.split(".")[1]));
-      userSpan.textContent =
-        payload.name ||
-        payload.given_name ||
-        payload.email ||
-        payload["cognito:username"] ||
-        "User";
-    } catch {
-      userSpan.textContent = "User";
-    }
-  }
+  el.textContent = name;
+}
 
-  document.addEventListener("DOMContentLoaded", updateNavbarUser);
+// run normally
+document.addEventListener("DOMContentLoaded", renderLoggedInUser);
+
+// run again after navbar is injected
+window.addEventListener("navbar:loaded", renderLoggedInUser);
+
 
 })();
+
+
+

@@ -251,14 +251,18 @@ fetch("/partials/navbar.html")
   .then(html => {
     document.getElementById("navbar-placeholder").innerHTML = html;
 
-    // 🔹 re-run active link logic after navbar loads
+    // active link logic (as before)
     document.querySelectorAll(".nav-link").forEach(link => {
       if (link.href === window.location.href) {
         link.classList.add("active");
         link.setAttribute("aria-current", "page");
       }
     });
+
+    // ✅ tell the rest of the app the navbar is now in the DOM
+    window.dispatchEvent(new Event("navbar:loaded"));
   });
 </script>
+
 </body>
 </html>
