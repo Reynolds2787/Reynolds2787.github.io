@@ -76,23 +76,25 @@ function renderBookings(bookings) {
         <td>${b.reason}</td>
 
         <td class="d-flex gap-2">
-          <a class="btn btn-sm btn-primary"
-          href="edit-booking.html?id=${b.bookingId}">
-          Edit
-          </a>
-
-          <button class="btn btn-sm btn-danger"
-             onclick="deleteBooking('${b.bookingId}')">
-          Delete
-        </button>
 
         <button class="btn btn-sm btn-success"
-             onclick="deleteBooking('${b.bookingId}')">
+            onclick="deleteBooking('${b.bookingId}')">
           Complete Flight
         </button>
-      </td>
+         
+        <a class="btn btn-sm btn-warning"
+          href="edit-booking.html?id=${b.bookingId}">
+          Edit
+        </a>
+
+        <button class="btn btn-sm btn-danger"
+          onclick="deleteBooking('${b.bookingId}')">
+          Delete
+        </button>
+      
+        </td>
      
-     
+
         </tr>
     `;
   });
@@ -109,17 +111,22 @@ function renderBookings(bookings) {
           <p><strong>ETA:</strong> ${b.eta}</p>
           <p>${b.from} → ${b.to}</p>
           <p>${b.reason}</p>
-          <a class="btn btn-primary w-100" href="edit-booking.html?id=${b.bookingId}">
-            Edit Booking
-          </a>
-          <button class="btn btn-danger w-100 mt-2"
-          onclick="deleteBooking('${b.bookingId}')">
-          Delete Booking
+          
           </button>
           <button class="btn btn-success w-100 mt-2"
           onclick="deleteBooking('${b.bookingId}')">
-          Delete Booking
+          Complete Flight
           </button>
+
+          
+          <a class="btn btn-warning w-100" href="edit-booking.html?id=${b.bookingId}">
+            Edit Booking
+          </a>
+
+          <button class="btn btn-danger w-100 mt-2"
+          onclick="deleteBooking('${b.bookingId}')">
+          Delete Booking
+      
         </div>
         </div>
     `;
