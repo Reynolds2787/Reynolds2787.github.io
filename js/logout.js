@@ -1,11 +1,7 @@
-function bindLogout() {
-  const logoutBtn = document.getElementById("logoutBtn");
-  if (!logoutBtn || logoutBtn.dataset.bound === "1") return;
+document.addEventListener("click", (e) => {
+  const logoutBtn = e.target.closest("#logoutBtn");
+  if (!logoutBtn) return;
 
-  // prevent double-binding if bindLogout runs twice
-  logoutBtn.dataset.bound = "1";
-
-  logoutBtn.addEventListener("click", (e) => {
     e.preventDefault();
 
     localStorage.removeItem("access_token");
@@ -21,15 +17,8 @@ function bindLogout() {
     const logoutUrl =
       `${COGNITO_DOMAIN}/logout` +
       `?client_id=${CLIENT_ID}` +
-      `&logout_uri=${encodeURIComponent(window.location.origin + "/")}`;
+      `&logout_uri=${encodeURIComponent(window.location.origin)}`;
 
     window.location.href = logoutUrl;
   });
-}
-
-// run on normal page load
-document.addEventListener("DOMContentLoaded", bindLogout);
-
-// run again after navbar is injected
-window.addEventListener("navbar:loaded", bindLogout);
 
