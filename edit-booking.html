@@ -198,21 +198,30 @@ loadBooking();
 
 <script>
 fetch("/partials/navbar.html")
-  .then(res => res.text())
+  .then(res => {
+    if (!res.ok) throw new Error("Failed to load navbar.html");
+    return res.text();
+  })
   .then(html => {
-    document.getElementById("navbar-placeholder").innerHTML = html;
+    const mount = document.getElementById("navbar-placeholder");
+    if (!mount) return;
 
-    // active link logic (as before)
+    mount.innerHTML = html;
+
+    // Active link logic (robust)
+    const currentPath = window.location.pathname.replace(/\/$/, "");
     document.querySelectorAll(".nav-link").forEach(link => {
-      if (link.href === window.location.href) {
+      const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
+      if (linkPath === currentPath) {
         link.classList.add("active");
         link.setAttribute("aria-current", "page");
       }
     });
 
-    // ✅ tell the rest of the app the navbar is now in the DOM
+    // ✅ Navbar is now in DOM
     window.dispatchEvent(new Event("navbar:loaded"));
-  });
+  })
+  .catch(err => console.error(err));
 </script>
 
 
