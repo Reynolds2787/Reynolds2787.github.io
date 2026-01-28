@@ -24,10 +24,24 @@
     @media (min-width: 768px) {
       #aircraftCards { display: none; }
     }
+  
+    body.loading { cursor: wait; }
+
+    .skeleton {
+      background: linear-gradient(90deg,#e9ecef 25%,#f8f9fa 37%,#e9ecef 63%);
+      background-size: 400% 100%;
+      animation: shimmer 1.4s ease infinite;
+      border-radius: 0.5rem;
+    }
+    @keyframes shimmer {
+      0% { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
+    }
   </style>
 
 <script src="js/auth.js"></script>
 <script src="js/logout.js"></script>
+<script src="js/ui.js"></script>
 
 </head>
 
@@ -53,10 +67,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
 <div class="container mt-3">
 
-  <div id="loadingSpinner" class="text-center my-3">
-    <div class="spinner-border text-primary"></div>
-    <div>Loading stats...</div>
+  <div id="statsSkeleton" class="my-3">
+    <div class="skeleton mb-3" style="height: 84px;"></div>
+
+    <div class="table-responsive d-none d-md-block">
+      <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+          <tr>
+            <th>Aircraft</th><th>Remaining Time</th><th>Remaining Fuel</th><th>Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><div class="skeleton" style="height:14px; width:120px"></div></td><td><div class="skeleton" style="height:14px; width:90px"></div></td><td><div class="skeleton" style="height:14px; width:110px"></div></td><td><div class="skeleton" style="height:14px; width:140px"></div></td></tr><tr><td><div class="skeleton" style="height:14px; width:120px"></div></td><td><div class="skeleton" style="height:14px; width:90px"></div></td><td><div class="skeleton" style="height:14px; width:110px"></div></td><td><div class="skeleton" style="height:14px; width:140px"></div></td></tr><tr><td><div class="skeleton" style="height:14px; width:120px"></div></td><td><div class="skeleton" style="height:14px; width:90px"></div></td><td><div class="skeleton" style="height:14px; width:110px"></div></td><td><div class="skeleton" style="height:14px; width:140px"></div></td></tr><tr><td><div class="skeleton" style="height:14px; width:120px"></div></td><td><div class="skeleton" style="height:14px; width:90px"></div></td><td><div class="skeleton" style="height:14px; width:110px"></div></td><td><div class="skeleton" style="height:14px; width:140px"></div></td></tr><tr><td><div class="skeleton" style="height:14px; width:120px"></div></td><td><div class="skeleton" style="height:14px; width:90px"></div></td><td><div class="skeleton" style="height:14px; width:110px"></div></td><td><div class="skeleton" style="height:14px; width:140px"></div></td></tr><tr><td><div class="skeleton" style="height:14px; width:120px"></div></td><td><div class="skeleton" style="height:14px; width:90px"></div></td><td><div class="skeleton" style="height:14px; width:110px"></div></td><td><div class="skeleton" style="height:14px; width:140px"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="d-md-none">
+      <div class="card mb-2"><div class="card-body"><div class="skeleton" style="height:18px; width:40%; margin-bottom:12px"></div><div class="skeleton mb-2" style="height:14px; width:70%"></div><div class="skeleton mb-2" style="height:14px; width:60%"></div><div class="skeleton" style="height:14px; width:80%"></div></div></div><div class="card mb-2"><div class="card-body"><div class="skeleton" style="height:18px; width:40%; margin-bottom:12px"></div><div class="skeleton mb-2" style="height:14px; width:70%"></div><div class="skeleton mb-2" style="height:14px; width:60%"></div><div class="skeleton" style="height:14px; width:80%"></div></div></div><div class="card mb-2"><div class="card-body"><div class="skeleton" style="height:18px; width:40%; margin-bottom:12px"></div><div class="skeleton mb-2" style="height:14px; width:70%"></div><div class="skeleton mb-2" style="height:14px; width:60%"></div><div class="skeleton" style="height:14px; width:80%"></div></div></div><div class="card mb-2"><div class="card-body"><div class="skeleton" style="height:18px; width:40%; margin-bottom:12px"></div><div class="skeleton mb-2" style="height:14px; width:70%"></div><div class="skeleton mb-2" style="height:14px; width:60%"></div><div class="skeleton" style="height:14px; width:80%"></div></div></div>
+    </div>
   </div>
+
 
   <div id="bowserContainer" class="alert alert-warning d-none">
     <div class="d-flex justify-content-between">
@@ -88,7 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
 const apiUrl = "https://s83jb0vzt6.execute-api.eu-west-2.amazonaws.com/stats/getall";
 const tableBody = document.getElementById("flightsTableBody");
 const cards = document.getElementById("aircraftCards");
-const spinner = document.getElementById("loadingSpinner");
+const skeleton = document.getElementById("statsSkeleton");
 
 const bowserContainer = document.getElementById("bowserContainer");
 const bowserFuel = document.getElementById("bowserFuel");
@@ -105,7 +136,8 @@ function fadeClear(el) {
 }
 
 function fetchStats() {
-  spinner.style.display = "block";
+  setPageLoading(true);
+  if (skeleton) skeleton.style.display = "block";
   fadeClear(tableBody);
   fadeClear(cards);
 
@@ -150,7 +182,14 @@ function fetchStats() {
         bowserContainer.classList.remove("d-none");
       }
 
-      spinner.style.display = "none";
+      if (skeleton) skeleton.style.display = "none";
+      setPageLoading(false);
+    })
+    .catch(err => {
+      console.error(err);
+      if (skeleton) skeleton.style.display = "none";
+      setPageLoading(false);
+      showToast("Unable to load stats.", { variant: "danger" });
     });
 }
 

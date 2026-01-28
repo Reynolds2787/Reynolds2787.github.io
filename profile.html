@@ -10,6 +10,7 @@
   
   <script src="js/auth.js"></script>
   <script src="js/logout.js"></script>
+  <script src="js/ui.js"></script>
 
   <script>
   function parseJwt(token) {
@@ -37,38 +38,45 @@
 
     </script>
   
-  <script>
-  const API_BASE = "https://hwjx5fihi5.execute-api.eu-west-2.amazonaws.com";
+    <script>
+    const API_BASE = "https://hwjx5fihi5.execute-api.eu-west-2.amazonaws.com";
 
     
     
-  function loadExtendedProfile() {
+    function loadExtendedProfile() {
     return withLoading(async () => {
-      const res = await authFetch(`${API_BASE}/profile`);
-      if (!res || !res.ok) return;
+const res = await authFetch(`${API_BASE}/profile`);
 
-      const profile = await res.json();
-      document.getElementById("role").value = profile.role || "";
-      document.getElementById("self_auth").value = profile.self_auth || "";
-      document.getElementById("phone").value = profile.phone || "";
-      document.getElementById("efis").value = profile.efis || "";
-      document.getElementById("bulldog").value = profile.bulldog || "";
-      document.getElementById("complex").value = profile.complex || "";
-      document.getElementById("aeros").value = profile.aeros || "";
-    });
+    if (!res.ok) return;
+
+    const profile = await res.json();
+
+    document.getElementById("role").value = profile.role || "";
+    document.getElementById("self_auth").value = profile.self_auth || ""; 
+    document.getElementById("phone").value = profile.phone || "";
+    document.getElementById("efis").value = profile.efis || "";
+    document.getElementById("bulldog").value = profile.bulldog || "";
+    document.getElementById("complex").value = profile.complex || "";
+    document.getElementById("aeros").value = profile.aeros || "";
+  });
 }
     
-     
+    
+  
   </script>
 
 
   <script>
-    
-    async function saveProfile() {
-      const body = {
+  async function saveProfile() {
+  try {
+    const btn = document.getElementById("saveProfileBtn");
+      setButtonLoading(btn, true, { loadingText: "Saving…" });
+    const body = {
+
         name: document.getElementById("name").value,
         role: document.getElementById("role").value,
         phone: document.getElementById("phone").value,
+
       };
 
       const res = await authFetch(`${API_BASE}/profile`, {
@@ -76,10 +84,16 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)
       });
+    if (res && res.ok) {
+        showToast("Profile updated", { variant: "success" });
+      } else {
+        showToast("Failed to save profile", { variant: "danger" });
+      }
+  } finally {
+    setButtonLoading(btn, false);
+  }
 
-      if (res && res.ok) alert("Profile updated");
-      else alert("Failed to save profile");
-    }
+} 
 
 </script>
 
@@ -118,26 +132,6 @@
     display: none;
   }
 </style>
-
-<script>
-  function showLoading() {
-    document.body.classList.add("loading");
-  }
-
-  function hideLoading() {
-    document.body.classList.remove("loading");
-  }
-
-  async function withLoading(asyncFn) {
-    showLoading();
-    try {
-      await asyncFn();
-    } finally {
-      hideLoading();
-    }
-  }
-</script>
-
 
 </head>
 
@@ -227,7 +221,7 @@
       </div>
 
 
-      <button class="btn btn-primary w-100" onclick="saveProfile()">Save Changes</button>
+      <button id="saveProfileBtn" class="btn btn-primary w-100" onclick="saveProfile()">Save Changes</button>
       <a href="index.html" class="btn btn-link w-100 mt-2">← Back</a>
     </div>
   </div>

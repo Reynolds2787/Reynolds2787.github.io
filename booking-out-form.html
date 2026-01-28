@@ -2,403 +2,448 @@
 <html lang="en">
 <head>
   <title>EFM Web App</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
 
-<script src="js/auth.js"></script>
-<script src="js/logout.js"></script>
+  <style>
+    body.loading { cursor: wait; }
 
+    /* Slightly tighter, nicer on mobile */
+    .page-title {
+      letter-spacing: 0.02em;
+    }
 
+    .section-card {
+      border: 1px solid rgba(0,0,0,.075);
+      border-radius: 1rem;
+      box-shadow: 0 .25rem .75rem rgba(0,0,0,.04);
+    }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(2px);
+      transition: opacity .18s ease, transform .18s ease;
+    }
+
+    .fade-in.ready {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .passenger-block[hidden] { display: none !important; }
+  </style>
+
+  <!-- Auth + Logout + shared UI helpers -->
+  <script src="js/auth.js"></script>
+  <script src="js/logout.js"></script>
+  <script src="js/ui.js"></script>
 </head>
 
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".nav-link").forEach(link => {
-    if (link.href === window.location.href) {
-      link.classList.add("active");
-      link.setAttribute("aria-current", "page");
-    }
-  });
-});
-</script>
-
-
 <body>
-
-<div class="container-fluid p-2 bg-primary text-white text-center">
-  <h2>BOOK OUT</h2>
-</div>
-
-<div id="navbar-placeholder"></div>
-
-<div class="container">
-<h2 class="mt-3">Booking Out Form</h2>
-<p2 class="mt-3">Test mode only — feel free to experiment!</p2>
-
-<form id="bookingForm" class="needs-validation" novalidate>
-
-<div class="col-md-2 pt-3">
-<label>Aircraft</label>
-<select id="aircraft" class="form-control" required>
-<option value="">Choose...</option>
-<option>G-AZWS</option>
-<option>G-BPAF</option>
-<option>G-EDGI</option>
-<option>G-AVYL</option>
-<option>G-BULL</option>
-</select>
-<div class="invalid-feedback">Aircraft required</div>
-</div>
-
-<div class="col-md-2 pt-3">
-<label>PIC Name</label>
-<input id="pic_name" class="form-control" required>
-<div class="invalid-feedback">PIC required</div>
-</div>
-
-<div class="col-md-2 pt-3">
-<label>Reason</label>
-<select id="reason" class="form-control" required>
-<option value="">Choose...</option>
-<option>Currency</option>
-<option>Circuits</option>
-<option>Landaway</option>
-<option>Nav</option>
-</select>
-<div class="invalid-feedback">Reason required</div>
-</div>
-
-<div class="row pt-3">
-<div class="col-md-2">
-<label>Authorised</label>
-<input id="auth" class="form-control" required>
-<div class="invalid-feedback">Authorisation required</div>
-</div>
-<div class="col pt-4">
-<input type="checkbox" id="auth_self"> Self
-</div>
-</div>
-
-<div class="row pt-3">
-<div class="col-md-2">
-<label>From</label>
-<input id="from" class="form-control" required>
-<div class="invalid-feedback">From required</div>
-</div>
-<div class="col pt-4">
-<input type="checkbox" id="from_kemble"> Kemble
-</div>
-</div>
-
-<div class="row pt-3">
-<div class="col-md-2">
-<label>To</label>
-<input id="to" class="form-control" required>
-<div class="invalid-feedback">To required</div>
-</div>
-<div class="col pt-4">
-<input type="checkbox" id="to_kemble"> Kemble
-</div>
-</div>
-
-<div class="col-md-2 pt-3">
-<label>ETA</label>
-<input type="datetime-local" id="ETA" class="form-control" required>
-<div class="invalid-feedback">ETA required</div>
-</div>
-
-<div class="col-md-2 pt-3">
-<label>Additional Passengers</label>
-<select id="occupants" class="form-control">
-<option value="0">0</option>
-<option value="1">1</option>
-<option value="2">2</option>
-<option value="3">3</option>
-</select>
-</div>
-
-<div class="passenger row pt-3" data-index="1" style="display:none">
-<div class="col-md-2">
-<label>P2 Name</label>
-<input id="p2_name" class="form-control">
-<div class="invalid-feedback">Passenger name required</div>
-</div>
-<div class="col-md-2">
-<label>P2 Number</label>
-<input id="p2_number" class="form-control">
-<div class="invalid-feedback">Phone required unless club member</div>
-</div>
-<div class="col pt-4">
-<input type="checkbox" id="p2_club_member"> Club Member
-</div>
-</div>
-
-<div class="passenger row pt-3" data-index="2" style="display:none">
-<div class="col-md-2">
-<label>P3 Name</label>
-<input id="p3_name" class="form-control">
-<div class="invalid-feedback">Passenger name required</div>
-</div>
-<div class="col-md-2">
-<label>P3 Number</label>
-<input id="p3_number" class="form-control">
-<div class="invalid-feedback">Phone required unless club member</div>
-</div>
-<div class="col pt-4">
-<input type="checkbox" id="p3_club_member"> Club Member
-</div>
-</div>
-
-<div class="passenger row pt-3" data-index="3" style="display:none">
-<div class="col-md-2">
-<label>P4 Name</label>
-<input id="p4_name" class="form-control">
-<div class="invalid-feedback">Passenger name required</div>
-</div>
-<div class="col-md-2">
-<label>P4 Number</label>
-<input id="p4_number" class="form-control">
-<div class="invalid-feedback">Phone required unless club member</div>
-</div>
-<div class="col pt-4">
-<input type="checkbox" id="p4_club_member"> Club Member
-</div>
-</div>
-
-<div class="col-md-2 pt-3">
-<label>Cost Sharing</label>
-<select id="cost_sharing" class="form-control" required>
-<option value="">Choose...</option>
-<option>No</option>
-<option>Yes</option>
-</select>
-<div class="invalid-feedback">Required</div>
-</div>
-
-
-
-
-<div class="pt-3 d-flex gap-2">
-<button type="submit" class="btn btn-primary">Submit</button>
-<button type="button" id="clearAll" class="btn btn-outline-danger">Clear saved data</button>
-</div>
-
-</form>
-
-</div>
-
-<div class="toast-container position-fixed bottom-0 end-0 p-3">
-  <div id="successToast" class="toast align-items-center text-bg-success border-0">
-    <div class="d-flex">
-      <div class="toast-body">✈️ Flight booked successfully</div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-    </div>
+  <div class="container-fluid p-2 bg-primary text-white text-center">
+    <h2 class="mb-0 page-title">BOOK OUT</h2>
   </div>
-</div>
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  // ─────────────────────────────────────────────
-  // Safety check
-  // ─────────────────────────────────────────────
-  if (typeof authFetch !== "function") {
-    console.error("authFetch not available — auth.js may not be loaded");
-    return;
-  }
+  <div id="navbar-placeholder"></div>
 
-  const API_URL = "https://rj7w2wkpgj.execute-api.eu-west-2.amazonaws.com/bookout";
+  <main class="container py-3">
+    <div class="section-card bg-white p-3 p-md-4 fade-in" id="pageCard">
+      <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
+        <div>
+          <h1 class="h4 mb-1">Booking Out Form</h1>
+          <div class="text-muted small">Test mode only — feel free to experiment.</div>
+        </div>
+      </div>
 
-  const rows = document.querySelectorAll(".passenger");
+      <form id="bookingForm" class="needs-validation" novalidate>
+        <div class="row g-3">
+          <div class="col-12 col-md-4">
+            <label class="form-label" for="aircraft">Aircraft</label>
+            <select id="aircraft" class="form-select" required>
+              <option value="">Choose...</option>
+              <option>G-AZWS</option>
+              <option>G-BPAF</option>
+              <option>G-EDGI</option>
+              <option>G-AVYL</option>
+              <option>G-BULL</option>
+            </select>
+            <div class="invalid-feedback">Aircraft required</div>
+          </div>
 
-  // ─────────────────────────────────────────────
-  // Helpers
-  // ─────────────────────────────────────────────
-  function resetETATimeOnly() {
-    if (!ETA.value) return;
-    const datePart = ETA.value.split("T")[0];
-    ETA.value = datePart ? `${datePart}T` : "";
-  }
+          <div class="col-12 col-md-4">
+            <label class="form-label" for="pic_name">PIC Name</label>
+            <input id="pic_name" class="form-control" required />
+            <div class="invalid-feedback">PIC required</div>
+          </div>
 
-  // ─────────────────────────────────────────────
-  // Autofill PIC from logged-in user
-  // ─────────────────────────────────────────────
-  const loggedInUser = localStorage.getItem("username");
-  if (loggedInUser) {
-    pic_name.value = loggedInUser;
-  }
+          <div class="col-12 col-md-4">
+            <label class="form-label" for="reason">Reason</label>
+            <select id="reason" class="form-select" required>
+              <option value="">Choose...</option>
+              <option>Currency</option>
+              <option>Circuits</option>
+              <option>Landaway</option>
+              <option>Nav</option>
+            </select>
+            <div class="invalid-feedback">Reason required</div>
+          </div>
 
-  // ─────────────────────────────────────────────
-  // Clear form button (NO auth clearing)
-  // ─────────────────────────────────────────────
-  clearAll.addEventListener("click", () => {
-    if (!confirm("Clear all current form data?")) return;
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="auth">Authorised</label>
+            <div class="d-flex flex-column flex-sm-row gap-2">
+              <input id="auth" class="form-control" required />
+              <div class="form-check form-switch mt-1">
+                <input class="form-check-input" type="checkbox" id="auth_self" />
+                <label class="form-check-label" for="auth_self">Self</label>
+              </div>
+            </div>
+            <div class="invalid-feedback">Authorisation required</div>
+          </div>
 
-    bookingForm.reset();
-    bookingForm.classList.remove("was-validated");
-    occupants.value = "0";
-    updatePassengers();
-  });
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="ETA">ETA</label>
+            <input type="datetime-local" id="ETA" class="form-control" required />
+            <div class="invalid-feedback">ETA required</div>
+          </div>
 
-  // ─────────────────────────────────────────────
-  // Authorisation self checkbox
-  // ─────────────────────────────────────────────
-  auth_self.addEventListener("change", () => {
-    if (auth_self.checked) {
-      auth.value = "Self";
-      auth.readOnly = true;
-    } else {
-      auth.readOnly = false;
-      if (auth.value === "Self") auth.value = "";
-    }
-  });
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="from">From</label>
+            <div class="d-flex flex-column flex-sm-row gap-2">
+              <input id="from" class="form-control" required />
+              <div class="form-check form-switch mt-1">
+                <input class="form-check-input" type="checkbox" id="from_kemble" />
+                <label class="form-check-label" for="from_kemble">Kemble</label>
+              </div>
+            </div>
+            <div class="invalid-feedback">From required</div>
+          </div>
 
-  // ─────────────────────────────────────────────
-  // Kemble shortcuts
-  // ─────────────────────────────────────────────
-  from_kemble.addEventListener("change", () => {
-    if (from_kemble.checked) from.value = "Kemble";
-  });
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="to">To</label>
+            <div class="d-flex flex-column flex-sm-row gap-2">
+              <input id="to" class="form-control" required />
+              <div class="form-check form-switch mt-1">
+                <input class="form-check-input" type="checkbox" id="to_kemble" />
+                <label class="form-check-label" for="to_kemble">Kemble</label>
+              </div>
+            </div>
+            <div class="invalid-feedback">To required</div>
+          </div>
 
-  to_kemble.addEventListener("change", () => {
-    if (to_kemble.checked) to.value = "Kemble";
-  });
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="occupants">Additional Passengers</label>
+            <select id="occupants" class="form-select">
+              <option value="0">0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+          </div>
 
-  // ─────────────────────────────────────────────
-  // Passenger logic
-  // ─────────────────────────────────────────────
-  function updatePassengers() {
-    const count = Number(occupants.value);
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="cost_sharing">Cost Sharing</label>
+            <select id="cost_sharing" class="form-select" required>
+              <option value="">Choose...</option>
+              <option>No</option>
+              <option>Yes</option>
+            </select>
+            <div class="invalid-feedback">Required</div>
+          </div>
 
-    rows.forEach(row => {
-      const idx = Number(row.dataset.index);
-      const show = idx <= count;
-      row.style.display = show ? "" : "none";
+          <!-- Passengers -->
+          <div class="col-12">
+            <div class="border-top pt-3 mt-1">
+              <div class="fw-semibold mb-2">Passengers</div>
 
-      const name = row.querySelector("input[id$='_name']");
-      const number = row.querySelector("input[id$='_number']");
-      const club = row.querySelector("input[id$='_club_member']");
+              <div class="passenger passenger-block rounded-4 p-3 mb-2 bg-body-tertiary" data-index="1" hidden>
+                <div class="row g-2 align-items-end">
+                  <div class="col-12 col-md-4">
+                    <label class="form-label" for="p2_name">P2 Name</label>
+                    <input id="p2_name" class="form-control" />
+                    <div class="invalid-feedback">Passenger name required</div>
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label" for="p2_number">P2 Number</label>
+                    <input id="p2_number" class="form-control" />
+                    <div class="invalid-feedback">Phone required unless club member</div>
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <div class="form-check form-switch mt-2">
+                      <input class="form-check-input" type="checkbox" id="p2_club_member" />
+                      <label class="form-check-label" for="p2_club_member">Club Member</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-      if (show) {
-        name.required = true;
-        number.required = !club.checked;
-      } else {
-        name.required = false;
-        number.required = false;
-        name.value = "";
-        number.value = "";
-        club.checked = false;
-      }
-    });
-  }
+              <div class="passenger passenger-block rounded-4 p-3 mb-2 bg-body-tertiary" data-index="2" hidden>
+                <div class="row g-2 align-items-end">
+                  <div class="col-12 col-md-4">
+                    <label class="form-label" for="p3_name">P3 Name</label>
+                    <input id="p3_name" class="form-control" />
+                    <div class="invalid-feedback">Passenger name required</div>
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label" for="p3_number">P3 Number</label>
+                    <input id="p3_number" class="form-control" />
+                    <div class="invalid-feedback">Phone required unless club member</div>
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <div class="form-check form-switch mt-2">
+                      <input class="form-check-input" type="checkbox" id="p3_club_member" />
+                      <label class="form-check-label" for="p3_club_member">Club Member</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-  occupants.addEventListener("change", updatePassengers);
-  updatePassengers();
+              <div class="passenger passenger-block rounded-4 p-3 mb-2 bg-body-tertiary" data-index="3" hidden>
+                <div class="row g-2 align-items-end">
+                  <div class="col-12 col-md-4">
+                    <label class="form-label" for="p4_name">P4 Name</label>
+                    <input id="p4_name" class="form-control" />
+                    <div class="invalid-feedback">Passenger name required</div>
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label" for="p4_number">P4 Number</label>
+                    <input id="p4_number" class="form-control" />
+                    <div class="invalid-feedback">Phone required unless club member</div>
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <div class="form-check form-switch mt-2">
+                      <input class="form-check-input" type="checkbox" id="p4_club_member" />
+                      <label class="form-check-label" for="p4_club_member">Club Member</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-  document.querySelectorAll("input[id$='_club_member']").forEach(cb => {
-    cb.addEventListener("change", () => {
-      const row = cb.closest(".passenger");
-      row.querySelector("input[id$='_number']").required = !cb.checked;
-    });
-  });
+              <div class="text-muted small mt-2">
+                Club members may omit phone number.
+              </div>
+            </div>
+          </div>
 
-  // ─────────────────────────────────────────────
-  // Submit booking (auth-safe)
-  // ─────────────────────────────────────────────
-  bookingForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
+          <!-- Actions -->
+          <div class="col-12 pt-2">
+            <div class="d-flex flex-column flex-sm-row gap-2">
+              <button type="submit" id="submitBtn" class="btn btn-primary">
+                Submit
+              </button>
+              <button type="button" id="clearAll" class="btn btn-outline-danger">
+                Clear form
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </main>
 
-    bookingForm.classList.add("was-validated");
-    if (!bookingForm.checkValidity()) return;
+  <script>
+    // Navbar active link highlighting (once navbar is mounted)
+    fetch("/partials/navbar.html")
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to load navbar.html");
+        return res.text();
+      })
+      .then(html => {
+        const mount = document.getElementById("navbar-placeholder");
+        if (!mount) return;
+        mount.innerHTML = html;
 
-    const payload = {
-      aircraft: aircraft.value,
-      picName: pic_name.value,
-      authorised: auth.value,
-      reason: reason.value,
-      from: from.value,
-      to: to.value,
-      eta: ETA.value,
-      costSharing: cost_sharing.value,
-      passengers: []
-    };
-
-    rows.forEach(row => {
-      if (row.style.display !== "none") {
-        payload.passengers.push({
-          name: row.querySelector("input[id$='_name']").value,
-          number: row.querySelector("input[id$='_number']").value || null,
-          clubMember: row.querySelector("input[id$='_club_member']").checked
+        const currentPath = window.location.pathname.replace(/\/$/, "");
+        document.querySelectorAll(".nav-link").forEach(link => {
+          const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
+          if (linkPath === currentPath) {
+            link.classList.add("active");
+            link.setAttribute("aria-current", "page");
+          }
         });
+
+        window.dispatchEvent(new Event("navbar:loaded"));
+      })
+      .catch(err => console.error(err));
+  </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const pageCard = document.getElementById("pageCard");
+      // fade in
+      requestAnimationFrame(() => pageCard?.classList.add("ready"));
+
+      // Safety checks
+      if (typeof authFetch !== "function") {
+        console.error("authFetch not available — auth.js may not be loaded");
+        return;
       }
-    });
-
-    try {
-      const res = await authFetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-
-      if (!res || !res.ok) {
-        throw new Error("Booking failed");
-      }
-
-      new bootstrap.Toast(successToast).show();
-
-      // Redirect if returning to Kemble
-      if (to.value.trim().toLowerCase() === "kemble") {
-        setTimeout(() => {
-          window.location.href = "index.html";
-        }, 1200);
+      if (typeof setButtonLoading !== "function" || typeof showToast !== "function") {
+        console.error("ui.js helpers not available");
         return;
       }
 
-      // Prepare for next booking
-      to.value = "";
-      to_kemble.checked = false;
-      resetETATimeOnly();
+      const API_URL = "https://rj7w2wkpgj.execute-api.eu-west-2.amazonaws.com/bookout";
 
-    } catch (err) {
-      console.error(err);
-      alert("❌ Failed to save booking. Please try again.");
-    }
-  });
-});
-</script>
+      const bookingForm = document.getElementById("bookingForm");
+      const submitBtn = document.getElementById("submitBtn");
+      const rows = document.querySelectorAll(".passenger");
 
-<script>
-fetch("/partials/navbar.html")
-  .then(res => {
-    if (!res.ok) throw new Error("Failed to load navbar.html");
-    return res.text();
-  })
-  .then(html => {
-    const mount = document.getElementById("navbar-placeholder");
-    if (!mount) return;
-
-    mount.innerHTML = html;
-
-    // Active link logic (robust)
-    const currentPath = window.location.pathname.replace(/\/$/, "");
-    document.querySelectorAll(".nav-link").forEach(link => {
-      const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
-      if (linkPath === currentPath) {
-        link.classList.add("active");
-        link.setAttribute("aria-current", "page");
+      // Helpers
+      function resetETATimeOnly() {
+        const ETA = document.getElementById("ETA");
+        if (!ETA?.value) return;
+        const datePart = ETA.value.split("T")[0];
+        ETA.value = datePart ? `${datePart}T` : "";
       }
+
+      // Autofill PIC from logged-in user
+      const loggedInUser = localStorage.getItem("username");
+      const pic = document.getElementById("pic_name");
+      if (loggedInUser && pic) pic.value = loggedInUser;
+
+      // Clear form button (NO auth clearing)
+      document.getElementById("clearAll")?.addEventListener("click", () => {
+        if (!confirm("Clear all current form data?")) return;
+        bookingForm.reset();
+        bookingForm.classList.remove("was-validated");
+        document.getElementById("occupants").value = "0";
+        updatePassengers();
+      });
+
+      // Authorisation self checkbox
+      const authSelf = document.getElementById("auth_self");
+      const auth = document.getElementById("auth");
+      authSelf?.addEventListener("change", () => {
+        if (!auth) return;
+        if (authSelf.checked) {
+          auth.value = "Self";
+          auth.readOnly = true;
+        } else {
+          auth.readOnly = false;
+          if (auth.value === "Self") auth.value = "";
+        }
+      });
+
+      // Kemble shortcuts
+      document.getElementById("from_kemble")?.addEventListener("change", (e) => {
+        const from = document.getElementById("from");
+        if (e.target.checked && from) from.value = "Kemble";
+      });
+
+      document.getElementById("to_kemble")?.addEventListener("change", (e) => {
+        const to = document.getElementById("to");
+        if (e.target.checked && to) to.value = "Kemble";
+      });
+
+      // Passenger logic
+      function updatePassengers() {
+        const count = Number(document.getElementById("occupants").value);
+
+        rows.forEach(row => {
+          const idx = Number(row.dataset.index);
+          const show = idx <= count;
+
+          row.hidden = !show;
+
+          const name = row.querySelector("input[id$='_name']");
+          const number = row.querySelector("input[id$='_number']");
+          const club = row.querySelector("input[id$='_club_member']");
+
+          if (show) {
+            name.required = true;
+            number.required = !club.checked;
+          } else {
+            name.required = false;
+            number.required = false;
+            name.value = "";
+            number.value = "";
+            club.checked = false;
+          }
+        });
+      }
+
+      document.getElementById("occupants")?.addEventListener("change", updatePassengers);
+      updatePassengers();
+
+      document.querySelectorAll("input[id$='_club_member']").forEach(cb => {
+        cb.addEventListener("change", () => {
+          const row = cb.closest(".passenger");
+          row.querySelector("input[id$='_number']").required = !cb.checked;
+        });
+      });
+
+      // Submit booking (auth-safe + button spinner + toast)
+      bookingForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        bookingForm.classList.add("was-validated");
+        if (!bookingForm.checkValidity()) {
+          showToast("Please check the highlighted fields.", { variant: "warning", title: "Form incomplete" });
+          return;
+        }
+
+        const payload = {
+          aircraft: document.getElementById("aircraft").value,
+          picName: document.getElementById("pic_name").value,
+          authorised: document.getElementById("auth").value,
+          reason: document.getElementById("reason").value,
+          from: document.getElementById("from").value,
+          to: document.getElementById("to").value,
+          eta: document.getElementById("ETA").value,
+          costSharing: document.getElementById("cost_sharing").value,
+          passengers: []
+        };
+
+        rows.forEach(row => {
+          if (!row.hidden) {
+            payload.passengers.push({
+              name: row.querySelector("input[id$='_name']").value,
+              number: row.querySelector("input[id$='_number']").value || null,
+              clubMember: row.querySelector("input[id$='_club_member']").checked
+            });
+          }
+        });
+
+        setButtonLoading(submitBtn, true, { loadingText: "Submitting…" });
+
+        try {
+          await withLoading(async () => {
+            const res = await authFetch(API_URL, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
+
+            if (!res || !res.ok) throw new Error("Booking failed");
+          });
+
+          showToast("Flight booked successfully.", { variant: "success", title: "Booked" });
+
+          // Redirect if returning to Kemble
+          const toVal = (document.getElementById("to").value || "").trim().toLowerCase();
+          if (toVal === "kemble") {
+            setTimeout(() => { window.location.href = "index.html"; }, 900);
+            return;
+          }
+
+          // Prepare for next booking
+          document.getElementById("to").value = "";
+          document.getElementById("to_kemble").checked = false;
+          resetETATimeOnly();
+
+        } catch (err) {
+          console.error(err);
+          showToast("Failed to save booking. Please try again.", { variant: "danger", title: "Error" });
+        } finally {
+          setButtonLoading(submitBtn, false);
+        }
+      });
     });
-
-    // ✅ Navbar is now in DOM
-    window.dispatchEvent(new Event("navbar:loaded"));
-  })
-  .catch(err => console.error(err));
-</script>
-
-
+  </script>
 </body>
 </html>
