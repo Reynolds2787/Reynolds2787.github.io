@@ -338,9 +338,121 @@
   </main>
 
 
+<script>
+  const TIME_IDS = ["offChocks", "takeoff", "land", "onChocks"];
+
+  function parseHHMM(v) {
+    if (!v || !/^\d{2}:\d{2}$/.test(v)) return null;
+    const [hh, mm] = v.split(":").map(Number);
+    if (hh < 0 || hh > 23 || mm < 0 || mm > 59) return null;
+    return hh * 60 + mm;
+  }
+
+  function minutesToHHMM(mins) {
+    const hh = Math.floor(mins / 60);
+    const mm = mins % 60;
+    return String(hh).padStart(2, "0") + ":" + String(mm).padStart(2, "0");
+  }
+
+  function snapMinutesTo5(mins) {
+    return Math.round(mins / 5) * 5;
+  }
+
+  function duration(start, end) {
+    let d = end - start;
+    if (d < 0) d += 24 * 60; // overnight
+    return d;
+  }
+
+  function allTimesPresent() {
+    return TIME_IDS.every(id => {
+      const v = document.getElementById(id)?.value;
+      return v && /^\d{2}:\d{2}$/.test(v);
+    });
+  }
+
+  function clearInvalid() {
+    TIME_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      el?.classList.remove("is-invalid");
+    });
+  }
+
+  function setInvalid(flag) {
+    TIME_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      el?.classList.toggle("is-invalid", flag);
+    });
+  }
+
+  function validateAndCalcTimes() {
+    // Do nothing until all four are filled
+    if (!allTimesPresent()) {
+      clearInvalid();
+      return;
+    }
+
+    const off = parseHHMM(offChocks.value);
+    const to  = parseHHMM(takeoff.value);
+    const land= parseHHMM(land.value);
+    const on  = parseHHMM(onChocks.value);
+
+    // Snap all to nearest 5 minutes
+    const snapped = {
+      off: snapMinutesTo5(off),
+      to: snapMinutesTo5(to),
+      land: snapMinutesTo5(land),
+      on: snapMinutesTo5(on)
+    };
+
+    offChocks.value = minutesToHHMM(snapped.off);
+    takeoff.value   = minutesToHHMM(snapped.to);
+    land.value      = minutesToHHMM(snapped.land);
+    onChocks.value  = minutesToHHMM(snapped.on);
+
+    const block = duration(snapped.off, snapped.on);
+    const air   = duration(snapped.to, snapped.land);
+
+    let invalid = false;
+
+    if (air > block) invalid = true;
+    if (block <= 0) invalid = true;
+    if (block > 16 * 60) invalid = true;
+
+    // taxi sanity (optional but sensible)
+    const taxiOut = duration(snapped.off, snapped.to);
+    const taxiIn  = duration(snapped.land, snapped.on);
+    if (taxiOut > 6 * 60 || taxiIn > 6 * 60) invalid = true;
+
+    setInvalid(invalid);
+
+    if (invalid) {
+      if (typeof showToast === "function") {
+        showToast(
+          "Check time order: Off chocks → Takeoff → Land → On chocks",
+          { variant: "danger" }
+        );
+      }
+      return;
+    }
+
+    // Optional outputs if you added them earlier
+    const blockOut = document.getElementById("blockTime");
+    const airOut = document.getElementById("airTime");
+    if (blockOut) blockOut.value = minutesToHHMM(block);
+    if (airOut) airOut.value = minutesToHHMM(air);
+  }
+
+  TIME_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("change", validateAndCalcTimes);
+    el.addEventListener("blur", validateAndCalcTimes);
+  });
+</script>
 
 
-  <script>
+<script>
   function timeToMinutes(hhmm) {
     if (!hhmm || !/^\d{2}:\d{2}$/.test(hhmm)) return null;
     const [hh, mm] = hhmm.split(":").map(n => parseInt(n, 10));
