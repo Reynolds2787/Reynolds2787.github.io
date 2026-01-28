@@ -191,6 +191,22 @@
               <input class="form-control" id="onChocks" name="onChocks" type="time">
             </div>
 
+
+          <div class="row g-3 mt-1">
+            <div class="col-12 col-md-6">
+              <label class="form-label" for="blockTime">Block time (auto)</label>
+              <input class="form-control" id="blockTime" type="text" readonly placeholder="--:--">
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label" for="airTime">Air time (auto)</label>
+              <input class="form-control" id="airTime" type="text" readonly placeholder="--:--">
+            </div>
+          </div>
+
+<div class="form-text mt-2" id="timeHelp">
+  Times auto-calculate once all four fields are complete.
+</div>
+
             <div class="col-12 col-md-6">
               <label class="form-label" for="startTacho">Start tacho</label>
               <input class="form-control" id="startTacho" name="startTacho" type="number" step="0.1" min="0">
@@ -202,6 +218,14 @@
           </div>
         </div>
       </div>
+
+      
+
+
+
+
+
+
 
       <!-- Fuel & oil -->
       <div class="card section-card alt mb-3">
@@ -298,6 +322,7 @@
         </div>
       </div>
 
+
       <!-- Confirmation + submit -->
       <div class="card section-card alt mt-3">
         <div class="card-body">
@@ -318,8 +343,110 @@
     </form>
   </main>
 
+
+
+
+  <script>
+  function timeToMinutes(hhmm) {
+    if (!hhmm || !/^\d{2}:\d{2}$/.test(hhmm)) return null;
+    const [hh, mm] = hhmm.split(":").map(n => parseInt(n, 10));
+    if (Number.isNaN(hh) || Number.isNaN(mm)) return null;
+    return hh * 60 + mm;
+  }
+
+  function minutesToHHMM(mins) {
+    const hh = Math.floor(mins / 60);
+    const mm = mins % 60;
+    return String(hh).padStart(2, "0") + ":" + String(mm).padStart(2, "0");
+  }
+
+  // Computes duration allowing overnight crossing (adds 24h if end < start)
+  function durationMinutes(startMins, endMins) {
+    if (startMins == null || endMins == null) return null;
+    let d = endMins - startMins;
+    if (d < 0) d += 24 * 60; // cross midnight
+    return d;
+  }
+
+  function setInvalid(el, isInvalid) {
+    if (!el) return;
+    el.classList.toggle("is-invalid", isInvalid);
+  }
+
+  function clearOutputs() {
+    const block = document.getElementById("blockTime");
+    const air = document.getElementById("airTime");
+    if (block) block.value = "";
+    if (air) air.value = "";
+  }
+
+  function autoCalcTimes() {
+    const offEl = document.getElementById("offChocks");
+    const toEl  = document.getElementById("takeoff");
+    const landEl= document.getElementById("land");
+    const onEl  = document.getElementById("onChocks");
+
+    const blockOut = document.getElementById("blockTime");
+    const airOut = document.getElementById("airTime");
+
+    const off = timeToMinutes(offEl?.value);
+    const to  = timeToMinutes(toEl?.value);
+    const land= timeToMinutes(landEl?.value);
+    const on  = timeToMinutes(onEl?.value);
+
+    // Only compute once all four are present
+    if ([off, to, land, on].some(v => v == null)) {
+      [offEl, toEl, landEl, onEl].forEach(el => setInvalid(el, false));
+      clearOutputs();
+      return;
+    }
+
+    const blockMins = durationMinutes(off, on);
+    const airMins = durationMinutes(to, land);
+
+    // Basic sanity checks:
+    // - zero durations are allowed (if you want to disallow, change <= 0)
+    // - cap at 16 hours to catch accidental wrong entries
+    let invalid = false;
+
+    if (blockMins == null || airMins == null) invalid = true;
+    if (blockMins < 0 || airMins < 0) invalid = true; // should never happen now
+    if (airMins > blockMins) invalid = true; // can't fly longer than block time
+    if (blockMins > 16 * 60) invalid = true;
+
+    // Also enforce sequence (as best we can with potential overnight):
+    // If someone enters takeoff before offchocks in same-day sense, that's usually wrong.
+    // We'll enforce using durations too: off->to and land->on should be >= 0 and reasonable.
+    const taxiOut = durationMinutes(off, to);
+    const taxiIn  = durationMinutes(land, on);
+    if (taxiOut == null || taxiIn == null) invalid = true;
+    if (taxiOut > 6 * 60 || taxiIn > 6 * 60) invalid = true; // absurd taxi times
+
+    [offEl, toEl, landEl, onEl].forEach(el => setInvalid(el, invalid));
+
+    if (invalid) {
+      clearOutputs();
+      if (typeof showToast === "function") {
+        showToast("Check time order: Off chocks → Takeoff → Land → On chocks. Durations can't be negative.", { variant: "danger" });
+      }
+      return;
+    }
+
+    if (blockOut) blockOut.value = minutesToHHMM(blockMins);
+    if (airOut) airOut.value = minutesToHHMM(airMins);
+  }
+
+  // Hook up listeners
+  ["offChocks", "takeoff", "land", "onChocks"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("input", autoCalcTimes);
+    if (el) el.addEventListener("change", autoCalcTimes);
+  });
+</script>
+
   <!-- Auth + shared UI helpers -->
   <script src="js/auth.js"></script>
+  <script src="js/logout.js"></script>
   <script src="js/ui.js"></script>
 
   <script>
