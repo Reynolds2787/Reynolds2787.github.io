@@ -28,93 +28,64 @@
       100% { background-position: -100% 0; }
     }
 
-    /* Keep the layout tidy on phones */
-    .section-card { border: 0; box-shadow: 0 .125rem .25rem rgba(0,0,0,.075); }
-    .section-card .card-header { background: #646669; }
+    /* Section styling: subtle contrast */
+    .section-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 0.85rem;
+      box-shadow: 0 .125rem .25rem rgba(0,0,0,.06);
+      overflow: hidden;
+    }
+    .section-card .card-header {
+      background: #f8f9fa;
+      border-bottom: 1px solid #e5e7eb;
+      font-weight: 700;
+    }
+    .section-card.alt { background: #ffffff; }
     .form-label { font-weight: 600; }
+
+    /* Tacho widget */
+    .tacho {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.5rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.75rem;
+      background: #f8f9fa;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+
+    .tacho-digit {
+      width: 2.1rem;
+      height: 2.3rem;
+      text-align: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+      border-radius: 0.5rem;
+      border: 1px solid #ced4da;
+      background: #000;
+      color: #fff;
+      padding: 0;
+    }
+
+    .tacho-digit:focus {
+      outline: none;
+      box-shadow: 0 0 0 0.2rem rgba(13,110,253,.25);
+      border-color: #86b7fe;
+    }
+
+    .tacho-dot {
+      font-weight: 900;
+      font-size: 1.2rem;
+      padding: 0 0.1rem;
+      color: #212529;
+    }
+
+    .tacho.invalid {
+      border-color: #dc3545;
+      box-shadow: 0 0 0 0.15rem rgba(220,53,69,.15);
+    }
   </style>
-
-
-
-
-
-    <style>
-      /* Section container */
-      .form-section {
-        background-color: #8d8f91; /* light grey */
-        border: 1px solid #14044d;
-        border-radius: 0.75rem;
-        padding: 1.25rem 1.5rem;
-        margin-bottom: 1.5rem;
-      }
-
-      /* Alternate shade for visual rhythm */
-      .form-section.alt {
-        background-color: #b0b0e6;
-      }
-
-      /* Section header */
-      .form-section h5 {
-        font-weight: 600;
-        margin-bottom: 1rem;
-        color: #212529;
-      }
-
-      /* Slight elevation */
-      .form-section {
-        box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-      }
-
-      .section-card.alt {
-        background-color: #ffffff;
-      }
-
-      .tacho {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.35rem 0.5rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.75rem;
-  background: #f8f9fa;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-}
-
-.tacho-digit {
-  width: 2.1rem;
-  height: 2.3rem;
-  text-align: center;
-  font-weight: 700;
-  font-size: 1.1rem;
-  border-radius: 0.5rem;
-  border: 1px solid #ced4da;
-  background: #000;
-  color: #fff;
-  padding: 0;
-}
-
-.tacho-digit:focus {
-  outline: none;
-  box-shadow: 0 0 0 0.2rem rgba(13,110,253,.25);
-  border-color: #86b7fe;
-}
-
-.tacho-dot {
-  font-weight: 800;
-  font-size: 1.2rem;
-  padding: 0 0.1rem;
-  color: #212529;
-}
-
-.tacho.invalid {
-  border-color: #dc3545;
-  box-shadow: 0 0 0 0.15rem rgba(220,53,69,.15);
-}
-
-  </style>
-  
-
-
 </head>
 
 <body>
@@ -146,41 +117,39 @@
     </div>
 
     <form id="flightLogForm" class="fade-in" novalidate>
-
-
-    
-
-
-
-      <!-- Basic details -->
-      
+      <!-- Flight details -->
       <div class="card section-card alt mb-3">
-        <div class="card-header"><strong>Flight details</strong></div>
+        <div class="card-header">Flight details</div>
         <div class="card-body">
           <div class="row g-3">
             <div class="col-12 col-lg-4">
               <label class="form-label" for="picName">PIC Name</label>
               <input class="form-control" id="picName" name="picName" type="text" required>
+              <div class="invalid-feedback">PIC Name is required.</div>
             </div>
 
             <div class="col-12 col-lg-4">
               <label class="form-label" for="flightDate">Date</label>
               <input class="form-control" id="flightDate" name="flightDate" type="date" required>
+              <div class="invalid-feedback">Date is required.</div>
             </div>
 
             <div class="col-12 col-lg-4">
               <label class="form-label" for="aircraft">Aircraft</label>
               <input class="form-control" id="aircraft" name="aircraft" type="text" required>
+              <div class="invalid-feedback">Aircraft is required.</div>
             </div>
 
             <div class="col-12 col-lg-4">
               <label class="form-label" for="from">From</label>
               <input class="form-control" id="from" name="from" type="text" required>
+              <div class="invalid-feedback">From is required.</div>
             </div>
 
             <div class="col-12 col-lg-4">
               <label class="form-label" for="to">To</label>
               <input class="form-control" id="to" name="to" type="text" required>
+              <div class="invalid-feedback">To is required.</div>
             </div>
 
             <div class="col-12 col-lg-4">
@@ -211,10 +180,9 @@
         </div>
       </div>
 
-
-
+      <!-- Times + tacho -->
       <div class="card section-card alt mb-3">
-        <div class="card-header"><strong>Times</strong></div>
+        <div class="card-header">Times</div>
         <div class="card-body">
           <div class="row g-3">
             <div class="col-12 col-md-6 col-lg-3">
@@ -233,7 +201,7 @@
               <label class="form-label" for="onChocks">On chocks</label>
               <input class="form-control" id="onChocks" name="onChocks" type="time" step="300">
             </div>
-
+          </div>
 
           <div class="row g-3 mt-1">
             <div class="col-12 col-md-6">
@@ -244,58 +212,55 @@
               <label class="form-label" for="airTime">Air time (auto)</label>
               <input class="form-control" id="airTime" type="text" readonly placeholder="--:--">
             </div>
+            <div class="col-12">
+              <div class="form-text" id="timeHelp">
+                Times auto-calculate once all four fields are complete (snaps to nearest 5 minutes).
+              </div>
+            </div>
           </div>
 
-<div class="form-text mt-2" id="timeHelp">
-  Times auto-calculate once all four fields are complete.
-</div>
+          <hr class="my-3">
 
-  <div class="row g-3 mt-1">
-    <div class="col-12 col-md-6">
-      <label class="form-label">Start tacho</label>
-  
-      <div class="tacho" data-tacho="start">
-        <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 1">
-        <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 2">
-        <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 3">
-        <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 4">
-        <span class="tacho-dot" aria-hidden="true">.</span>
-        <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho decimal digit">
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <label class="form-label">Start tacho</label>
+              <div class="tacho" data-tacho="start">
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 1">
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 2">
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 3">
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 4">
+                <span class="tacho-dot" aria-hidden="true">.</span>
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho decimal digit">
+              </div>
+              <input type="hidden" id="startTacho" name="startTacho" value="">
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label">End tacho <span class="text-danger">*</span></label>
+              <div class="tacho" data-tacho="end">
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 1">
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 2">
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 3">
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 4">
+                <span class="tacho-dot" aria-hidden="true">.</span>
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho decimal digit">
+              </div>
+              <input type="hidden" id="endTacho" name="endTacho" value="">
+              <div class="form-text">End tacho is mandatory.</div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label" for="tachoDiff">Tacho difference (auto)</label>
+              <input class="form-control" id="tachoDiff" type="text" readonly placeholder="--.-">
+              <div class="form-text">Shown as hours.tenths (e.g. 1.7).</div>
+            </div>
+          </div>
+        </div>
       </div>
-  
-      <!-- hidden actual value -->
-      <input type="hidden" id="startTacho" name="startTacho" value="">
-    </div>
-  
-    <div class="col-12 col-md-6">
-      <label class="form-label">End tacho</label>
-  
-      <div class="tacho" data-tacho="end">
-        <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 1">
-        <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 2">
-        <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 3">
-        <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 4">
-        <span class="tacho-dot" aria-hidden="true">.</span>
-        <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho decimal digit">
-      </div>
-  
-      <!-- hidden actual value -->
-      <input type="hidden" id="endTacho" name="endTacho" value="">
-    </div>
-  
-    <div class="col-12 col-md-6">
-      <label class="form-label" for="tachoDiff">Tacho difference (auto)</label>
-      <input class="form-control" id="tachoDiff" type="text" readonly placeholder="--.-">
-      <div class="form-text">Calculated once both tachos are entered.</div>
-    </div>
-  </div>
-
-
-      
 
       <!-- Fuel & oil -->
       <div class="card section-card alt mb-3">
-        <div class="card-header"><strong>Fuel & oil</strong></div>
+        <div class="card-header">Fuel & oil</div>
         <div class="card-body">
           <div class="row g-3">
             <div class="col-12 col-lg-4">
@@ -326,24 +291,25 @@
       <div class="row g-3">
         <div class="col-12 col-lg-6">
           <div class="card section-card alt h-100">
-            <div class="card-header"><strong>Landings</strong></div>
+            <div class="card-header">Landings</div>
             <div class="card-body">
               <div class="row g-3">
                 <div class="col-12">
-                  <label class="form-label" for="landingsKemble">Kemble total landings (inc T&G / overshoots)</label>
+                  <label class="form-label" for="landingsKemble">Kemble total landings (inc T&amp;G / overshoots)</label>
                   <input class="form-control" id="landingsKemble" name="landingsKemble" type="number" step="1" min="0" value="0">
                 </div>
                 <div class="col-12">
-                  <label class="form-label" for="landingsOther">T&Gs and landings at other airfields</label>
+                  <label class="form-label" for="landingsOther">T&amp;Gs and landings at other airfields</label>
                   <input class="form-control" id="landingsOther" name="landingsOther" type="number" step="1" min="0" value="0">
                 </div>
               </div>
             </div>
           </div>
         </div>
+
         <div class="col-12 col-lg-6">
           <div class="card section-card alt h-100">
-            <div class="card-header"><strong>Payment</strong></div>
+            <div class="card-header">Payment</div>
             <div class="card-body">
               <div class="row g-3">
                 <div class="col-12">
@@ -388,7 +354,6 @@
         </div>
       </div>
 
-
       <!-- Confirmation + submit -->
       <div class="card section-card alt mt-3">
         <div class="card-body">
@@ -397,6 +362,7 @@
             <label class="form-check-label" for="confirm">
               I confirm as pilot in command the information in this form is correct.
             </label>
+            <div class="invalid-feedback">You must confirm before submitting.</div>
           </div>
           <div class="d-flex flex-wrap justify-content-end gap-2 mt-3">
             <a class="btn btn-outline-secondary" href="my-bookings.html">Cancel</a>
@@ -409,447 +375,18 @@
     </form>
   </main>
 
-
-<script>
-  const TIME_IDS = ["offChocks", "takeoff", "land", "onChocks"];
-
-  function parseHHMM(v) {
-    if (!v || !/^\d{2}:\d{2}$/.test(v)) return null;
-    const [hh, mm] = v.split(":").map(Number);
-    if (hh < 0 || hh > 23 || mm < 0 || mm > 59) return null;
-    return hh * 60 + mm;
-  }
-
-  function minutesToHHMM(mins) {
-    const hh = Math.floor(mins / 60);
-    const mm = mins % 60;
-    return String(hh).padStart(2, "0") + ":" + String(mm).padStart(2, "0");
-  }
-
-  function snapMinutesTo5(mins) {
-    return Math.round(mins / 5) * 5;
-  }
-
-  function duration(start, end) {
-    let d = end - start;
-    if (d < 0) d += 24 * 60; // overnight
-    return d;
-  }
-
-  function allTimesPresent() {
-    return TIME_IDS.every(id => {
-      const v = document.getElementById(id)?.value;
-      return v && /^\d{2}:\d{2}$/.test(v);
-    });
-  }
-
-  function clearInvalid() {
-    TIME_IDS.forEach(id => {
-      const el = document.getElementById(id);
-      el?.classList.remove("is-invalid");
-    });
-  }
-
-  function setInvalid(flag) {
-    TIME_IDS.forEach(id => {
-      const el = document.getElementById(id);
-      el?.classList.toggle("is-invalid", flag);
-    });
-  }
-
-  function validateAndCalcTimes() {
-    // Do nothing until all four are filled
-    if (!allTimesPresent()) {
-      clearInvalid();
-      return;
-    }
-
-    const off = parseHHMM(offChocks.value);
-    const to  = parseHHMM(takeoff.value);
-    const land= parseHHMM(land.value);
-    const on  = parseHHMM(onChocks.value);
-
-    // Snap all to nearest 5 minutes
-    const snapped = {
-      off: snapMinutesTo5(off),
-      to: snapMinutesTo5(to),
-      land: snapMinutesTo5(land),
-      on: snapMinutesTo5(on)
-    };
-
-    offChocks.value = minutesToHHMM(snapped.off);
-    takeoff.value   = minutesToHHMM(snapped.to);
-    land.value      = minutesToHHMM(snapped.land);
-    onChocks.value  = minutesToHHMM(snapped.on);
-
-    const block = duration(snapped.off, snapped.on);
-    const air   = duration(snapped.to, snapped.land);
-
-    let invalid = false;
-
-    if (air > block) invalid = true;
-    if (block <= 0) invalid = true;
-    if (block > 16 * 60) invalid = true;
-
-    // taxi sanity (optional but sensible)
-    const taxiOut = duration(snapped.off, snapped.to);
-    const taxiIn  = duration(snapped.land, snapped.on);
-    if (taxiOut > 6 * 60 || taxiIn > 6 * 60) invalid = true;
-
-    setInvalid(invalid);
-
-    if (invalid) {
-      if (typeof showToast === "function") {
-        showToast(
-          "Check time order: Off chocks → Takeoff → Land → On chocks",
-          { variant: "danger" }
-        );
-      }
-      return;
-    }
-
-    // Optional outputs if you added them earlier
-    const blockOut = document.getElementById("blockTime");
-    const airOut = document.getElementById("airTime");
-    if (blockOut) blockOut.value = minutesToHHMM(block);
-    if (airOut) airOut.value = minutesToHHMM(air);
-  }
-
-  TIME_IDS.forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.addEventListener("change", validateAndCalcTimes);
-    el.addEventListener("blur", validateAndCalcTimes);
-  });
-</script>
-
-
-<script>
-  function timeToMinutes(hhmm) {
-    if (!hhmm || !/^\d{2}:\d{2}$/.test(hhmm)) return null;
-    const [hh, mm] = hhmm.split(":").map(n => parseInt(n, 10));
-    if (Number.isNaN(hh) || Number.isNaN(mm)) return null;
-    return hh * 60 + mm;
-  }
-
-  function minutesToHHMM(mins) {
-    const hh = Math.floor(mins / 60);
-    const mm = mins % 60;
-    return String(hh).padStart(2, "0") + ":" + String(mm).padStart(2, "0");
-  }
-
-  // Computes duration allowing overnight crossing (adds 24h if end < start)
-  function durationMinutes(startMins, endMins) {
-    if (startMins == null || endMins == null) return null;
-    let d = endMins - startMins;
-    if (d < 0) d += 24 * 60; // cross midnight
-    return d;
-  }
-
-  function setInvalid(el, isInvalid) {
-    if (!el) return;
-    el.classList.toggle("is-invalid", isInvalid);
-  }
-
-  function clearOutputs() {
-    const block = document.getElementById("blockTime");
-    const air = document.getElementById("airTime");
-    if (block) block.value = "";
-    if (air) air.value = "";
-  }
-
-  function autoCalcTimes() {
-    const offEl = document.getElementById("offChocks");
-    const toEl  = document.getElementById("takeoff");
-    const landEl= document.getElementById("land");
-    const onEl  = document.getElementById("onChocks");
-
-    const blockOut = document.getElementById("blockTime");
-    const airOut = document.getElementById("airTime");
-
-    const off = timeToMinutes(offEl?.value);
-    const to  = timeToMinutes(toEl?.value);
-    const land= timeToMinutes(landEl?.value);
-    const on  = timeToMinutes(onEl?.value);
-
-    // Only compute once all four are present
-    if ([off, to, land, on].some(v => v == null)) {
-      [offEl, toEl, landEl, onEl].forEach(el => setInvalid(el, false));
-      clearOutputs();
-      return;
-    }
-
-    const blockMins = durationMinutes(off, on);
-    const airMins = durationMinutes(to, land);
-
-    // Basic sanity checks:
-    // - zero durations are allowed (if you want to disallow, change <= 0)
-    // - cap at 16 hours to catch accidental wrong entries
-    let invalid = false;
-
-    if (blockMins == null || airMins == null) invalid = true;
-    if (blockMins < 0 || airMins < 0) invalid = true; // should never happen now
-    if (airMins > blockMins) invalid = true; // can't fly longer than block time
-    if (blockMins > 16 * 60) invalid = true;
-
-    // Also enforce sequence (as best we can with potential overnight):
-    // If someone enters takeoff before offchocks in same-day sense, that's usually wrong.
-    // We'll enforce using durations too: off->to and land->on should be >= 0 and reasonable.
-    const taxiOut = durationMinutes(off, to);
-    const taxiIn  = durationMinutes(land, on);
-    if (taxiOut == null || taxiIn == null) invalid = true;
-    if (taxiOut > 6 * 60 || taxiIn > 6 * 60) invalid = true; // absurd taxi times
-
-    [offEl, toEl, landEl, onEl].forEach(el => setInvalid(el, invalid));
-
-    if (invalid) {
-      clearOutputs();
-      if (typeof showToast === "function") {
-        showToast("Check time order: Off chocks → Takeoff → Land → On chocks. Durations can't be negative.", { variant: "danger" });
-      }
-      return;
-    }
-
-    if (blockOut) blockOut.value = minutesToHHMM(blockMins);
-    if (airOut) airOut.value = minutesToHHMM(airMins);
-  }
-
-  // Hook up listeners
-  ["offChocks", "takeoff", "land", "onChocks"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener("input", autoCalcTimes);
-    if (el) el.addEventListener("change", autoCalcTimes);
-  });
-</script>
-
-<script>
-  function clampDigitChar(ch) {
-    return /[0-9]/.test(ch) ? ch : "";
-  }
-
-  function getDigits(container) {
-    return Array.from(container.querySelectorAll(".tacho-digit"));
-  }
-
-  function buildTachoString(container) {
-    const digits = getDigits(container).map(i => (i.value || "0"));
-    // first 4 digits are whole hours, last digit is tenths
-    return `${digits[0]}${digits[1]}${digits[2]}${digits[3]}.${digits[4]}`;
-  }
-
-  function isComplete(container) {
-    // consider complete when ALL 5 boxes have a digit
-    return getDigits(container).every(i => /^[0-9]$/.test(i.value));
-  }
-
-  function tachoToTenths(tachoStr) {
-    // "0123.4" -> 1234 tenths
-    if (!/^\d{4}\.\d$/.test(tachoStr)) return null;
-    const whole = parseInt(tachoStr.slice(0, 4), 10);
-    const tenth = parseInt(tachoStr.slice(5, 6), 10);
-    if (Number.isNaN(whole) || Number.isNaN(tenth)) return null;
-    return whole * 10 + tenth;
-  }
-
-  function tenthsToTacho(tenths) {
-    const whole = Math.floor(tenths / 10);
-    const tenth = tenths % 10;
-    return String(whole).padStart(4, "0") + "." + String(tenth);
-  }
-
-  function syncHidden(container) {
-    const kind = container.getAttribute("data-tacho"); // "start" or "end"
-    const hidden = document.getElementById(kind === "start" ? "startTacho" : "endTacho");
-    if (!hidden) return;
-
-    if (!isComplete(container)) {
-      hidden.value = "";
-      return;
-    }
-
-    hidden.value = buildTachoString(container);
-  }
-
-  function validateAndCalcTacho() {
-    const startBox = document.querySelector('.tacho[data-tacho="start"]');
-    const endBox = document.querySelector('.tacho[data-tacho="end"]');
-    const diffOut = document.getElementById("tachoDiff");
-
-    if (!startBox || !endBox) return;
-
-    // only validate once BOTH are complete
-    if (!isComplete(startBox) || !isComplete(endBox)) {
-      startBox.classList.remove("invalid");
-      endBox.classList.remove("invalid");
-      if (diffOut) diffOut.value = "";
-      return;
-    }
-
-    const startStr = buildTachoString(startBox);
-    const endStr = buildTachoString(endBox);
-
-    const startT = tachoToTenths(startStr);
-    const endT = tachoToTenths(endStr);
-
-    const invalid = (startT == null || endT == null || endT < startT);
-
-    startBox.classList.toggle("invalid", invalid);
-    endBox.classList.toggle("invalid", invalid);
-
-    if (invalid) {
-      if (diffOut) diffOut.value = "";
-      if (typeof showToast === "function") {
-        showToast("End tacho must be greater than or equal to start tacho.", { variant: "danger" });
-      }
-      return;
-    }
-
-    function tenthsToHoursTenths(tenths) {
-      const hours = Math.floor(tenths / 10);
-      const t = tenths % 10;
-      return `${hours}.${t}`; // e.g. "1.7"
-    }
-
-    // ...
-
-    if (diffOut) diffOut.value = tenthsToHoursTenths(diffTenths);
-  
-  
-  
-  }
-
-  function wireTacho(container) {
-    const inputs = getDigits(container);
-
-    inputs.forEach((input, idx) => {
-      input.setAttribute("autocomplete", "off");
-      input.setAttribute("pattern", "[0-9]*");
-
-      input.addEventListener("input", (e) => {
-        const v = clampDigitChar(input.value);
-        input.value = v;
-
-        if (v && idx < inputs.length - 1) {
-          inputs[idx + 1].focus();
-          inputs[idx + 1].select?.();
-        }
-
-        syncHidden(container);
-        validateAndCalcTacho();
-      });
-
-      input.addEventListener("keydown", (e) => {
-        const key = e.key;
-
-        // Backspace: move left if empty, otherwise clear
-        if (key === "Backspace") {
-          if (input.value) {
-            input.value = "";
-            e.preventDefault();
-          } else if (idx > 0) {
-            inputs[idx - 1].focus();
-            inputs[idx - 1].value = "";
-            e.preventDefault();
-          }
-          syncHidden(container);
-          validateAndCalcTacho();
-          return;
-        }
-
-        // Arrow navigation
-        if (key === "ArrowLeft" && idx > 0) {
-          inputs[idx - 1].focus();
-          e.preventDefault();
-          return;
-        }
-        if (key === "ArrowRight" && idx < inputs.length - 1) {
-          inputs[idx + 1].focus();
-          e.preventDefault();
-          return;
-        }
-
-        // Only allow digits, tab, etc.
-        if (
-          key.length === 1 &&
-          !/[0-9]/.test(key)
-        ) {
-          e.preventDefault();
-        }
-      });
-
-      input.addEventListener("focus", () => {
-        // select content for quick overwrite
-        input.select?.();
-      });
-
-      input.addEventListener("blur", () => {
-        syncHidden(container);
-        validateAndCalcTacho();
-      });
-    });
-  }
-
-
-    function setTachoDigits(container, tachoStr) {
-        // expects "0123.4"
-        if (!/^\d{4}\.\d$/.test(tachoStr)) return false;
-
-        const digits = getDigits(container);
-        const raw = tachoStr.replace(".", ""); // "01234"
-        for (let i = 0; i < 5; i++) digits[i].value = raw[i];
-
-        syncHidden(container);
-        validateAndCalcTacho();
-        return true;
-      }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll(".tacho").forEach(wireTacho);
-  });
-</script>
-
-<script>
-  function isFiveMinuteIncrement(hhmm) {
-    if (!hhmm || !/^\d{2}:\d{2}$/.test(hhmm)) return false;
-    const minutes = parseInt(hhmm.split(":")[1], 10);
-    return minutes % 5 === 0;
-  }
-
-  function enforceFiveMinuteStep(e) {
-    const el = e.target;
-    if (!el || !el.value) return;
-
-    if (!isFiveMinuteIncrement(el.value)) {
-      el.classList.add("is-invalid");
-      if (typeof showToast === "function") {
-        showToast("Times must be entered in 5-minute increments.", { variant: "warning" });
-      }
-      return;
-    }
-
-    el.classList.remove("is-invalid");
-  }
-
-  ["offChocks", "takeoff", "land", "onChocks"].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.addEventListener("change", enforceFiveMinuteStep);
-    el.addEventListener("blur", enforceFiveMinuteStep);
-  });
-</script>
-
-  <!-- Auth + shared UI helpers -->
+  <!-- Auth + shared helpers -->
   <script src="js/auth.js"></script>
   <script src="js/logout.js"></script>
   <script src="js/ui.js"></script>
 
   <script>
-    // NOTE: Keep this consistent with your other pages
     // FlightBookings API base
     const API_BASE = "https://rj7w2wkpgj.execute-api.eu-west-2.amazonaws.com";
 
     const params = new URLSearchParams(window.location.search);
     const bookingId = params.get("id");
+
     const prefillSkeleton = document.getElementById("prefillSkeleton");
     const form = document.getElementById("flightLogForm");
     const submitBtn = document.getElementById("submitBtn");
@@ -861,14 +398,279 @@
       form.classList.toggle("ready", isReady);
     }
 
-    function todayISO() {
-      const d = new Date();
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth() + 1).padStart(2, "0");
-      const dd = String(d.getDate()).padStart(2, "0");
-      return `${yyyy}-${mm}-${dd}`;
+    function toISODateFromEta(eta) {
+      if (!eta) return null;
+      const s = String(eta).replace(" ", "T");
+      const d = s.split("T")[0];
+      return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : null;
     }
 
+    // ---------- Times logic (single source of truth) ----------
+    const TIME_IDS = ["offChocks", "takeoff", "land", "onChocks"];
+
+    function parseHHMM(v) {
+      if (!v || !/^\d{2}:\d{2}$/.test(v)) return null;
+      const [hh, mm] = v.split(":").map(Number);
+      if (hh < 0 || hh > 23 || mm < 0 || mm > 59) return null;
+      return hh * 60 + mm;
+    }
+
+    function minutesToHHMM(mins) {
+      const hh = Math.floor(mins / 60);
+      const mm = mins % 60;
+      return String(hh).padStart(2, "0") + ":" + String(mm).padStart(2, "0");
+    }
+
+    function snapMinutesTo5(mins) {
+      return Math.round(mins / 5) * 5;
+    }
+
+    function duration(start, end) {
+      let d = end - start;
+      if (d < 0) d += 24 * 60;
+      return d;
+    }
+
+    function allTimesPresent() {
+      return TIME_IDS.every(id => {
+        const v = document.getElementById(id)?.value;
+        return v && /^\d{2}:\d{2}$/.test(v);
+      });
+    }
+
+    function clearInvalidTimes() {
+      TIME_IDS.forEach(id => document.getElementById(id)?.classList.remove("is-invalid"));
+    }
+
+    function setInvalidTimes(flag) {
+      TIME_IDS.forEach(id => document.getElementById(id)?.classList.toggle("is-invalid", flag));
+    }
+
+    function validateAndCalcTimes() {
+      if (!allTimesPresent()) {
+        clearInvalidTimes();
+        document.getElementById("blockTime").value = "";
+        document.getElementById("airTime").value = "";
+        return;
+      }
+
+      const offEl = document.getElementById("offChocks");
+      const toEl = document.getElementById("takeoff");
+      const landEl = document.getElementById("land");
+      const onEl = document.getElementById("onChocks");
+
+      const off = parseHHMM(offEl.value);
+      const to = parseHHMM(toEl.value);
+      const land = parseHHMM(landEl.value);
+      const on = parseHHMM(onEl.value);
+
+      const snapped = {
+        off: snapMinutesTo5(off),
+        to: snapMinutesTo5(to),
+        land: snapMinutesTo5(land),
+        on: snapMinutesTo5(on)
+      };
+
+      offEl.value = minutesToHHMM(snapped.off);
+      toEl.value = minutesToHHMM(snapped.to);
+      landEl.value = minutesToHHMM(snapped.land);
+      onEl.value = minutesToHHMM(snapped.on);
+
+      const block = duration(snapped.off, snapped.on);
+      const air = duration(snapped.to, snapped.land);
+
+      let invalid = false;
+      if (air > block) invalid = true;
+      if (block <= 0) invalid = true;
+      if (block > 16 * 60) invalid = true;
+
+      const taxiOut = duration(snapped.off, snapped.to);
+      const taxiIn = duration(snapped.land, snapped.on);
+      if (taxiOut > 6 * 60 || taxiIn > 6 * 60) invalid = true;
+
+      setInvalidTimes(invalid);
+
+      if (invalid) {
+        document.getElementById("blockTime").value = "";
+        document.getElementById("airTime").value = "";
+        if (typeof showToast === "function") {
+          showToast("Check time order: Off chocks → Takeoff → Land → On chocks", { variant: "danger" });
+        }
+        return false;
+      }
+
+      document.getElementById("blockTime").value = minutesToHHMM(block);
+      document.getElementById("airTime").value = minutesToHHMM(air);
+      return true;
+    }
+
+    TIME_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener("change", validateAndCalcTimes);
+      el.addEventListener("blur", validateAndCalcTimes);
+    });
+
+    // ---------- Tacho logic ----------
+    function clampDigitChar(ch) {
+      return /[0-9]/.test(ch) ? ch : "";
+    }
+
+    function getDigits(container) {
+      return Array.from(container.querySelectorAll(".tacho-digit"));
+    }
+
+    function buildTachoString(container) {
+      const digits = getDigits(container).map(i => (i.value || "0"));
+      return `${digits[0]}${digits[1]}${digits[2]}${digits[3]}.${digits[4]}`;
+    }
+
+    function isComplete(container) {
+      return getDigits(container).every(i => /^[0-9]$/.test(i.value));
+    }
+
+    function tachoToTenths(tachoStr) {
+      if (!/^\d{4}\.\d$/.test(tachoStr)) return null;
+      const whole = parseInt(tachoStr.slice(0, 4), 10);
+      const tenth = parseInt(tachoStr.slice(5, 6), 10);
+      if (Number.isNaN(whole) || Number.isNaN(tenth)) return null;
+      return whole * 10 + tenth;
+    }
+
+    function tenthsToHoursTenths(tenths) {
+      const hours = Math.floor(tenths / 10);
+      const t = tenths % 10;
+      return `${hours}.${t}`;
+    }
+
+    function syncHidden(container) {
+      const kind = container.getAttribute("data-tacho");
+      const hidden = document.getElementById(kind === "start" ? "startTacho" : "endTacho");
+      if (!hidden) return;
+
+      hidden.value = isComplete(container) ? buildTachoString(container) : "";
+    }
+
+    function validateAndCalcTacho() {
+      const startBox = document.querySelector('.tacho[data-tacho="start"]');
+      const endBox = document.querySelector('.tacho[data-tacho="end"]');
+      const diffOut = document.getElementById("tachoDiff");
+
+      if (!startBox || !endBox) return true;
+
+      // Only validate once BOTH are complete
+      if (!isComplete(startBox) || !isComplete(endBox)) {
+        startBox.classList.remove("invalid");
+        endBox.classList.remove("invalid");
+        diffOut.value = "";
+        return true;
+      }
+
+      const startT = tachoToTenths(buildTachoString(startBox));
+      const endT = tachoToTenths(buildTachoString(endBox));
+
+      const invalid = (startT == null || endT == null || endT < startT);
+
+      startBox.classList.toggle("invalid", invalid);
+      endBox.classList.toggle("invalid", invalid);
+
+      if (invalid) {
+        diffOut.value = "";
+        if (typeof showToast === "function") {
+          showToast("End tacho must be greater than or equal to start tacho.", { variant: "danger" });
+        }
+        return false;
+      }
+
+      const diffTenths = endT - startT;
+      diffOut.value = tenthsToHoursTenths(diffTenths);
+      return true;
+    }
+
+    function wireTacho(container) {
+      const inputs = getDigits(container);
+
+      inputs.forEach((input, idx) => {
+        input.setAttribute("autocomplete", "off");
+        input.setAttribute("pattern", "[0-9]*");
+
+        input.addEventListener("input", () => {
+          const v = clampDigitChar(input.value);
+          input.value = v;
+
+          if (v && idx < inputs.length - 1) {
+            inputs[idx + 1].focus();
+            inputs[idx + 1].select?.();
+          }
+
+          syncHidden(container);
+          validateAndCalcTacho();
+        });
+
+        input.addEventListener("keydown", (e) => {
+          const key = e.key;
+
+          if (key === "Backspace") {
+            if (input.value) {
+              input.value = "";
+              e.preventDefault();
+            } else if (idx > 0) {
+              inputs[idx - 1].focus();
+              inputs[idx - 1].value = "";
+              e.preventDefault();
+            }
+            syncHidden(container);
+            validateAndCalcTacho();
+            return;
+          }
+
+          if (key === "ArrowLeft" && idx > 0) { inputs[idx - 1].focus(); e.preventDefault(); return; }
+          if (key === "ArrowRight" && idx < inputs.length - 1) { inputs[idx + 1].focus(); e.preventDefault(); return; }
+
+          if (key.length === 1 && !/[0-9]/.test(key)) e.preventDefault();
+        });
+
+        input.addEventListener("focus", () => input.select?.());
+
+        input.addEventListener("blur", () => {
+          syncHidden(container);
+          validateAndCalcTacho();
+        });
+      });
+    }
+
+    function setTachoDigits(container, tachoStr) {
+      if (!/^\d{4}\.\d$/.test(tachoStr)) return false;
+      const digits = getDigits(container);
+      const raw = tachoStr.replace(".", ""); // "01234"
+      for (let i = 0; i < 5; i++) digits[i].value = raw[i];
+      syncHidden(container);
+      validateAndCalcTacho();
+      return true;
+    }
+
+    async function prefillStartTachoFromLast(aircraft) {
+      try {
+        const res = await authFetch(`${API_BASE}/aircraft_tacho/${encodeURIComponent(aircraft)}`);
+        if (!res || !res.ok) return;
+
+        const data = await res.json();
+        if (!data?.lastTacho) return;
+
+        const startBox = document.querySelector('.tacho[data-tacho="start"]');
+        if (!startBox) return;
+
+        const digits = Array.from(startBox.querySelectorAll(".tacho-digit"));
+        const userStarted = digits.some(d => (d.value || "").trim() !== "");
+        if (userStarted) return;
+
+        setTachoDigits(startBox, data.lastTacho);
+      } catch (e) {
+        console.warn("Could not prefill start tacho", e);
+      }
+    }
+
+    // ---------- Prefill + submit ----------
     async function prefillFromBooking() {
       if (!bookingId) {
         showToast("Missing booking id", { variant: "danger" });
@@ -877,10 +679,8 @@
       }
 
       document.getElementById("bookingId").value = bookingId;
-      document.getElementById("flightDate").value = todayISO();
 
-      // The booking API should already exist (used by edit-booking.html)
-      const res = await authFetch(`${API_BASE}/get_booking/${bookingId}`);
+      const res = await authFetch(`${API_BASE}/get_booking/${encodeURIComponent(bookingId)}`);
       if (!res || !res.ok) {
         showToast("Failed to load booking for prefill", { variant: "danger" });
         setPrefillVisible(true);
@@ -889,53 +689,55 @@
 
       const b = await res.json();
 
-      // Prefill fields you mentioned
-      document.getElementById("picName").value = b.pic || b.PIC || b.picName || localStorage.getItem("username") || "";
+      // Best-effort mapping
+      document.getElementById("picName").value = b.picName || b.pic || b.PIC || localStorage.getItem("username") || "";
       document.getElementById("from").value = b.from ?? "";
       document.getElementById("to").value = b.to ?? "";
       document.getElementById("authorised").value = b.authorised ?? b.authorized ?? "";
       document.getElementById("aircraft").value = b.aircraft ?? "";
 
-      // P2–P4: depending on how you store it today
-      document.getElementById("p2").value = b.p2 ?? b.passenger2 ?? b.pax2 ?? "";
-      document.getElementById("p3").value = b.p3 ?? b.passenger3 ?? b.pax3 ?? "";
-      document.getElementById("p4").value = b.p4 ?? b.passenger4 ?? b.pax4 ?? "";
+      // Date from booking ETA if available, otherwise today
+      const etaDate = toISODateFromEta(b.eta);
+      document.getElementById("flightDate").value = etaDate || new Date().toISOString().slice(0, 10);
+
+      // P2–P4 from passengers array
+      const pax = Array.isArray(b.passengers) ? b.passengers : [];
+      document.getElementById("p2").value = pax[0]?.name || "";
+      document.getElementById("p3").value = pax[1]?.name || "";
+      document.getElementById("p4").value = pax[2]?.name || "";
+
+      // Prefill start tacho from last known per aircraft
+      if (b.aircraft) {
+        await prefillStartTachoFromLast(b.aircraft);
+      }
 
       setPrefillVisible(true);
     }
 
-    async function prefillStartTachoFromLast(aircraft) {
-        try {
-          const res = await authFetch(`${API_BASE}/aircraft_tacho/${encodeURIComponent(aircraft)}`);
-          if (!res || !res.ok) return;
-
-          const data = await res.json();
-          if (!data.lastTacho) return;
-
-          // Only prefill if user hasn't started typing
-          const startBox = document.querySelector('.tacho[data-tacho="start"]');
-          if (!startBox) return;
-
-          if (!isComplete(startBox)) {
-            setTachoDigits(startBox, data.lastTacho);
-          }
-        } catch (e) {
-          console.warn("Could not prefill start tacho", e);
-        }
-      }
-
-      await prefillStartTachoFromLast(booking.aircraft);
-
-
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      // Basic bootstrap validation feel
+      // Bootstrap validation
       if (!form.checkValidity()) {
         form.classList.add("was-validated");
         showToast("Please complete the required fields", { variant: "warning" });
         return;
       }
+
+      // End tacho mandatory (matches server-side)
+      const endTacho = document.getElementById("endTacho")?.value || "";
+      if (!/^\d{4}\.\d$/.test(endTacho)) {
+        showToast("Please enter End tacho (4 digits + . + 1 digit)", { variant: "warning" });
+        return;
+      }
+
+      // Validate times group (only meaningful if all four entered)
+      const timesOk = validateAndCalcTimes();
+      if (timesOk === false) return;
+
+      // Validate tacho group (if both complete, must be ordered)
+      const tachoOk = validateAndCalcTacho();
+      if (tachoOk === false) return;
 
       const payload = Object.fromEntries(new FormData(form).entries());
 
@@ -943,8 +745,7 @@
       setButtonLoading(submitBtnTop, true, { loadingText: "Submitting…" });
 
       try {
-        // MVP endpoint you will add: writes the log AND removes booking from active flights.
-        const res = await authFetch(`${API_BASE}/complete_booking/${bookingId}`, {
+        const res = await authFetch(`${API_BASE}/complete_booking/${encodeURIComponent(bookingId)}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
@@ -969,17 +770,19 @@
       .then(html => {
         const mount = document.getElementById("navbar-placeholder");
         if (mount) mount.innerHTML = html;
-        // Ensure logout + username in navbar works after injecting
+        // Re-run logout wiring after injecting navbar
         const s = document.createElement("script");
-        s.src = "logout.js";
+        s.src = "js/logout.js";
         document.body.appendChild(s);
       })
       .catch(err => console.error("Navbar load failed", err));
 
-    // Prefill
-    withLoading(async () => {
-      setPrefillVisible(false);
-      await prefillFromBooking();
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll(".tacho").forEach(wireTacho);
+      withLoading(async () => {
+        setPrefillVisible(false);
+        await prefillFromBooking();
+      });
     });
   </script>
 </body>
