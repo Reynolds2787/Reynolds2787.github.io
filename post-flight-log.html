@@ -176,19 +176,19 @@
           <div class="row g-3">
             <div class="col-12 col-md-6 col-lg-3">
               <label class="form-label" for="offChocks">Off chocks</label>
-              <input class="form-control" id="offChocks" name="offChocks" type="time">
+              <input class="form-control" id="offChocks" name="offChocks" type="time" step="300">
             </div>
             <div class="col-12 col-md-6 col-lg-3">
               <label class="form-label" for="takeoff">Takeoff</label>
-              <input class="form-control" id="takeoff" name="takeoff" type="time">
+              <input class="form-control" id="takeoff" name="takeoff" type="time" step="300">
             </div>
             <div class="col-12 col-md-6 col-lg-3">
               <label class="form-label" for="land">Land</label>
-              <input class="form-control" id="land" name="land" type="time">
+              <input class="form-control" id="land" name="land" type="time" step="300">
             </div>
             <div class="col-12 col-md-6 col-lg-3">
               <label class="form-label" for="onChocks">On chocks</label>
-              <input class="form-control" id="onChocks" name="onChocks" type="time">
+              <input class="form-control" id="onChocks" name="onChocks" type="time" step="300">
             </div>
 
 
@@ -220,12 +220,6 @@
       </div>
 
       
-
-
-
-
-
-
 
       <!-- Fuel & oil -->
       <div class="card section-card alt mb-3">
@@ -441,6 +435,37 @@
     const el = document.getElementById(id);
     if (el) el.addEventListener("input", autoCalcTimes);
     if (el) el.addEventListener("change", autoCalcTimes);
+  });
+</script>
+
+
+<script>
+  function isFiveMinuteIncrement(hhmm) {
+    if (!hhmm || !/^\d{2}:\d{2}$/.test(hhmm)) return false;
+    const minutes = parseInt(hhmm.split(":")[1], 10);
+    return minutes % 5 === 0;
+  }
+
+  function enforceFiveMinuteStep(e) {
+    const el = e.target;
+    if (!el || !el.value) return;
+
+    if (!isFiveMinuteIncrement(el.value)) {
+      el.classList.add("is-invalid");
+      if (typeof showToast === "function") {
+        showToast("Times must be entered in 5-minute increments.", { variant: "warning" });
+      }
+      return;
+    }
+
+    el.classList.remove("is-invalid");
+  }
+
+  ["offChocks", "takeoff", "land", "onChocks"].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("change", enforceFiveMinuteStep);
+    el.addEventListener("blur", enforceFiveMinuteStep);
   });
 </script>
 
