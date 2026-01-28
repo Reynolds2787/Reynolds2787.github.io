@@ -8,197 +8,238 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 
+  <style>
+    body.loading { cursor: wait; }
+
+    .fade-in { opacity: 0; transform: translateY(2px); transition: opacity .2s ease, transform .2s ease; }
+    .fade-in.ready { opacity: 1; transform: none; }
+
+    .skeleton {
+      height: 38px;
+      border-radius: .375rem;
+      background: linear-gradient(90deg,#e9ecef 25%,#f8f9fa 37%,#e9ecef 63%);
+      background-size: 400% 100%;
+      animation: shimmer 1.4s ease infinite;
+    }
+    @keyframes shimmer { 0% { background-position: 100% 0 } 100% { background-position: 0 0 } }
+
+    .sk-row { height: 18px; border-radius: .25rem; }
+  </style>
+
+  <!-- Auth + shared UI helpers -->
   <script src="js/auth.js"></script>
   <script src="js/logout.js"></script>
   <script src="js/ui.js"></script>
-
-
 </head>
 
 <body>
+  <div class="container-fluid p-2 bg-primary text-white text-center">
+    <h2 class="mb-0">BOOKINGS</h2>
+  </div>
 
-<div class="container-fluid p-2 bg-primary text-white text-center">
-  <h2>BOOKINGS</h2>
-</div>
+  <div id="navbar-placeholder"></div>
 
-<div id="navbar-placeholder"></div>
+  <div class="container mt-4">
+    <h3 class="mb-3">My Bookings</h3>
 
-<div class="container mt-4">
-  <h3 class="mb-3">My Bookings</h3>
+    <!-- Skeletons -->
+    <div id="bookings-skeleton" class="fade-in">
+      <!-- Desktop skeleton table -->
+      <div class="table-responsive d-none d-md-block">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>Aircraft</th>
+              <th>ETA</th>
+              <th>Route</th>
+              <th>Reason</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><div class="skeleton sk-row" style="width:80px"></div></td><td><div class="skeleton sk-row" style="width:140px"></div></td><td><div class="skeleton sk-row" style="width:160px"></div></td><td><div class="skeleton sk-row" style="width:120px"></div></td><td><div class="skeleton" style="height:32px;width:260px"></div></td></tr>
+            <tr><td><div class="skeleton sk-row" style="width:80px"></div></td><td><div class="skeleton sk-row" style="width:140px"></div></td><td><div class="skeleton sk-row" style="width:160px"></div></td><td><div class="skeleton sk-row" style="width:120px"></div></td><td><div class="skeleton" style="height:32px;width:260px"></div></td></tr>
+            <tr><td><div class="skeleton sk-row" style="width:80px"></div></td><td><div class="skeleton sk-row" style="width:140px"></div></td><td><div class="skeleton sk-row" style="width:160px"></div></td><td><div class="skeleton sk-row" style="width:120px"></div></td><td><div class="skeleton" style="height:32px;width:260px"></div></td></tr>
+            <tr><td><div class="skeleton sk-row" style="width:80px"></div></td><td><div class="skeleton sk-row" style="width:140px"></div></td><td><div class="skeleton sk-row" style="width:160px"></div></td><td><div class="skeleton sk-row" style="width:120px"></div></td><td><div class="skeleton" style="height:32px;width:260px"></div></td></tr>
+            <tr><td><div class="skeleton sk-row" style="width:80px"></div></td><td><div class="skeleton sk-row" style="width:140px"></div></td><td><div class="skeleton sk-row" style="width:160px"></div></td><td><div class="skeleton sk-row" style="width:120px"></div></td><td><div class="skeleton" style="height:32px;width:260px"></div></td></tr>
+            <tr><td><div class="skeleton sk-row" style="width:80px"></div></td><td><div class="skeleton sk-row" style="width:140px"></div></td><td><div class="skeleton sk-row" style="width:160px"></div></td><td><div class="skeleton sk-row" style="width:120px"></div></td><td><div class="skeleton" style="height:32px;width:260px"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
 
-  <div id="bookings"></div>
-</div>
+      <!-- Mobile skeleton cards -->
+      <div class="d-md-none">
+        <div class="card mb-3"><div class="card-body"><div class="skeleton sk-row" style="width:120px;height:22px"></div><div class="skeleton sk-row mt-2" style="width:220px"></div><div class="skeleton sk-row mt-2" style="width:160px"></div><div class="skeleton" style="height:38px" class="mt-3"></div><div class="skeleton mt-2" style="height:38px"></div><div class="skeleton mt-2" style="height:38px"></div></div></div>
+        <div class="card mb-3"><div class="card-body"><div class="skeleton sk-row" style="width:120px;height:22px"></div><div class="skeleton sk-row mt-2" style="width:220px"></div><div class="skeleton sk-row mt-2" style="width:160px"></div><div class="skeleton" style="height:38px" class="mt-3"></div><div class="skeleton mt-2" style="height:38px"></div><div class="skeleton mt-2" style="height:38px"></div></div></div>
+        <div class="card mb-3"><div class="card-body"><div class="skeleton sk-row" style="width:120px;height:22px"></div><div class="skeleton sk-row mt-2" style="width:220px"></div><div class="skeleton sk-row mt-2" style="width:160px"></div><div class="skeleton" style="height:38px" class="mt-3"></div><div class="skeleton mt-2" style="height:38px"></div><div class="skeleton mt-2" style="height:38px"></div></div></div>
+        <div class="card mb-3"><div class="card-body"><div class="skeleton sk-row" style="width:120px;height:22px"></div><div class="skeleton sk-row mt-2" style="width:220px"></div><div class="skeleton sk-row mt-2" style="width:160px"></div><div class="skeleton" style="height:38px" class="mt-3"></div><div class="skeleton mt-2" style="height:38px"></div><div class="skeleton mt-2" style="height:38px"></div></div></div>
+      </div>
+    </div>
 
-<script>
-const API_BASE = "https://rj7w2wkpgj.execute-api.eu-west-2.amazonaws.com";
+    <!-- Real content -->
+    <div id="bookings" class="fade-in" hidden></div>
+  </div>
 
-async function getToken() {
-  return localStorage.getItem("access_token");
-}
+  <script>
+    const API_BASE = "https://rj7w2wkpgj.execute-api.eu-west-2.amazonaws.com";
 
-async function loadBookings() {
-  const res = await fetch(`${API_BASE}/get_bookings_all`, {
-    headers: {
-      "Authorization": `Bearer ${await getToken()}`
+    function showSkeleton() {
+      document.body.classList.add("loading");
+      const sk = document.getElementById("bookings-skeleton");
+      const real = document.getElementById("bookings");
+      if (sk) { sk.hidden = false; requestAnimationFrame(() => sk.classList.add("ready")); }
+      if (real) { real.hidden = true; real.classList.remove("ready"); }
     }
-  });
 
-  const data = await res.json();
-  renderBookings(data);
-}
+    function showReal() {
+      document.body.classList.remove("loading");
+      const sk = document.getElementById("bookings-skeleton");
+      const real = document.getElementById("bookings");
+      if (sk) sk.hidden = true;
+      if (real) { real.hidden = false; requestAnimationFrame(() => real.classList.add("ready")); }
+    }
 
-function renderBookings(bookings) {
-  const container = document.getElementById("bookings");
-
-  if (!bookings.length) {
-    container.innerHTML = "<p>No bookings found.</p>";
-    return;
-  }
-
-  let html = `
-  <div class="table-responsive d-none d-md-block">
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Aircraft</th>
-          <th>ETA</th>
-          <th>Route</th>
-          <th>Reason</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-  `;
-
-  bookings.forEach(b => {
-    html += `
-      <tr>
-        <td>${b.aircraft}</td>
-        <td>${b.eta}</td>
-        <td>${b.from} → ${b.to}</td>
-        <td>${b.reason}</td>
-
-        <td class="d-flex gap-2">
-
-        <button class="btn btn-sm btn-success"
-          onclick="deleteBooking('${b.bookingId}', this)">
-          Complete Flight
-        </button>
-         
-        <a class="btn btn-sm btn-primary"
-          href="edit-booking.html?id=${b.bookingId}">
-          Edit
-        </a>
-
-        <button class="btn btn-sm btn-danger"
-          onclick="deleteBooking('${b.bookingId}', this)">
-          Delete
-        </button>
-      
-        </td>
-     
-
-        </tr>
-    `;
-  });
-
-  html += `</tbody></table></div>`;
-
-  // Mobile cards
-  html += `<div class="d-md-none">`;
-  bookings.forEach(b => {
-    html += `
-      <div class="card mb-3">
-        <div class="card-body">
-          <h5>${b.aircraft}</h5>
-          <p><strong>ETA:</strong> ${b.eta}</p>
-          <p>${b.from} → ${b.to}</p>
-          <p>${b.reason}</p>
-          
-          </button>
-          <button class="btn btn-success w-100 mt-2"
-          onclick="deleteBooking('${b.bookingId}', this)">
-          Complete Flight
-          </button>
-
-          
-          <a class="btn btn-primary w-100 mt-2" href="edit-booking.html?id=${b.bookingId}">
-          Edit Booking
-          </a>
-
-          <button class="btn btn-danger w-100 mt-2"
-          onclick="deleteBooking('${b.bookingId}', this)">
-          Delete Booking
-      
-        </div>
-        </div>
-    `;
-  });
-  html += `</div>`;
-
-  container.innerHTML = html;
-}
-
-loadBookings();
-</script>
-
-
-<script>
-</script>
-
-
-<script>
-fetch("/partials/navbar.html")
-  .then(res => {
-    if (!res.ok) throw new Error("Failed to load navbar.html");
-    return res.text();
-  })
-  .then(html => {
-    const mount = document.getElementById("navbar-placeholder");
-    if (!mount) return;
-
-    mount.innerHTML = html;
-
-    // Active link logic (robust)
-    const currentPath = window.location.pathname.replace(/\/$/, "");
-    document.querySelectorAll(".nav-link").forEach(link => {
-      const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
-      if (linkPath === currentPath) {
-        link.classList.add("active");
-        link.setAttribute("aria-current", "page");
+    async function loadBookings() {
+      showSkeleton();
+      try {
+        const res = await authFetch(`${API_BASE}/get_bookings_all`);
+        if (!res || !res.ok) throw new Error(`Load failed (${res?.status || "no response"})`);
+        const data = await res.json();
+        renderBookings(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error(err);
+        showToast("Unable to load bookings.", { variant: "danger" });
+        document.getElementById("bookings").innerHTML = "<p class='text-muted'>No bookings available.</p>";
+      } finally {
+        showReal();
       }
-    });
+    }
 
-    // ✅ Navbar is now in DOM
-    window.dispatchEvent(new Event("navbar:loaded"));
-  })
-  .catch(err => console.error(err));
-</script>
+    function renderBookings(bookings) {
+      const container = document.getElementById("bookings");
 
+      if (!bookings.length) {
+        container.innerHTML = "<p class='text-muted'>No bookings found.</p>";
+        return;
+      }
 
+      let html = `
+        <div class="table-responsive d-none d-md-block">
+          <table class="table table-striped align-middle">
+            <thead>
+              <tr>
+                <th>Aircraft</th>
+                <th>ETA</th>
+                <th>Route</th>
+                <th>Reason</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
 
+      bookings.forEach(b => {
+        html += `
+          <tr>
+            <td>${b.aircraft ?? ""}</td>
+            <td>${b.eta ?? ""}</td>
+            <td>${b.from ?? ""} → ${b.to ?? ""}</td>
+            <td>${b.reason ?? ""}</td>
+            <td class="d-flex gap-2 flex-wrap">
+              <button class="btn btn-sm btn-success" onclick="completeBooking('${b.bookingId}', this)">Complete Flight</button>
+              <a class="btn btn-sm btn-primary" href="edit-booking.html?id=${b.bookingId}">Edit</a>
+              <button class="btn btn-sm btn-danger" onclick="deleteBooking('${b.bookingId}', this)">Delete</button>
+            </td>
+          </tr>
+        `;
+      });
+
+      html += `</tbody></table></div>`;
+
+      // Mobile cards
+      html += `<div class="d-md-none">`;
+      bookings.forEach(b => {
+        html += `
+          <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+              <h5 class="mb-2">${b.aircraft ?? ""}</h5>
+              <div class="text-muted small mb-2">${b.from ?? ""} → ${b.to ?? ""}</div>
+              <div class="mb-1"><strong>ETA:</strong> ${b.eta ?? ""}</div>
+              <div class="mb-3"><strong>Reason:</strong> ${b.reason ?? ""}</div>
+
+              <button class="btn btn-success w-100" onclick="completeBooking('${b.bookingId}', this)">Complete Flight</button>
+              <a class="btn btn-primary w-100 mt-2" href="edit-booking.html?id=${b.bookingId}">Edit Booking</a>
+              <button class="btn btn-danger w-100 mt-2" onclick="deleteBooking('${b.bookingId}', this)">Delete Booking</button>
+            </div>
+          </div>
+        `;
+      });
+      html += `</div>`;
+
+      container.innerHTML = html;
+    }
+
+    async function completeBooking(bookingId, btnEl) {
+      if (!confirm("Are you sure you want to complete this booking?")) return;
+      setButtonLoading(btnEl, true, { loadingText: "Completing…" });
+
+      try {
+        const res = await authFetch(`${API_BASE}/delete_booking/${bookingId}`, { method: "DELETE" });
+        if (!res || !res.ok) throw new Error(`Complete failed (${res?.status || "no response"})`);
+        showToast("Booking completed", { variant: "success" });
+        await loadBookings();
+      } catch (err) {
+        console.error(err);
+        showToast("There was a problem completing the booking.", { variant: "danger" });
+      } finally {
+        setButtonLoading(btnEl, false);
+      }
+    }
+
+    async function deleteBooking(bookingId, btnEl) {
+      if (!confirm("Are you sure you want to delete this booking?")) return;
+      setButtonLoading(btnEl, true, { loadingText: "Deleting…" });
+
+      try {
+        const res = await authFetch(`${API_BASE}/delete_booking/${bookingId}`, { method: "DELETE" });
+        if (!res || !res.ok) throw new Error(`Delete failed (${res?.status || "no response"})`);
+        showToast("Booking deleted", { variant: "success" });
+        await loadBookings();
+      } catch (err) {
+        console.error(err);
+        showToast("There was a problem deleting the booking.", { variant: "danger" });
+      } finally {
+        setButtonLoading(btnEl, false);
+      }
+    }
+
+    loadBookings();
+  </script>
+
+  <script>
+    fetch("/partials/navbar.html")
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to load navbar.html");
+        return res.text();
+      })
+      .then(html => {
+        const mount = document.getElementById("navbar-placeholder");
+        if (!mount) return;
+
+        mount.innerHTML = html;
+
+        const currentPath = window.location.pathname.replace(/\/$/, "");
+        document.querySelectorAll(".nav-link").forEach(link => {
+          const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
+          if (linkPath === currentPath) {
+            link.classList.add("active");
+            link.setAttribute("aria-current", "page");
+          }
+        });
+
+        window.dispatchEvent(new Event("navbar:loaded"));
+      })
+      .catch(err => console.error(err));
+  </script>
 </body>
 </html>
-async function deleteBooking(bookingId, btnEl) {
-  if (!confirm("Are you sure you want to complete/delete this booking?")) return;
-
-  setButtonLoading(btnEl, true, { loadingText: "Completing…" });
-
-  try {
-    const res = await authFetch(`${API_BASE}/delete_booking/${bookingId}`, { method: "DELETE" });
-
-    if (!res || !res.ok) {
-      throw new Error(`Delete failed (${res?.status || "no response"})`);
-    }
-
-    showToast("Booking completed", { variant: "success" });
-    await loadBookings();
-  } catch (err) {
-    console.error(err);
-    showToast("There was a problem completing the booking.", { variant: "danger" });
-  } finally {
-    setButtonLoading(btnEl, false);
-  }
-}
-
-
