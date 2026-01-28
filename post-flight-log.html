@@ -68,8 +68,51 @@
       .section-card.alt {
         background-color: #ffffff;
       }
-    </style>
-    
+
+      .tacho {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  background: #f8f9fa;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.tacho-digit {
+  width: 2.1rem;
+  height: 2.3rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ced4da;
+  background: #000;
+  color: #fff;
+  padding: 0;
+}
+
+.tacho-digit:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(13,110,253,.25);
+  border-color: #86b7fe;
+}
+
+.tacho-dot {
+  font-weight: 800;
+  font-size: 1.2rem;
+  padding: 0 0.1rem;
+  color: #212529;
+}
+
+.tacho.invalid {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.15rem rgba(220,53,69,.15);
+}
+
+  </style>
+  
 
 
 </head>
@@ -207,17 +250,46 @@
   Times auto-calculate once all four fields are complete.
 </div>
 
-            <div class="col-12 col-md-6">
-              <label class="form-label" for="startTacho">Start tacho</label>
-              <input class="form-control" id="startTacho" name="startTacho" type="number" step="0.1" min="0">
-            </div>
-            <div class="col-12 col-md-6">
-              <label class="form-label" for="endTacho">End tacho</label>
-              <input class="form-control" id="endTacho" name="endTacho" type="number" step="0.1" min="0">
-            </div>
-          </div>
-        </div>
+  <div class="row g-3 mt-1">
+    <div class="col-12 col-md-6">
+      <label class="form-label">Start tacho</label>
+  
+      <div class="tacho" data-tacho="start">
+        <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 1">
+        <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 2">
+        <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 3">
+        <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 4">
+        <span class="tacho-dot" aria-hidden="true">.</span>
+        <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho decimal digit">
       </div>
+  
+      <!-- hidden actual value -->
+      <input type="hidden" id="startTacho" name="startTacho" value="">
+    </div>
+  
+    <div class="col-12 col-md-6">
+      <label class="form-label">End tacho</label>
+  
+      <div class="tacho" data-tacho="end">
+        <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 1">
+        <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 2">
+        <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 3">
+        <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 4">
+        <span class="tacho-dot" aria-hidden="true">.</span>
+        <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho decimal digit">
+      </div>
+  
+      <!-- hidden actual value -->
+      <input type="hidden" id="endTacho" name="endTacho" value="">
+    </div>
+  
+    <div class="col-12 col-md-6">
+      <label class="form-label" for="tachoDiff">Tacho difference (auto)</label>
+      <input class="form-control" id="tachoDiff" type="text" readonly placeholder="--.-">
+      <div class="form-text">Calculated once both tachos are entered.</div>
+    </div>
+  </div>
+
 
       
 
@@ -550,6 +622,167 @@
   });
 </script>
 
+<script>
+  function clampDigitChar(ch) {
+    return /[0-9]/.test(ch) ? ch : "";
+  }
+
+  function getDigits(container) {
+    return Array.from(container.querySelectorAll(".tacho-digit"));
+  }
+
+  function buildTachoString(container) {
+    const digits = getDigits(container).map(i => (i.value || "0"));
+    // first 4 digits are whole hours, last digit is tenths
+    return `${digits[0]}${digits[1]}${digits[2]}${digits[3]}.${digits[4]}`;
+  }
+
+  function isComplete(container) {
+    // consider complete when ALL 5 boxes have a digit
+    return getDigits(container).every(i => /^[0-9]$/.test(i.value));
+  }
+
+  function tachoToTenths(tachoStr) {
+    // "0123.4" -> 1234 tenths
+    if (!/^\d{4}\.\d$/.test(tachoStr)) return null;
+    const whole = parseInt(tachoStr.slice(0, 4), 10);
+    const tenth = parseInt(tachoStr.slice(5, 6), 10);
+    if (Number.isNaN(whole) || Number.isNaN(tenth)) return null;
+    return whole * 10 + tenth;
+  }
+
+  function tenthsToTacho(tenths) {
+    const whole = Math.floor(tenths / 10);
+    const tenth = tenths % 10;
+    return String(whole).padStart(4, "0") + "." + String(tenth);
+  }
+
+  function syncHidden(container) {
+    const kind = container.getAttribute("data-tacho"); // "start" or "end"
+    const hidden = document.getElementById(kind === "start" ? "startTacho" : "endTacho");
+    if (!hidden) return;
+
+    if (!isComplete(container)) {
+      hidden.value = "";
+      return;
+    }
+
+    hidden.value = buildTachoString(container);
+  }
+
+  function validateAndCalcTacho() {
+    const startBox = document.querySelector('.tacho[data-tacho="start"]');
+    const endBox = document.querySelector('.tacho[data-tacho="end"]');
+    const diffOut = document.getElementById("tachoDiff");
+
+    if (!startBox || !endBox) return;
+
+    // only validate once BOTH are complete
+    if (!isComplete(startBox) || !isComplete(endBox)) {
+      startBox.classList.remove("invalid");
+      endBox.classList.remove("invalid");
+      if (diffOut) diffOut.value = "";
+      return;
+    }
+
+    const startStr = buildTachoString(startBox);
+    const endStr = buildTachoString(endBox);
+
+    const startT = tachoToTenths(startStr);
+    const endT = tachoToTenths(endStr);
+
+    const invalid = (startT == null || endT == null || endT < startT);
+
+    startBox.classList.toggle("invalid", invalid);
+    endBox.classList.toggle("invalid", invalid);
+
+    if (invalid) {
+      if (diffOut) diffOut.value = "";
+      if (typeof showToast === "function") {
+        showToast("End tacho must be greater than or equal to start tacho.", { variant: "danger" });
+      }
+      return;
+    }
+
+    const diffTenths = endT - startT;
+    if (diffOut) diffOut.value = tenthsToTacho(diffTenths); // e.g. 0001.7
+  }
+
+  function wireTacho(container) {
+    const inputs = getDigits(container);
+
+    inputs.forEach((input, idx) => {
+      input.setAttribute("autocomplete", "off");
+      input.setAttribute("pattern", "[0-9]*");
+
+      input.addEventListener("input", (e) => {
+        const v = clampDigitChar(input.value);
+        input.value = v;
+
+        if (v && idx < inputs.length - 1) {
+          inputs[idx + 1].focus();
+          inputs[idx + 1].select?.();
+        }
+
+        syncHidden(container);
+        validateAndCalcTacho();
+      });
+
+      input.addEventListener("keydown", (e) => {
+        const key = e.key;
+
+        // Backspace: move left if empty, otherwise clear
+        if (key === "Backspace") {
+          if (input.value) {
+            input.value = "";
+            e.preventDefault();
+          } else if (idx > 0) {
+            inputs[idx - 1].focus();
+            inputs[idx - 1].value = "";
+            e.preventDefault();
+          }
+          syncHidden(container);
+          validateAndCalcTacho();
+          return;
+        }
+
+        // Arrow navigation
+        if (key === "ArrowLeft" && idx > 0) {
+          inputs[idx - 1].focus();
+          e.preventDefault();
+          return;
+        }
+        if (key === "ArrowRight" && idx < inputs.length - 1) {
+          inputs[idx + 1].focus();
+          e.preventDefault();
+          return;
+        }
+
+        // Only allow digits, tab, etc.
+        if (
+          key.length === 1 &&
+          !/[0-9]/.test(key)
+        ) {
+          e.preventDefault();
+        }
+      });
+
+      input.addEventListener("focus", () => {
+        // select content for quick overwrite
+        input.select?.();
+      });
+
+      input.addEventListener("blur", () => {
+        syncHidden(container);
+        validateAndCalcTacho();
+      });
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".tacho").forEach(wireTacho);
+  });
+</script>
 
 <script>
   function isFiveMinuteIncrement(hhmm) {
