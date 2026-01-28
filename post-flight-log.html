@@ -704,8 +704,18 @@
       return;
     }
 
-    const diffTenths = endT - startT;
-    if (diffOut) diffOut.value = tenthsToTacho(diffTenths); // e.g. 0001.7
+    function tenthsToHoursTenths(tenths) {
+      const hours = Math.floor(tenths / 10);
+      const t = tenths % 10;
+      return `${hours}.${t}`; // e.g. "1.7"
+    }
+
+    // ...
+
+    if (diffOut) diffOut.value = tenthsToHoursTenths(diffTenths);
+  
+  
+  
   }
 
   function wireTacho(container) {
@@ -778,6 +788,20 @@
       });
     });
   }
+
+
+    function setTachoDigits(container, tachoStr) {
+        // expects "0123.4"
+        if (!/^\d{4}\.\d$/.test(tachoStr)) return false;
+
+        const digits = getDigits(container);
+        const raw = tachoStr.replace(".", ""); // "01234"
+        for (let i = 0; i < 5; i++) digits[i].value = raw[i];
+
+        syncHidden(container);
+        validateAndCalcTacho();
+        return true;
+      }
 
   document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".tacho").forEach(wireTacho);
@@ -879,6 +903,29 @@
 
       setPrefillVisible(true);
     }
+
+    async function prefillStartTachoFromLast(aircraft) {
+        try {
+          const res = await authFetch(`${API_BASE}/aircraft_tacho/${encodeURIComponent(aircraft)}`);
+          if (!res || !res.ok) return;
+
+          const data = await res.json();
+          if (!data.lastTacho) return;
+
+          // Only prefill if user hasn't started typing
+          const startBox = document.querySelector('.tacho[data-tacho="start"]');
+          if (!startBox) return;
+
+          if (!isComplete(startBox)) {
+            setTachoDigits(startBox, data.lastTacho);
+          }
+        } catch (e) {
+          console.warn("Could not prefill start tacho", e);
+        }
+      }
+
+      await prefillStartTachoFromLast(booking.aircraft);
+
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
