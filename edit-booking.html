@@ -138,23 +138,14 @@
 const API_BASE = "https://rj7w2wkpgj.execute-api.eu-west-2.amazonaws.com";
 const bookingId = new URLSearchParams(window.location.search).get("id");
 
-function getToken() {
-  return localStorage.getItem("id_token");
-}
 
 function loadBooking() {
   return withLoading(async () => {
-    const res = await fetch(`${API_BASE}/get_booking/${bookingId}`, {
-      headers: {
-        "Authorization": `Bearer ${getToken()}`
-      }
-    });
-
-    if (!res.ok) {
+    const res = await authFetch(`${API_BASE}/get_booking/${bookingId}`);
+    if (!res || !res.ok) {
       alert("Failed to load booking");
       return;
     }
-
     const b = await res.json();
 
     aircraft.value = b.aircraft;
@@ -165,6 +156,7 @@ function loadBooking() {
     costSharing.value = b.costSharing;
   });
 }
+
 
 document.getElementById("editForm").addEventListener("submit", async e => {
   e.preventDefault();
@@ -178,22 +170,20 @@ document.getElementById("editForm").addEventListener("submit", async e => {
     costSharing: costSharing.value
   };
 
-  const res = await fetch(`${API_BASE}/update-booking/${bookingId}`, {
+  const res = await authFetch(`${API_BASE}/update-booking/${bookingId}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${getToken()}`
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
 
-  if (!res.ok) {
+  if (!res || !res.ok) {
     alert("Failed to save changes");
     return;
   }
 
   window.location.href = "my-bookings.html";
 });
+
 
 loadBooking();
 </script>

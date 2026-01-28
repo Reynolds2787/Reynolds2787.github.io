@@ -31,17 +31,13 @@
 <script>
 const API_BASE = "https://rj7w2wkpgj.execute-api.eu-west-2.amazonaws.com";
 
-async function getToken() {
-  return localStorage.getItem("access_token");
-}
 
 async function loadBookings() {
-  const res = await fetch(`${API_BASE}/get_bookings_all`, {
-    headers: {
-      "Authorization": `Bearer ${await getToken()}`
-    }
-  });
-
+  const res = await authFetch(`${API_BASE}/get_bookings_all`);
+  if (!res || !res.ok) {
+    console.error("Failed to load bookings", res?.status);
+    return;
+  }
   const data = await res.json();
   renderBookings(data);
 }
@@ -143,35 +139,31 @@ loadBookings();
 
 
 <script>
+
 async function deleteBooking(bookingId) {
-  if (!confirm("Are you sure you want to delete this booking?")) {
-    return;
-  }
+  if (!confirm("Are you sure you want to delete this booking?")) return;
 
   try {
-    const res = await fetch(
-      `${API_BASE}/delete_booking/${bookingId}`,
-      {
-        method: "DELETE",
-        headers: {
-          "Authorization": `Bearer ${await getToken()}`
-        }
-      }
-    );
+    const res = await authFetch(`${API_BASE}/delete_booking/${bookingId}`, {
+      method: "DELETE"
+    });
 
-    if (!res.ok) {
-      throw new Error("Failed to delete booking");
-    }
+    if (!res || !res.ok) throw new Error("Failed to delete booking");
 
-    // Reload bookings after successful delete
     loadBookings();
-
   } catch (err) {
     console.error(err);
     alert("There was a problem deleting the booking.");
   }
 }
+
+
+
 </script>
+
+
+
+
 
 
 <script>

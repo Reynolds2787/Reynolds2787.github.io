@@ -37,69 +37,49 @@
 
     </script>
   
-    <script>
-    const API_BASE = "https://hwjx5fihi5.execute-api.eu-west-2.amazonaws.com";
+  <script>
+  const API_BASE = "https://hwjx5fihi5.execute-api.eu-west-2.amazonaws.com";
 
     
     
-    function loadExtendedProfile() {
+  function loadExtendedProfile() {
     return withLoading(async () => {
-    const token = localStorage.getItem("access_token");
-    if (!token) return;
+      const res = await authFetch(`${API_BASE}/profile`);
+      if (!res || !res.ok) return;
 
-    const res = await fetch(`${API_BASE}/profile`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+      const profile = await res.json();
+      document.getElementById("role").value = profile.role || "";
+      document.getElementById("self_auth").value = profile.self_auth || "";
+      document.getElementById("phone").value = profile.phone || "";
+      document.getElementById("efis").value = profile.efis || "";
+      document.getElementById("bulldog").value = profile.bulldog || "";
+      document.getElementById("complex").value = profile.complex || "";
+      document.getElementById("aeros").value = profile.aeros || "";
     });
-
-    if (!res.ok) return;
-
-    const profile = await res.json();
-
-    document.getElementById("role").value = profile.role || "";
-    document.getElementById("self_auth").value = profile.self_auth || ""; 
-    document.getElementById("phone").value = profile.phone || "";
-    document.getElementById("efis").value = profile.efis || "";
-    document.getElementById("bulldog").value = profile.bulldog || "";
-    document.getElementById("complex").value = profile.complex || "";
-    document.getElementById("aeros").value = profile.aeros || "";
-  });
 }
     
-    
-  
+     
   </script>
 
 
   <script>
-  async function saveProfile() {
-  const token = localStorage.getItem("access_token");
-  if (!token) return alert("Not logged in");
+    
+    async function saveProfile() {
+      const body = {
+        name: document.getElementById("name").value,
+        role: document.getElementById("role").value,
+        phone: document.getElementById("phone").value,
+      };
 
-  const body = {
+      const res = await authFetch(`${API_BASE}/profile`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
 
-    name: document.getElementById("name").value,
-    role: document.getElementById("role").value,
-    phone: document.getElementById("phone").value,
-
-  };
-
-  const res = await fetch(`${API_BASE}/profile`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify(body)
-  });
-
-  if (res.ok) {
-    alert("Profile updated");
-  } else {
-    alert("Failed to save profile");
-  }
-} 
+      if (res && res.ok) alert("Profile updated");
+      else alert("Failed to save profile");
+    }
 
 </script>
 
