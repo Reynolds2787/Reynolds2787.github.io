@@ -202,12 +202,6 @@ async function fetchKembleQNH() {
   if (!qnhTooltip) qnhTooltip = new bootstrap.Tooltip(qnhDisplayEl);
 }
 
-const stationEl = document.getElementById("metarStation");
-
-if (stationEl && data.stationUsed) {
-  stationEl.textContent = data.stationUsed;
-}
-
 document.addEventListener("DOMContentLoaded", () => {
   fetchKembleQNH();
   setInterval(fetchKembleQNH, 600000); // every 10 minutes
