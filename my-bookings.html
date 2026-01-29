@@ -186,7 +186,6 @@
     function completeBooking(bookingId, btnEl) {
       // Completing a booking now means: open the post-flight log page.
       // The log submission endpoint should remove the active booking once the log is successfully filed.
-      if (!confirm("Complete this flight and open the post-flight log?")) return;
       setButtonLoading(btnEl, true, { loadingText: "Opening…" });
       window.location.href = `post-flight-log.html?id=${encodeURIComponent(bookingId)}`;
     }
