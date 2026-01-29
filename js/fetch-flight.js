@@ -33,8 +33,8 @@ function radarIconHtml() {
   `;
 }
 
-function openNewTab(url) {
-  window.open(url, "_blank", "noopener,noreferrer");
+function openInSameTab(url) {
+  window.location.href = url;
 }
 
 function renderNoFlightsFallback() {
@@ -55,6 +55,8 @@ function renderNoFlightsFallback() {
   const tr = tableBody.querySelector("tr");
   tr.title = `Open FlightRadar24 centred on ${HOME_AIRFIELD}`;
   tr.addEventListener("click", () => openNewTab(homeUrl));
+
+ 
 
   // Mobile card fallback
   cardsContainer.innerHTML = `
@@ -119,8 +121,10 @@ function fetchFlights() {
         `;
 
         tr.title = frUrl ? "Open in FlightRadar24" : `Open FlightRadar24 centred on ${HOME_AIRFIELD}`;
-        tr.addEventListener("click", () => openNewTab(frUrl || fr24HomeMapUrl()));
+        tr.addEventListener("click", () => openInSameTab(frUrl || fr24HomeMapUrl()));
         tableBody.appendChild(tr);
+
+          
 
         // Mobile card (click anywhere)
         const card = document.createElement("div");
@@ -142,7 +146,7 @@ function fetchFlights() {
         `;
 
         card.title = frUrl ? "Open in FlightRadar24" : `Open FlightRadar24 centred on ${HOME_AIRFIELD}`;
-        card.addEventListener("click", () => openNewTab(frUrl || fr24HomeMapUrl()));
+        card.addEventListener("click", () => openInSameTab(frUrl || fr24HomeMapUrl()));
         cardsContainer.appendChild(card);
       });
 
@@ -155,3 +159,5 @@ function fetchFlights() {
 
 fetchFlights();
 setInterval(fetchFlights, 30000);
+
+
