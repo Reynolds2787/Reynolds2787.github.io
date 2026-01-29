@@ -38,6 +38,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 <div id="navbar-placeholder"></div>
 
+
+
 <div class="container-fluid bg-light border-bottom">
   <div class="container py-2">
     <div class="d-flex justify-content-center align-items-center gap-2"
@@ -48,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
          style="cursor: default;">
 
       <span class="badge bg-primary">QNH</span>
-      <span class="fw-semibold">Kemble</span>
+      <span class="fw-semibold"><var>metarStation</var></span>
 
       <span id="qnhValue" class="fs-5 fw-bold text-primary">
         <span class="spinner-border spinner-border-sm"></span>
@@ -179,6 +181,8 @@ async function fetchKembleQNH() {
 
     // Update display
     qnhValueEl.textContent = data.qnh_hpa;
+    metarStation = data.stationUsed;
+    
 
     // Tooltip: METAR + station + source
     const title = `${data.metar || "METAR unavailable"}\n— Source: ${data.sourceUsed || "Unknown"} (${data.stationUsed || "Unknown"})`;
