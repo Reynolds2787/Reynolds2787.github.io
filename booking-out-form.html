@@ -446,6 +446,7 @@
           document.getElementById("from").value = document.getElementById("to").value;
           document.getElementById("to").value = "";
           document.getElementById("to_kemble").checked = false;
+          showToast("Enter next leg", { variant: "info", title: "Booked" });
           resetETATimeOnly();
 
         } catch (err) {
