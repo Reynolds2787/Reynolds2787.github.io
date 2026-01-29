@@ -22,7 +22,7 @@ function fr24UrlFromReg(reg) {
 
 function radarIconHtml() {
   return `
-    <span class="fr24-link" aria-hidden="true">
+    <span class="fr24-link">
       <span class="fr24-icon">
         <svg viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
