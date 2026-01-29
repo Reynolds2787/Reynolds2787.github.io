@@ -12,11 +12,13 @@
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 
   <style>
+
+        body {
+      background: linear-gradient(180deg, #f4f6f9 0%, #eef1f5 100%);
+    }
+    
     body.loading { cursor: wait; }
 
-    body {
-    background: linear-gradient(180deg, #a3bef3 0%, #84b2ee 100%);
-    }
 
     .fade-in { opacity: 0; transform: translateY(4px); transition: opacity .25s ease, transform .25s ease; }
     .fade-in.ready { opacity: 1; transform: translateY(0); }
