@@ -62,6 +62,14 @@
       </div>
 
       <form id="bookingForm" class="needs-validation" novalidate>
+       
+         <div class="col-12 col-md-4">
+            <label class="form-label" for="pic_name">PIC Name</label>
+            <input id="pic_name" class="form-control" required />
+            <div class="invalid-feedback">PIC required</div>
+          </div>
+
+       
         <div class="row g-3">
           <div class="col-12 col-md-4">
             <label class="form-label" for="aircraft">Aircraft</label>
@@ -76,12 +84,7 @@
             <div class="invalid-feedback">Aircraft required</div>
           </div>
 
-          <div class="col-12 col-md-4">
-            <label class="form-label" for="pic_name">PIC Name</label>
-            <input id="pic_name" class="form-control" required />
-            <div class="invalid-feedback">PIC required</div>
-          </div>
-
+        
           <div class="col-12 col-md-4">
             <label class="form-label" for="reason">Reason</label>
             <select id="reason" class="form-select" required>
