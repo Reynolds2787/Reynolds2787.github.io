@@ -130,7 +130,7 @@ function fetchFlights() {
           <div class="card-body">
             <h5 class="mb-3">
               ${reg ?? ""}
-              ${radarIconHtml()}
+              ${radarIconHtml()+ " open in FR24"}
             </h5>
             <p class="mb-1"><strong>From:</strong> ${f["From"] ?? ""}</p>
             <p class="mb-1"><strong>To:</strong> ${f["To"] ?? ""}</p>
