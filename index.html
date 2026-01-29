@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
          style="cursor: default;">
 
       <span class="badge bg-primary">QNH</span>
-      <span class="fw-semibold"><var>metarStation</var></span>
+      <span class="fw-semibold" id="metarStation">—</span>
 
       <span id="qnhValue" class="fs-5 fw-bold text-primary">
         <span class="spinner-border spinner-border-sm"></span>
@@ -200,6 +200,12 @@ async function fetchKembleQNH() {
   qnhValueEl.textContent = "—";
   qnhDisplayEl.setAttribute("title", "QNH unavailable");
   if (!qnhTooltip) qnhTooltip = new bootstrap.Tooltip(qnhDisplayEl);
+}
+
+const stationEl = document.getElementById("metarStation");
+
+if (stationEl && data.stationUsed) {
+  stationEl.textContent = data.stationUsed;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
