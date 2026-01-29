@@ -349,7 +349,7 @@
 
       // Clear form and exit? 
       document.getElementById("clearAllExit")?.addEventListener("click", () => {
-        if (!confirm("Return leg not required?")) return;
+        if (!confirm("Exit?")) return;
         bookingForm.reset();
         bookingForm.classList.remove("was-validated");
         document.getElementById("occupants").value = "0";
