@@ -442,6 +442,8 @@
           }
 
           // Prepare for next booking
+
+          document.getElementById("from").value = document.getElementById("to").value;
           document.getElementById("to").value = "";
           document.getElementById("to_kemble").checked = false;
           resetETATimeOnly();
