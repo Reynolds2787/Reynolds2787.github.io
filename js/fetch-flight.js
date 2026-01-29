@@ -19,16 +19,19 @@ function fr24UrlFromReg(reg) {
   return clean ? `https://www.flightradar24.com/${encodeURIComponent(clean)}/` : null;
 }
 
-// Small generic "radar" icon (inline SVG)
+
 function radarIconHtml() {
   return `
-    <span class="fr24-icon" aria-hidden="true" title="Open in FlightRadar24">
-      <svg viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
-        <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" opacity="0.7"/>
-        <path d="M12 12 L19 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        <circle cx="19" cy="9" r="1.6" fill="currentColor"/>
-      </svg>
+    <span class="fr24-link" aria-hidden="true">
+      <span class="fr24-icon">
+        <svg viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+          <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" opacity="0.7"/>
+          <path d="M12 12 L19 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="19" cy="9" r="1.6" fill="currentColor"/>
+        </svg>
+      </span>
+      <span>Open in FR24</span>
     </span>
   `;
 }
@@ -134,7 +137,7 @@ function fetchFlights() {
           <div class="card-body">
             <h5 class="mb-3">
               ${reg ?? ""}
-              ${radarIconHtml()+ " open in FR24"}
+              ${radarIconHtml()}
             </h5>
             <p class="mb-1"><strong>From:</strong> ${f["From"] ?? ""}</p>
             <p class="mb-1"><strong>To:</strong> ${f["To"] ?? ""}</p>
