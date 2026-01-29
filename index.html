@@ -181,8 +181,8 @@ async function fetchKembleQNH() {
 
     // Update display
     qnhValueEl.textContent = data.qnh_hpa;
-    metarStation = data.stationUsed;
-    
+    document.getElementById("metarStation").textContent = data.stationUsed;
+  
 
     // Tooltip: METAR + station + source
     const title = `${data.metar || "METAR unavailable"}\n— Source: ${data.sourceUsed || "Unknown"} (${data.stationUsed || "Unknown"})`;
