@@ -188,6 +188,7 @@
       // The log submission endpoint should remove the active booking once the log is successfully filed.
       setButtonLoading(btnEl, true, { loadingText: "Opening…" });
       window.location.href = `post-flight-log.html?id=${encodeURIComponent(bookingId)}`;
+      setButtonLoading(btnEl, false, { loadingText: "Opening…" });
     }
 
     async function deleteBooking(bookingId, btnEl) {
