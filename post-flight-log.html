@@ -15,7 +15,7 @@
     body.loading { cursor: wait; }
 
     body {
-    background: linear-gradient(180deg, #f4f6f9 0%, #eef1f5 100%);
+    background: linear-gradient(180deg, #b1b2b4 0%, #8ab2e7 100%);
     }
 
     .fade-in { opacity: 0; transform: translateY(4px); transition: opacity .25s ease, transform .25s ease; }
@@ -110,6 +110,10 @@
       padding: 0;
     }
 
+  .tacho-digit {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+
     .tacho-digit:focus {
       outline: none;
       box-shadow: 0 0 0 0.2rem rgba(13,110,253,.25);
@@ -127,7 +131,14 @@
       border-color: #dc3545;
       box-shadow: 0 0 0 0.15rem rgba(220,53,69,.15);
     }
+
+      .alert {
+      border-radius: 1rem;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
   </style>
+
+ 
 </head>
 
 <body>
