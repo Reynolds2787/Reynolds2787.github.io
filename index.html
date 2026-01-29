@@ -12,33 +12,20 @@
 <script src="js/auth.js"></script>
 <script src="js/logout.js"></script>
 
-</head>
-
 <style>
   .clickable-row, .clickable-card { cursor: pointer; }
-  .clickable-row:hover { filter: brightness(0.98); }
-  .clickable-card:hover { box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15); transform: translateY(-1px); }
 
-  .fr24-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 18px;
-    height: 18px;
-    margin-left: 8px;
-    opacity: 0.85;
-    vertical-align: text-bottom;
+  /* Table row hover: apply to cells, not the <tr> */
+  .clickable-row:hover > td {
+    background-color: rgba(13,110,253,0.06); /* subtle Bootstrap primary tint */
   }
-  .fr24-icon svg { width: 18px; height: 18px; }
 
-  .clickable-row:hover,
-.clickable-card:hover {
-  text-decoration: underline;
-}
+  /* Card hover */
+  .clickable-card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+    transform: translateY(-1px);
+  }
 
-</style>
-
-<style>
   .fr24-link {
     display: inline-flex;
     align-items: center;
@@ -50,6 +37,16 @@
     white-space: nowrap;
   }
 
+  .fr24-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+  }
+  .fr24-icon svg { width: 18px; height: 18px; }
+
+  /* Make the "Open in FR24" label pop on hover */
   .clickable-row:hover .fr24-link,
   .clickable-card:hover .fr24-link {
     opacity: 1;
@@ -58,16 +55,8 @@
 </style>
 
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".nav-link").forEach(link => {
-    if (link.href === window.location.href) {
-      link.classList.add("active");
-      link.setAttribute("aria-current", "page");
-    }
-  });
-});
-</script>
+</head>
+
 
 <body>
 
@@ -133,6 +122,17 @@ document.addEventListener("DOMContentLoaded", () => {
 <script src="js/fetch-flight.js"></script>
 
 <script src="js/fetch-qnh.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".nav-link").forEach(link => {
+    if (link.href === window.location.href) {
+      link.classList.add("active");
+      link.setAttribute("aria-current", "page");
+    }
+  });
+});
+</script>
 
 
 </body>

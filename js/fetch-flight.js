@@ -57,7 +57,7 @@ function renderNoFlightsFallback() {
   `;
   const tr = tableBody.querySelector("tr");
   tr.title = `Open FlightRadar24 centred on ${HOME_AIRFIELD}`;
-  tr.addEventListener("click", () => openNewTab(homeUrl));
+  tr.addEventListener("click", () => openInSameTab(homeUrl));
 
  
 
@@ -75,7 +75,7 @@ function renderNoFlightsFallback() {
   `;
   const card = cardsContainer.querySelector(".card");
   card.title = `Open FlightRadar24 centred on ${HOME_AIRFIELD}`;
-  card.addEventListener("click", () => openNewTab(homeUrl));
+  card.addEventListener("click", () => openInSameTab(homeUrl));
 }
 
 function fetchFlights() {
