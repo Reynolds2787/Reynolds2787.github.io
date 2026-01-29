@@ -230,9 +230,9 @@
               <input class="form-control" id="p4" name="p4" type="text">
             </div>
             <div class="col-12 col-lg-3">
-              <label class="form-label" for="instructional">Instructional flight?</label required>
-              <select class="form-select" id="instructional" name="instructional">
-                <option value="" selected></option>
+              <label class="form-label" for="instructional">Instructional flight?</label>
+              <select class="form-select" id="instructional" name="instructional" required>
+                <option value="" selected>Choose…</option>
                 <option value="No">No</option>
                 <option value="Yes">Yes</option>
               </select>
@@ -252,15 +252,15 @@
             </div>
             <div class="col-12 col-md-6 col-lg-3">
               <label class="form-label" for="takeoff">Takeoff</label>
-              <input class="form-control" id="takeoff" name="takeoff" type="time" step="300" require>
+              <input class="form-control" id="takeoff" name="takeoff" type="time" step="300" required>
             </div>
             <div class="col-12 col-md-6 col-lg-3">
               <label class="form-label" for="land">Land</label>
-              <input class="form-control" id="land" name="land" type="time" step="300" require>
+              <input class="form-control" id="land" name="land" type="time" step="300" required>
             </div>
             <div class="col-12 col-md-6 col-lg-3">
               <label class="form-label" for="onChocks">On chocks</label>
-              <input class="form-control" id="onChocks" name="onChocks" type="time" step="300" require>
+              <input class="form-control" id="onChocks" name="onChocks" type="time" step="300" required>
             </div>
           </div>
 
@@ -319,14 +319,14 @@
         </div>
       </div>
 
-      <!-- Fuel & oil -->
+      <!-- Fuel & oil Home-->
       <div class="card section-card alt mb-3">
-        <div class="card-header">Fuel & oil</div>
+        <div class="card-header">Fuel & oil Home</div>
         <div class="card-body">
           <div class="row g-3">
             <div class="col-12 col-lg-4">
               <label class="form-label" for="fuelUpliftedLfc">Fuel uplifted at LFC (litres)</label>
-              <input class="form-control" id="fuelUpliftedLfc" name="fuelUpliftedLfc" type="number" step="1" min="0" required>
+              <input class="form-control" id="fuelUpliftedLfc" name="fuelUpliftedLfc" value= "" type="number" step="1" min="0" required>
           </div>      
 
          <div class="col-12 col-lg-4">
@@ -354,6 +354,29 @@
           </div>
         </div>
       </div>
+
+
+          <!-- Fuel & oil Elsewhere-->
+          <div class="card section-card alt mb-3">
+            <div class="card-header">Fuel & oil Home</div>
+            <div class="card-body">
+          
+          
+              <div class="col-12 col-lg-4">
+                <label class="form-label" for="fuelUpliftedElsewhere">Fuel uplifted elsewhere (litres)</label>
+                <input class="form-control" id="fuelUpliftedElsewhere" name="fuelUpliftedElsewhere" type="number" step="0.1"
+                  min="0" value="0" required>
+              </div>
+              <div class="col-12 col-lg-4">
+                <label class="form-label" for="fuelCost">Cost of fuel (£)</label>
+                <input class="form-control" id="fuelCost" name="fuelCost" type="number" step="0.01" min="0" value="0" required>
+              </div>
+          
+            </div>
+          </div>
+          </div>
+
+
 
       <!-- Landings & payment -->
       <div class="row g-3">
