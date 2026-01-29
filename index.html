@@ -9,18 +9,14 @@
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 
 
-<script src="js/auth.js"></script>
-<script src="js/logout.js"></script>
 
 <style>
   .clickable-row, .clickable-card { cursor: pointer; }
 
-  /* Table row hover: apply to cells, not the <tr> */
-  .clickable-row:hover > td {
-    background-color: rgba(13,110,253,0.06); /* subtle Bootstrap primary tint */
+  .table tbody tr.clickable-row:hover > * {
+    background-color: rgba(13,110,253,0.06) !important;
   }
 
-  /* Card hover */
   .clickable-card:hover {
     box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
     transform: translateY(-1px);
@@ -29,24 +25,21 @@
   .fr24-link {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    margin-left: 6px;
+    gap: 6px;
+    margin-left: 8px;
     font-size: 0.85rem;
     color: var(--bs-primary);
-    opacity: 0.85;
+    opacity: 0.9;
     white-space: nowrap;
   }
 
   .fr24-icon {
     display: inline-flex;
-    align-items: center;
-    justify-content: center;
     width: 18px;
     height: 18px;
   }
   .fr24-icon svg { width: 18px; height: 18px; }
 
-  /* Make the "Open in FR24" label pop on hover */
   .clickable-row:hover .fr24-link,
   .clickable-card:hover .fr24-link {
     opacity: 1;
@@ -54,6 +47,11 @@
   }
 </style>
 
+
+<script src="js/auth.js"></script>
+<script src="js/logout.js"></script>
+<script src="js/fetch-flight.js"></script>
+<script src="js/fetch-qnh.js"></script>
 
 </head>
 
@@ -118,10 +116,6 @@
   </table>
 </div>
 
-
-<script src="js/fetch-flight.js"></script>
-
-<script src="js/fetch-qnh.js"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
