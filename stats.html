@@ -153,6 +153,8 @@ function fetchStats() {
 
       aircraft.forEach(a => {
 
+        if (a.Aircraft === "G-SPARE") return;
+
         const t = parseFloat(a["Remaining Time"]);
         const urgent = !isNaN(t) && t < LOW_TIME;
 
