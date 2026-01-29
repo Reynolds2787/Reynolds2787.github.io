@@ -214,7 +214,7 @@
 
             <div class="col-12 col-lg-4">
               <label class="form-label" for="authorised">Authorised</label>
-              <input class="form-control" id="authorised" name="authorised" type="text">
+              <input class="form-control" id="authorised" name="authorised" type="text" required>
             </div>
 
             <div class="col-12 col-lg-3">
@@ -230,9 +230,10 @@
               <input class="form-control" id="p4" name="p4" type="text">
             </div>
             <div class="col-12 col-lg-3">
-              <label class="form-label" for="instructional">Instructional flight?</label>
+              <label class="form-label" for="instructional">Instructional flight?</label required>
               <select class="form-select" id="instructional" name="instructional">
-                <option value="No" selected>No</option>
+                <option value="" selected></option>
+                <option value="No">No</option>
                 <option value="Yes">Yes</option>
               </select>
             </div>
@@ -247,19 +248,19 @@
           <div class="row g-3">
             <div class="col-12 col-md-6 col-lg-3">
               <label class="form-label" for="offChocks">Off chocks</label>
-              <input class="form-control" id="offChocks" name="offChocks" type="time" step="300">
+              <input class="form-control" id="offChocks" name="offChocks" type="time" step="300" required>
             </div>
             <div class="col-12 col-md-6 col-lg-3">
               <label class="form-label" for="takeoff">Takeoff</label>
-              <input class="form-control" id="takeoff" name="takeoff" type="time" step="300">
+              <input class="form-control" id="takeoff" name="takeoff" type="time" step="300" require>
             </div>
             <div class="col-12 col-md-6 col-lg-3">
               <label class="form-label" for="land">Land</label>
-              <input class="form-control" id="land" name="land" type="time" step="300">
+              <input class="form-control" id="land" name="land" type="time" step="300" require>
             </div>
             <div class="col-12 col-md-6 col-lg-3">
               <label class="form-label" for="onChocks">On chocks</label>
-              <input class="form-control" id="onChocks" name="onChocks" type="time" step="300">
+              <input class="form-control" id="onChocks" name="onChocks" type="time" step="300" require>
             </div>
           </div>
 
@@ -285,12 +286,12 @@
             <div class="col-12 col-md-6">
               <label class="form-label">Start tacho<span class="text-danger">*</span></label>
               <div class="tacho" data-tacho="start">
-                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 1">
-                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 2">
-                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 3">
-                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 4">
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 1" require>
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 2" require>
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 3" require>
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 4" require>
                 <span class="tacho-dot" aria-hidden="true">.</span>
-                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho decimal digit">
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho decimal digit" require>
               </div>
               <input type="hidden" id="startTacho" name="startTacho" value="">
             </div>
@@ -298,14 +299,14 @@
             <div class="col-12 col-md-6">
               <label class="form-label">End tacho <span class="text-danger">*</span></label>
               <div class="tacho" data-tacho="end">
-                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 1">
-                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 2">
-                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 3">
-                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 4">
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 1" require>
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 2" require>
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 3" require>
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 4" require>
                 <span class="tacho-dot" aria-hidden="true">.</span>
-                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho decimal digit">
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho decimal digit" require>
               </div>
-              <input type="hidden" id="endTacho" name="endTacho" value="">
+              <input type="hidden" id="endTacho" name="endTacho" value="" require>
               <div class="form-text">End tacho is mandatory.</div>
             </div>
 
@@ -325,23 +326,32 @@
           <div class="row g-3">
             <div class="col-12 col-lg-4">
               <label class="form-label" for="fuelUpliftedLfc">Fuel uplifted at LFC (litres)</label>
-              <input class="form-control" id="fuelUpliftedLfc" name="fuelUpliftedLfc" type="number" step="0.1" min="0">
-            </div>
-            <div class="col-12 col-lg-4">
-              <label class="form-label" for="fuelRemaining">Remaining fuel</label>
-              <input class="form-control" id="fuelRemaining" name="fuelRemaining" type="text" placeholder="e.g. Tabs / litres">
-            </div>
+              <input class="form-control" id="fuelUpliftedLfc" name="fuelUpliftedLfc" type="number" step="1" min="0" required>
+
+
+             <div class="col-12 col-lg-4">
+                  <label class="form-label" for="fuelRemaining">Remaining fuel?</label>
+                  <select class="form-select" id="fuelRemaining" name="fuelRemaining" required>
+                    <option value="" selected>Choose…</option>
+                    <option>Full</option>
+                    <option>Tabs</option>
+                    <option>Tabs -</option>
+                    <option>Tabs +</option>
+                  </select>
+              </div>
+
+
             <div class="col-12 col-lg-4">
               <label class="form-label" for="fuelUpliftedElsewhere">Fuel uplifted elsewhere (litres)</label>
-              <input class="form-control" id="fuelUpliftedElsewhere" name="fuelUpliftedElsewhere" type="number" step="0.1" min="0" value="0">
+              <input class="form-control" id="fuelUpliftedElsewhere" name="fuelUpliftedElsewhere" type="number" step="0.1" min="0" value="0" required>
             </div>
             <div class="col-12 col-lg-4">
               <label class="form-label" for="fuelCost">Cost of fuel (£)</label>
-              <input class="form-control" id="fuelCost" name="fuelCost" type="number" step="0.01" min="0" value="0">
+              <input class="form-control" id="fuelCost" name="fuelCost" type="number" step="0.01" min="0" value="0" required>
             </div>
             <div class="col-12 col-lg-4">
               <label class="form-label" for="oilUploaded">Oil uploaded</label>
-              <input class="form-control" id="oilUploaded" name="oilUploaded" type="text" placeholder="e.g. 1 litre">
+              <input class="form-control" id="oilUploaded" name="oilUploaded" type="text" placeholder="e.g. 1 Quart" required>
             </div>
           </div>
         </div>
@@ -356,11 +366,11 @@
               <div class="row g-3">
                 <div class="col-12">
                   <label class="form-label" for="landingsKemble">Kemble total landings (inc T&amp;G / overshoots)</label>
-                  <input class="form-control" id="landingsKemble" name="landingsKemble" type="number" step="1" min="0" value="0">
+                  <input class="form-control" id="landingsKemble" name="landingsKemble" type="number" step="1" min="0" value="" required>
                 </div>
                 <div class="col-12">
                   <label class="form-label" for="landingsOther">T&amp;Gs and landings at other airfields</label>
-                  <input class="form-control" id="landingsOther" name="landingsOther" type="number" step="1" min="0" value="0">
+                  <input class="form-control" id="landingsOther" name="landingsOther" type="number" step="1" min="0" value="" required>
                 </div>
               </div>
             </div>
@@ -375,7 +385,7 @@
                 
                  <div class="col-12 col-md-6">
                   <label class="form-label" for="paymentMethod">Who is paying for hire?</label>
-                  <select class="form-select" id="paymentMethod" name="paymentMethod">
+                  <select class="form-select" id="paymentMethod" name="paymentMethod" required>
                     <option value="" selected>Choose…</option>
                     <option>PIC</option>
                     <option>P2</option>
@@ -386,7 +396,7 @@
 
                 <div class="col-12 col-md-6">
                   <label class="form-label" for="paymentMethod">Payment method</label>
-                  <select class="form-select" id="paymentMethod" name="paymentMethod">
+                  <select class="form-select" id="paymentMethod" name="paymentMethod" required>
                     <option value="" selected>Choose…</option>
                     <option>Card</option>
                     <option>Cash</option>
@@ -405,14 +415,16 @@
 
                 <div class="col-12 col-md-6">
                   <label class="form-label" for="maintenanceTrip">Maintenance trip?</label>
-                  <select class="form-select" id="maintenanceTrip" name="maintenanceTrip">
+                  <select class="form-select" id="maintenanceTrip" name="maintenanceTrip" required>
+                    <option value="" selected></option>
                     <option value="No" selected>No</option>
                     <option value="Yes">Yes</option>
                   </select>
                 </div>
                 <div class="col-12 col-md-6">
                   <label class="form-label" for="rescueFlight">Rescue flight?</label>
-                  <select class="form-select" id="rescueFlight" name="rescueFlight">
+                  <select class="form-select" id="rescueFlight" name="rescueFlight" required>
+                    <option value="" selected></option>
                     <option value="No" selected>No</option>
                     <option value="Yes">Yes</option>
                   </select>
