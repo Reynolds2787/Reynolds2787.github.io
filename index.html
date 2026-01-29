@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
     <div class="d-flex justify-content-center align-items-center gap-2"
          id="qnhDisplay"
          data-bs-toggle="tooltip"
-         data-bs-placement="bottom"
+         data-bs-placement="bvottom"
          title="Loading METAR…"
          style="cursor: default;">
 
@@ -59,7 +59,6 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
   </div>
 </div>
-
 
 
 <div class="container-fluid pt-2 pb-2 ps-2 bg-light bg-gradient">
@@ -92,38 +91,92 @@ const tableBody = document.getElementById("flightsTableBody");
 const cardsContainer = document.getElementById("flightCards");
 const spinner = document.getElementById("loadingSpinner");
 
+function fr24UrlFromReg(reg) {
+  const clean = String(reg || "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, ""); // removes hyphens/spaces etc
+  return clean ? `https://www.flightradar24.com/${encodeURIComponent(clean)}/` : null;
+}
+
 function fetchFlights() {
   spinner.style.display = "block";
-  fetch(apiUrl).then(r => r.json()).then(data => {
-    tableBody.innerHTML = "";
-    cardsContainer.innerHTML = "";
-    data.sort((a,b) => new Date(a["ETA FULL"]) - new Date(b["ETA FULL"]));
-    const now = new Date();
 
-    data.forEach(f => {
-      const eta = new Date(f["ETA FULL"]);
-      const overdue = eta < now;
+  fetch(apiUrl)
+    .then(r => r.json())
+    .then(data => {
+      tableBody.innerHTML = "";
+      cardsContainer.innerHTML = "";
 
-      const tr = document.createElement("tr");
-      if (overdue) tr.classList.add("table-danger");
-      tr.innerHTML = `<td>${f["Aircraft"]}</td><td>${f["From"]}</td><td>${f["To"]}</td><td>${f["ETA Abbreviated"]}${overdue ? ' <span class="badge bg-danger">OVERDUE</span>' : ''}</td>`;
-      tableBody.appendChild(tr);
+      data.sort((a, b) => new Date(a["ETA FULL"]) - new Date(b["ETA FULL"]));
+      const now = new Date();
 
-      const card = document.createElement("div");
-      card.className = `card mb-2 ${overdue ? 'border-danger' : ''}`;
-      card.innerHTML = `<div class="card-body">
-        <h5>${f["Aircraft"]}</h5>
-        <p><strong>From:</strong> ${f["From"]}</p>
-        <p><strong>To:</strong> ${f["To"]}</p>
-        <p><strong>ETA:</strong> ${f["ETA Abbreviated"]}</p>
-        <p><strong>PIC:</strong> ${f["PIC"]}</p>
-        <p><strong>Reason:</strong> ${f["Reason For Flight"]}</p>
-        ${overdue ? '<span class="badge bg-danger">OVERDUE</span>' : ''}
-      </div>`;
-      cardsContainer.appendChild(card);
+      data.forEach(f => {
+        const reg = f["Aircraft"];
+        const frUrl = fr24UrlFromReg(reg);
+
+        const eta = new Date(f["ETA FULL"]);
+        const overdue = eta < now;
+
+        // -------- Desktop table row --------
+        const tr = document.createElement("tr");
+        if (overdue) tr.classList.add("table-danger");
+
+        // clickable aircraft link
+        const aircraftCell = frUrl
+          ? `<a href="${frUrl}" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
+               ${reg}
+             </a>`
+          : `${reg ?? ""}`;
+
+        tr.innerHTML = `
+          <td>${aircraftCell}</td>
+          <td>${f["From"] ?? ""}</td>
+          <td>${f["To"] ?? ""}</td>
+          <td>${f["ETA Abbreviated"] ?? ""}${overdue ? ' <span class="badge bg-danger">OVERDUE</span>' : ''}</td>
+        `;
+
+        // Bonus: clicking anywhere on the row opens FR24 (but not when clicking the link itself)
+        if (frUrl) {
+          tr.style.cursor = "pointer";
+          tr.title = "Open in FlightRadar24";
+          tr.addEventListener("click", (e) => {
+            if (e.target.closest("a")) return; // let the link do its thing
+            window.open(frUrl, "_blank", "noopener,noreferrer");
+          });
+        }
+
+        tableBody.appendChild(tr);
+
+        // -------- Mobile card --------
+        const card = document.createElement("div");
+        card.className = `card mb-2 ${overdue ? "border-danger" : ""}`;
+
+        const aircraftTitle = frUrl
+          ? `<a href="${frUrl}" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
+               ${reg}
+             </a>`
+          : `${reg ?? ""}`;
+
+        card.innerHTML = `
+          <div class="card-body">
+            <h5 class="mb-3">${aircraftTitle}</h5>
+            <p class="mb-1"><strong>From:</strong> ${f["From"] ?? ""}</p>
+            <p class="mb-1"><strong>To:</strong> ${f["To"] ?? ""}</p>
+            <p class="mb-1"><strong>ETA:</strong> ${f["ETA Abbreviated"] ?? ""}</p>
+            <p class="mb-1"><strong>PIC:</strong> ${f["PIC"] ?? ""}</p>
+            <p class="mb-0"><strong>Reason:</strong> ${f["Reason For Flight"] ?? ""}</p>
+            ${overdue ? '<span class="badge bg-danger mt-2">OVERDUE</span>' : ""}
+          </div>
+        `;
+
+        cardsContainer.appendChild(card);
+      });
+
+      spinner.style.display = "none";
+    })
+    .catch(() => {
+      spinner.style.display = "none";
     });
-    spinner.style.display = "none";
-  }).catch(() => spinner.style.display = "none");
 }
 
 fetchFlights();
