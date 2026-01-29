@@ -266,6 +266,9 @@
               <button type="button" id="clearAll" class="btn btn-outline-danger">
                 Clear form
               </button>
+              <button type="button" id="clearAllExit" class="btn btn-outline-warning">
+                Exit
+              </button>
             </div>
           </div>
         </div>
@@ -341,6 +344,18 @@
         bookingForm.classList.remove("was-validated");
         document.getElementById("occupants").value = "0";
         updatePassengers();
+      });
+
+
+      // Clear form and exit? 
+      document.getElementById("clearAllExit")?.addEventListener("click", () => {
+        if (!confirm("Return leg not required?")) return;
+        bookingForm.reset();
+        bookingForm.classList.remove("was-validated");
+        document.getElementById("occupants").value = "0";
+        updatePassengers();
+        window.location.href = "index.html";
+
       });
 
       // Authorisation self checkbox
