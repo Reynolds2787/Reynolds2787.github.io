@@ -372,10 +372,18 @@
             <div class="card-header">Payment</div>
             <div class="card-body">
               <div class="row g-3">
-                <div class="col-12">
-                  <label class="form-label" for="payer">Who is paying for hire?</label>
-                  <input class="form-control" id="payer" name="payer" type="text" placeholder="Name / member" />
+                
+                 <div class="col-12 col-md-6">
+                  <label class="form-label" for="paymentMethod">Who is paying for hire?</label>
+                  <select class="form-select" id="paymentMethod" name="paymentMethod">
+                    <option value="" selected>Choose…</option>
+                    <option>PIC</option>
+                    <option>P2</option>
+                    <option>Club</option>
+                    <option>Owner</option>
+                  </select>
                 </div>
+
                 <div class="col-12 col-md-6">
                   <label class="form-label" for="paymentMethod">Payment method</label>
                   <select class="form-select" id="paymentMethod" name="paymentMethod">
@@ -386,6 +394,7 @@
                     <option>Other</option>
                   </select>
                 </div>
+
                 <div class="col-12 col-md-6">
                   <label class="form-label" for="tempMember">Temp member?</label>
                   <select class="form-select" id="tempMember" name="tempMember">
