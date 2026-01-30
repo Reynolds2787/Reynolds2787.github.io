@@ -96,6 +96,17 @@
       vertical-align: middle;
     }
 
+        .section-card {
+      border-radius: 1rem;
+      overflow: hidden; /* key: clips header background to rounded corners */
+    }
+
+    /* Make sure header corners match */
+    .section-card > .card-header {
+      border-top-left-radius: 1rem;
+      border-top-right-radius: 1rem;
+    }
+
     .form-control,
     .form-select {
       border-radius: 1rem;
