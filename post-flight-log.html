@@ -78,24 +78,20 @@
     }
 
     .section-card .card-header {
-      background: linear-gradient(180deg, #346697, #2a5c8f);
-      border-bottom: 1px solid #315477;
-      font-weight: 700;
-      letter-spacing: 0.2px;
-      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
     }
 
     .section-card .card-header::before {
       content: "";
-      display: inline-block;
       width: 6px;
-      height: 100%;
-      margin-right: 0.75rem;
+      height: 1.5rem;          /* fixed height looks consistent */
       background: #0d6efd;
       border-radius: 1rem;
-      vertical-align: middle;
+      display: inline-block;
+      margin-right: 0;         /* gap handles spacing now */
     }
-
         .section-card {
       border-radius: 1rem;
       overflow: hidden; /* key: clips header background to rounded corners */
@@ -454,8 +450,8 @@
               <div class="row g-3">
 
                 <div class="col-12 col-md-6">
-                  <label class="form-label" for="paymentMethod">Who is paying for hire?</label>
-                  <select class="form-select" id="paymentMethod" name="paymentMethod" required>
+                  <label class="form-label" for="payer">Who is paying for hire?</label>
+                  <select class="form-select" id="payer" name="payer" required>
                     <option value="" selected>Choose…</option>
                     <option>PIC</option>
                     <option>P2</option>
