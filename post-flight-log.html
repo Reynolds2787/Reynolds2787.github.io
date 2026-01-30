@@ -566,6 +566,7 @@
   <script src="js/auth.js"></script>
   <script src="js/logout.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/calculatePayment.js"></script>
 
   <script>
     // FlightBookings API base
@@ -965,12 +966,17 @@
       .catch(err => console.error("Navbar load failed", err));
 
     document.addEventListener("DOMContentLoaded", () => {
+      refreshPaymentOverview();
+      
       document.querySelectorAll(".tacho").forEach(wireTacho);
       withLoading(async () => {
         setPrefillVisible(false);
         await prefillFromBooking();
+        refreshPaymentOverview();
       });
     });
+
+
   </script>
 </body>
 
