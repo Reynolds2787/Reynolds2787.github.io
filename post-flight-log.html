@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>Post Flight Log</title>
@@ -12,17 +13,26 @@
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 
   <style>
-
-      body {
-    background: linear-gradient(180deg, #d8d9db 100%,#d8d9db 100%);
+    body {
+      background: linear-gradient(180deg, #d8d9db 100%, #d8d9db 100%);
     }
 
 
-    body.loading { cursor: wait; }
+    body.loading {
+      cursor: wait;
+    }
 
 
-    .fade-in { opacity: 0; transform: translateY(4px); transition: opacity .25s ease, transform .25s ease; }
-    .fade-in.ready { opacity: 1; transform: translateY(0); }
+    .fade-in {
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity .25s ease, transform .25s ease;
+    }
+
+    .fade-in.ready {
+      opacity: 1;
+      transform: translateY(0);
+    }
 
     .skeleton {
       height: 38px;
@@ -33,27 +43,32 @@
     }
 
     @keyframes shimmer {
-      0% { background-position: 100% 0; }
-      100% { background-position: -100% 0; }
+      0% {
+        background-position: 100% 0;
+      }
+
+      100% {
+        background-position: -100% 0;
+      }
     }
 
     /* Section styling: subtle contrast */
-      .section-card {
-      border: 1px solid #abadb1;
+    .section-card {
+      border: 1px solid #636364;
       border-radius: 1rem;
-      background: #929396;
+      background: #cecfd1;
       box-shadow:
-        0 1px 2px rgba(0,0,0,0.04),
-        0 6px 20px rgba(0,0,0,0.06);
+        0 1px 2px rgba(0, 0, 0, 0.04),
+        0 6px 20px rgba(0, 0, 0, 0.06);
     }
 
-      .section-card:hover {
+    .section-card:hover {
       box-shadow:
-        0 4px 10px rgba(0,0,0,0.08),
-        0 12px 28px rgba(0,0,0,0.08);
+        0 4px 10px rgba(0, 0, 0, 0.08),
+        0 12px 28px rgba(0, 0, 0, 0.08);
     }
-      
-        .section-card .card-header {
+
+    .section-card .card-header {
       background: linear-gradient(180deg, #f8f9fa, #f1f3f5);
       border-bottom: 1px solid #dee2e6;
       font-weight: 700;
@@ -61,7 +76,7 @@
       padding: 0.75rem 1rem;
     }
 
-      .section-card .card-header::before {
+    .section-card .card-header::before {
       content: "";
       display: inline-block;
       width: 6px;
@@ -81,12 +96,17 @@
     .form-control:focus,
     .form-select:focus {
       border-color: #86b7fe;
-      box-shadow: 0 0 0 0.15rem rgba(13,110,253,.15);
+      box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, .15);
     }
 
 
-    .section-card.alt { background: #ffffff; }
-    .form-label { font-weight: 600; }
+    .section-card.alt {
+      background: #ffffff;
+    }
+
+    .form-label {
+      font-weight: 600;
+    }
 
     /* Tacho widget */
     .tacho {
@@ -97,7 +117,7 @@
       border: 1px solid #e5e7eb;
       border-radius: 0.75rem;
       background: #f8f9fa;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
     }
 
     .tacho-digit {
@@ -113,13 +133,13 @@
       padding: 0;
     }
 
-  .tacho-digit {
-  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  }
+    .tacho-digit {
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
 
     .tacho-digit:focus {
       outline: none;
-      box-shadow: 0 0 0 0.2rem rgba(13,110,253,.25);
+      box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, .25);
       border-color: #86b7fe;
     }
 
@@ -132,26 +152,28 @@
 
     .tacho.invalid {
       border-color: #dc3545;
-      box-shadow: 0 0 0 0.15rem rgba(220,53,69,.15);
+      box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, .15);
     }
 
-      .alert {
+    .alert {
       border-radius: 1rem;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
     }
   </style>
 
- 
+
 </head>
 
 <body>
   <div id="navbar-placeholder"></div>
 
+
   <div class="alert alert-warning">
-  <strong>Warning</strong> Test Mode Only - feel free to experiment!
-</div>
+    <strong>Warning</strong> Test Mode Only - feel free to experiment!
+  </div>
 
   <main class="container my-4">
+
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
       <div>
         <h1 class="h3 mb-0">Post Flight Log ✈️</h1>
@@ -167,11 +189,21 @@
     <div id="prefillSkeleton" class="card section-card mb-3">
       <div class="card-body">
         <div class="row g-3">
-          <div class="col-12 col-lg-4"><div class="skeleton"></div></div>
-          <div class="col-12 col-lg-4"><div class="skeleton"></div></div>
-          <div class="col-12 col-lg-4"><div class="skeleton"></div></div>
-          <div class="col-12 col-lg-6"><div class="skeleton"></div></div>
-          <div class="col-12 col-lg-6"><div class="skeleton"></div></div>
+          <div class="col-12 col-lg-4">
+            <div class="skeleton"></div>
+          </div>
+          <div class="col-12 col-lg-4">
+            <div class="skeleton"></div>
+          </div>
+          <div class="col-12 col-lg-4">
+            <div class="skeleton"></div>
+          </div>
+          <div class="col-12 col-lg-6">
+            <div class="skeleton"></div>
+          </div>
+          <div class="col-12 col-lg-6">
+          <div class="skeleton"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -291,7 +323,8 @@
                 <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 3" require>
                 <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 4" require>
                 <span class="tacho-dot" aria-hidden="true">.</span>
-                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho decimal digit" require>
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho decimal digit"
+                  require>
               </div>
               <input type="hidden" id="startTacho" name="startTacho" value="">
             </div>
@@ -304,7 +337,8 @@
                 <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 3" require>
                 <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 4" require>
                 <span class="tacho-dot" aria-hidden="true">.</span>
-                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho decimal digit" require>
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho decimal digit"
+                  require>
               </div>
               <input type="hidden" id="endTacho" name="endTacho" value="" require>
               <div class="form-text">End tacho is mandatory.</div>
@@ -326,48 +360,47 @@
           <div class="row g-3">
             <div class="col-12 col-lg-4">
               <label class="form-label" for="fuelUpliftedLfc">Fuel uplifted at LFC (litres)</label>
-              <input class="form-control" id="fuelUpliftedLfc" name="fuelUpliftedLfc" value= "" type="number" step="1" min="0" required>
-          </div>      
+              <input class="form-control" id="fuelUpliftedLfc" name="fuelUpliftedLfc" value="" type="number" step="1"
+                min="0" required>
+            </div>
 
-         <div class="col-12 col-lg-4">
-                <label class="form-label" for="fuelRemaining">Remaining fuel?</label>
-                <select class="form-select" id="fuelRemaining" name="fuelRemaining" required>
+            <div class="col-12 col-lg-4">
+              <label class="form-label" for="fuelRemaining">Remaining fuel?</label>
+              <select class="form-select" id="fuelRemaining" name="fuelRemaining" required>
                 <option value="" selected>Choose…</option>
                 <option>Full</option>
                 <option>Tabs</option>
                 <option>Tabs -</option>
                 <option>Tabs +</option>
-                </select>
+              </select>
             </div>
-           
+
             <div class="col-12 col-lg-4">
               <label class="form-label" for="oilUploaded">Oil uploaded</label>
-              <input class="form-control" id="oilUploaded" name="oilUploaded" type="text" placeholder="e.g. 1 Quart" required>
+              <input class="form-control" id="oilUploaded" name="oilUploaded" type="text" placeholder="e.g. 1 Quart"
+                required>
             </div>
           </div>
         </div>
       </div>
 
 
-          <!-- Fuel & oil Elsewhere-->
-          <div class="card section-card alt mb-3">
-            <div class="card-header">Fuel & oil Elsewhere ⛽ 🧳</div>
-            <div class="card-body">
-          
-          
-              <div class="col-12 col-lg-4">
-                <label class="form-label" for="fuelUpliftedElsewhere">Fuel uplifted elsewhere (litres)</label>
-                <input class="form-control" id="fuelUpliftedElsewhere" name="fuelUpliftedElsewhere" type="number" step="0.1"
-                  min="0" value="0" required>
-              </div>
-              <div class="col-12 col-lg-4">
-                <label class="form-label" for="fuelCost">Cost of fuel (£)</label>
-                <input class="form-control" id="fuelCost" name="fuelCost" type="number" step="0.01" min="0" value="0" required>
-              </div>
-          
-            </div>
+      <!-- Fuel & oil Elsewhere-->
+      <div class="card section-card alt mb-3">
+        <div class="card-header">Fuel & oil Elsewhere ⛽ 🧳</div>
+        <div class="card-body">
+          <div class="col-12 col-lg-4">
+            <label class="form-label" for="fuelUpliftedElsewhere">Fuel uplifted elsewhere (litres)</label>
+            <input class="form-control" id="fuelUpliftedElsewhere" name="fuelUpliftedElsewhere" type="number" step="0.1"
+              min="0" value="0" required>
           </div>
+          <div class="col-12 col-lg-4">
+            <label class="form-label" for="fuelCost">Cost of fuel (£)</label>
+            <input class="form-control" id="fuelCost" name="fuelCost" type="number" step="0.01" min="0" value="0" required>
           </div>
+      
+        </div>
+      </div>
 
       <!-- Landings & payment -->
       <div class="row g-3">
@@ -377,12 +410,15 @@
             <div class="card-body">
               <div class="row g-3">
                 <div class="col-12">
-                  <label class="form-label" for="landingsKemble">Kemble total landings (inc T&amp;G / overshoots)</label>
-                  <input class="form-control" id="landingsKemble" name="landingsKemble" type="number" step="1" min="0" value="" required>
+                  <label class="form-label" for="landingsKemble">Kemble total landings (inc T&amp;G /
+                    overshoots)</label>
+                  <input class="form-control" id="landingsKemble" name="landingsKemble" type="number" step="1" min="0"
+                    value="" required>
                 </div>
                 <div class="col-12">
                   <label class="form-label" for="landingsOther">T&amp;Gs and landings at other airfields</label>
-                  <input class="form-control" id="landingsOther" name="landingsOther" type="number" step="1" min="0" value="" required>
+                  <input class="form-control" id="landingsOther" name="landingsOther" type="number" step="1" min="0"
+                    value="" required>
                 </div>
               </div>
             </div>
@@ -394,8 +430,8 @@
             <div class="card-header">Payment 💸</div>
             <div class="card-body">
               <div class="row g-3">
-                
-                 <div class="col-12 col-md-6">
+
+                <div class="col-12 col-md-6">
                   <label class="form-label" for="paymentMethod">Who is paying for hire?</label>
                   <select class="form-select" id="paymentMethod" name="paymentMethod" required>
                     <option value="" selected>Choose…</option>
@@ -446,36 +482,6 @@
           </div>
         </div>
       </div>
-
-      <div class="row g-3">
-        <div class="card section-card alt h-100">
-          <div class="card-header">Payment Summary 💸</div>
-          <div class="card-body">
-            <div class="row g-3">
-
-             <div class="col-12 col-md-6">
-              <label class="form-label" for="totalPayment">Total to Pay</label>
-              <input class="form-control" id="totalPayment" type="text" readonly placeholder="--:--">
-            </div>  
-
-            <div class="col-12 col-md-6">
-              <label class="form-label" for="aicraftPayment">Aircraft Cost</label>
-              <input class="form-control" id="aircraftPayment" type="text" readonly placeholder="--:--">
-            </div>        
-            
-            </div>
-      
-          </div>
-        </div>
-      </div>
-
-
-
-
-
-
-
-
 
 
 
@@ -916,4 +922,5 @@
     });
   </script>
 </body>
+
 </html>
