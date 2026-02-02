@@ -464,7 +464,7 @@
                   <label class="form-label" for="paymentMethod">Payment method</label>
                   <select class="form-select" id="paymentMethod" name="paymentMethod" required>
                     <option value="" selected>Choose…</option>
-                    <option>Card</option>
+                    <option>BACS</option>
                     <option>Cash</option>
                     <option>Account</option>
                     <option>Other</option>
@@ -474,7 +474,8 @@
                 <div class="col-12 col-md-6">
                   <label class="form-label" for="tempMember">Temp member?</label>
                   <select class="form-select" id="tempMember" name="tempMember">
-                    <option value="No" selected>No</option>
+                    <option value="" selected>Choose…</option>
+                    <option value="No">No</option>
                     <option value="Yes">Yes</option>
                   </select>
                 </div>
@@ -982,15 +983,15 @@
 
   <script>
 
-   if (getElementById("to") == "Kemble" || "EGBP")
+   if (document.getElementById("to") == "Kemble" || "EGBP")
    
-    {getElementById("landingsKemble").innerHTML = "1";
-    getElementById("landingsOther").innerHTML = "0";
+    {document.getElementById("landingsKemble").innerHTML = "1";
+    document.getElementById("landingsOther").innerHTML = "0";
     
    } 
    
-   else {getElementById("landingsKemble").innerHTML = "0";
-   getElementById("landingsOther").innerHTML = "1";
+   else {document.getElementById("landingsKemble").innerHTML = "0";
+   document.getElementById("landingsOther").innerHTML = "1";
     
    }
 
