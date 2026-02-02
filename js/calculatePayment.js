@@ -132,8 +132,8 @@ document.addEventListener("DOMContentLoaded", () => {
     "onChocks",
     "maintenanceTrip",
     "rescueFlight",
-    //"endTacho",
-    //"startTacho"
+    "endTacho",
+    "startTacho"
     
   ];
 
