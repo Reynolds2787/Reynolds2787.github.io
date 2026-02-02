@@ -55,10 +55,16 @@ function buildPaymentPayload() {
   // tempMember is a select "Yes"/"No"
   const tempMember = document.getElementById("tempMember")?.value === "Yes";
 
+  // Maintenance Flight is a select "Yes"/"No"
+  const maintFlight = document.getElementById("maintenanceTrip")?.value === "Yes";
+
+  // Rescue Flight is a select "Yes"/"No"
+  const rescueFlight = document.getElementById("rescueFlight")?.value === "Yes";
+
   // no surcharge input yet; keep zero for now
   const surcharge = 0;
 
-  return { aircraft, blockMinutes, instructional, landingCount, tachDiff, tempMember, surcharge };
+  return { aircraft, blockMinutes, instructional, landingCount, tachDiff, tempMember, surcharge, maintFlight, rescueFlight };
 }
 
 async function fetchPaymentSummary() {
@@ -124,7 +130,9 @@ document.addEventListener("DOMContentLoaded", () => {
     "offChocks",
     "takeoff",
     "land",
-    "onChocks"
+    "onChocks",
+    "maintenanceFlight",
+    "rescueFlight"
   ];
 
   for (const id of watchIds) {
