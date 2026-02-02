@@ -126,13 +126,14 @@ document.addEventListener("DOMContentLoaded", () => {
     "landingsKemble",
     "tempMember",
     // These change blockTime indirectly via your validateAndCalcTimes():
-    "offChocks",
-    "takeoff",
-    "land",
-    "onChocks",
+    //"offChocks",
+    //"takeoff",
+    //"land",
+    //"onChocks",
     "maintenanceTrip",
     "rescueFlight",
     "tachoDiff",
+    "blockTime"
    
     
   ];
