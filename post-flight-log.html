@@ -981,17 +981,18 @@
   </script>
 
 
+
   <script>
 
-   if (document.getElementById("to") == "Kemble" || "EGBP")
+   if (document.getElementById("to").value == "Kemble" || "EGBP")
    
-    {document.getElementById("landingsKemble").innerHTML = "1";
-    document.getElementById("landingsOther").innerHTML = "0";
+    {document.getElementById("landingsKemble").value = "1";
+    document.getElementById("landingsOther").value = "0";
     
    } 
    
-   else {document.getElementById("landingsKemble").innerHTML = "0";
-   document.getElementById("landingsOther").innerHTML = "1";
+   else {document.getElementById("landingsKemble").value = "0";
+   document.getElementById("landingsOther").value = "1";
     
    }
 
