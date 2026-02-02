@@ -132,7 +132,8 @@ document.addEventListener("DOMContentLoaded", () => {
     "land",
     "onChocks",
     "maintenanceTrip",
-    "rescueFlight"
+    "rescueFlight",
+    "tachoDiff"
   ];
 
   for (const id of watchIds) {
