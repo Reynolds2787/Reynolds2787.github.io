@@ -131,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
     "takeoff",
     "land",
     "onChocks",
-    "maintenanceFlight",
+    "maintenanceTrip",
     "rescueFlight"
   ];
 
