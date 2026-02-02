@@ -124,7 +124,6 @@ document.addEventListener("DOMContentLoaded", () => {
     "aircraft",
     "instructional",
     "landingsKemble",
-    "landingsOther",
     "tempMember",
     // These change blockTime indirectly via your validateAndCalcTimes():
     "offChocks",
@@ -133,7 +132,9 @@ document.addEventListener("DOMContentLoaded", () => {
     "onChocks",
     "maintenanceTrip",
     "rescueFlight",
-    "tachoDiff"
+    "endTacho",
+    "startTacho"
+    
   ];
 
   for (const id of watchIds) {
