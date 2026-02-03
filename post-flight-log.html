@@ -636,6 +636,7 @@
     }
 
     let hasAttemptedSubmit = false;
+    let timesToastShown = false;
 
   function validateAndCalcTimes({ finalCheck = false } = {}) {
   const blockEl = document.getElementById("blockTime");
@@ -687,18 +688,23 @@
   if (taxiOut > 6 * 60 || taxiIn > 6 * 60) invalid = true;
 
   // IMPORTANT: only show red + toast during final submit check
-  if (finalCheck) {
-    setInvalidTimes(invalid);
+  
+    if (finalCheck) {
+      setInvalidTimes(invalid);
 
-    if (invalid && typeof showToast === "function") {
-      showToast(
-        "Check time order: Off chocks → Takeoff → Land → On chocks", { variant: "danger" });
-      timesToastShown = true;
+      if (invalid) {
+        if (!timesToastShown && typeof showToast === "function") {
+          showToast("Check time order: Off chocks → Takeoff → Land → On chocks", { variant: "danger" });
+          timesToastShown = true;
+        }
+      } else {
+        timesToastShown = false; // reset once valid again
+      }
+    } else {
+      clearInvalidTimes();       // keep it clean before submit attempt
+      timesToastShown = false;   // don't latch before submit
     }
 
-  } else {
-    timesToastShown = false;
-  }
 
   if (invalid) {
     if (blockEl) blockEl.value = "";
