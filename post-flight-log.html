@@ -13,24 +13,20 @@
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 
   <style>
-
-      /* Chrome, Safari, Edge */
+    /* Chrome, Safari, Edge */
     input[type=number]::-webkit-inner-spin-button,
     input[type=number]::-webkit-outer-spin-button {
       -webkit-appearance: none;
       margin: 0;
     }
 
-
     body {
       background: linear-gradient(180deg, #d8d9db 100%, #d8d9db 100%);
     }
 
-
     body.loading {
       cursor: wait;
     }
-
 
     .fade-in {
       opacity: 0;
@@ -52,16 +48,10 @@
     }
 
     @keyframes shimmer {
-      0% {
-        background-position: 100% 0;
-      }
-
-      100% {
-        background-position: -100% 0;
-      }
+      0% { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
     }
 
-    /* Section styling: subtle contrast */
     .section-card {
       border: 1px solid #636364;
       border-radius: 1rem;
@@ -69,6 +59,7 @@
       box-shadow:
         0 1px 2px rgba(0, 0, 0, 0.04),
         0 6px 20px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
     }
 
     .section-card:hover {
@@ -86,18 +77,13 @@
     .section-card .card-header::before {
       content: "";
       width: 6px;
-      height: 1.5rem;          /* fixed height looks consistent */
+      height: 1.5rem;
       background: #0d6efd;
       border-radius: 1rem;
       display: inline-block;
-      margin-right: 0;         /* gap handles spacing now */
-    }
-        .section-card {
-      border-radius: 1rem;
-      overflow: hidden; /* key: clips header background to rounded corners */
+      margin-right: 0;
     }
 
-    /* Make sure header corners match */
     .section-card > .card-header {
       border-top-left-radius: 1rem;
       border-top-right-radius: 1rem;
@@ -115,7 +101,6 @@
       box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, .15);
     }
 
-
     .section-card.alt {
       background: #ffffff;
     }
@@ -124,7 +109,6 @@
       font-weight: 600;
     }
 
-    /* Tacho widget */
     .tacho {
       display: inline-flex;
       align-items: center;
@@ -147,9 +131,6 @@
       background: #000;
       color: #fff;
       padding: 0;
-    }
-
-    .tacho-digit {
       font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     }
 
@@ -176,20 +157,16 @@
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
     }
   </style>
-
-
 </head>
 
 <body>
   <div id="navbar-placeholder"></div>
-
 
   <div class="alert alert-warning">
     <strong>Warning</strong> Test Mode Only - feel free to experiment!
   </div>
 
   <main class="container my-4">
-
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
       <div>
         <h1 class="h3 mb-0">Post Flight Log ✈️</h1>
@@ -205,21 +182,11 @@
     <div id="prefillSkeleton" class="card section-card mb-3">
       <div class="card-body">
         <div class="row g-3">
-          <div class="col-12 col-lg-4">
-            <div class="skeleton"></div>
-          </div>
-          <div class="col-12 col-lg-4">
-            <div class="skeleton"></div>
-          </div>
-          <div class="col-12 col-lg-4">
-            <div class="skeleton"></div>
-          </div>
-          <div class="col-12 col-lg-6">
-            <div class="skeleton"></div>
-          </div>
-          <div class="col-12 col-lg-6">
-          <div class="skeleton"></div>
-          </div>
+          <div class="col-12 col-lg-4"><div class="skeleton"></div></div>
+          <div class="col-12 col-lg-4"><div class="skeleton"></div></div>
+          <div class="col-12 col-lg-4"><div class="skeleton"></div></div>
+          <div class="col-12 col-lg-6"><div class="skeleton"></div></div>
+          <div class="col-12 col-lg-6"><div class="skeleton"></div></div>
         </div>
       </div>
     </div>
@@ -334,13 +301,12 @@
             <div class="col-12 col-md-6">
               <label class="form-label">Start tacho<span class="text-danger">*</span></label>
               <div class="tacho" data-tacho="start">
-                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 1" require>
-                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 2" require>
-                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 3" require>
-                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 4" require>
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 1" required>
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 2" required>
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 3" required>
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho digit 4" required>
                 <span class="tacho-dot" aria-hidden="true">.</span>
-                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho decimal digit"
-                  require>
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="Start tacho decimal digit" required>
               </div>
               <input type="hidden" id="startTacho" name="startTacho" value="">
             </div>
@@ -348,15 +314,14 @@
             <div class="col-12 col-md-6">
               <label class="form-label">End tacho <span class="text-danger">*</span></label>
               <div class="tacho" data-tacho="end">
-                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 1" require>
-                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 2" require>
-                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 3" require>
-                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 4" require>
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 1" required>
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 2" required>
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 3" required>
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho digit 4" required>
                 <span class="tacho-dot" aria-hidden="true">.</span>
-                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho decimal digit"
-                  require>
+                <input class="tacho-digit" inputmode="numeric" maxlength="1" aria-label="End tacho decimal digit" required>
               </div>
-              <input type="hidden" id="endTacho" name="endTacho" value="" require>
+              <input type="hidden" id="endTacho" name="endTacho" value="">
               <div class="form-text">End tacho is mandatory.</div>
             </div>
 
@@ -376,8 +341,7 @@
           <div class="row g-3">
             <div class="col-12 col-lg-4">
               <label class="form-label" for="fuelUpliftedLfc">Fuel uplifted at LFC (litres)</label>
-              <input class="form-control" id="fuelUpliftedLfc" name="fuelUpliftedLfc" value="" type="number" step="1"
-                min="0" required>
+              <input class="form-control" id="fuelUpliftedLfc" name="fuelUpliftedLfc" value="" type="number" step="1" min="0" required>
             </div>
 
             <div class="col-12 col-lg-4">
@@ -393,32 +357,28 @@
 
             <div class="col-12 col-lg-4">
               <label class="form-label" for="oilUploaded">Oil uploaded</label>
-              <input class="form-control" id="oilUploaded" name="oilUploaded" type="text" placeholder="e.g. 1 Quart"
-                required>
+              <input class="form-control" id="oilUploaded" name="oilUploaded" type="text" placeholder="e.g. 1 Quart" required>
             </div>
           </div>
         </div>
       </div>
-
 
       <!-- Fuel & oil Elsewhere-->
       <div class="card section-card alt mb-3">
         <div class="card-header">Fuel & oil Elsewhere ⛽ 🧳</div>
         <div class="card-body">
           <div class="row g-3">
-          <div class="col-12 col-lg-6">
-            <label class="form-label" for="fuelUpliftedElsewhere">Fuel uplifted elsewhere (litres)</label>
-            <input class="form-control" id="fuelUpliftedElsewhere" name="fuelUpliftedElsewhere" type="number" value="0" required>             
+            <div class="col-12 col-lg-6">
+              <label class="form-label" for="fuelUpliftedElsewhere">Fuel uplifted elsewhere (litres)</label>
+              <input class="form-control" id="fuelUpliftedElsewhere" name="fuelUpliftedElsewhere" type="number" value="0" required>
+            </div>
+            <div class="col-12 col-lg-6">
+              <label class="form-label" for="fuelCost">Cost of fuel (£)</label>
+              <input class="form-control" id="fuelCost" name="fuelCost" type="number" value="0" required>
+            </div>
           </div>
-          <div class="col-12 col-lg-6">
-            <label class="form-label" for="fuelCost">Cost of fuel (£)</label>
-            <input class="form-control" id="fuelCost" name="fuelCost" type="number" value="0" required>
-          </div>
-      
         </div>
       </div>
-      </div>
-
 
       <!-- Landings & payment -->
       <div class="row g-3 mb-3">
@@ -428,15 +388,12 @@
             <div class="card-body">
               <div class="row g-3">
                 <div class="col-12">
-                  <label class="form-label" for="landingsKemble">Kemble total landings (inc T&amp;G /
-                    overshoots)</label>
-                  <input class="form-control" id="landingsKemble" name="landingsKemble" type="number" step="1" min="0"
-                    value="" required>
+                  <label class="form-label" for="landingsKemble">Kemble total landings (inc T&amp;G / overshoots)</label>
+                  <input class="form-control" id="landingsKemble" name="landingsKemble" type="number" step="1" min="0" value="" required>
                 </div>
                 <div class="col-12">
                   <label class="form-label" for="landingsOther">T&amp;Gs and landings at other airfields</label>
-                  <input class="form-control" id="landingsOther" name="landingsOther" type="number" step="1" min="0"
-                    value="" required>
+                  <input class="form-control" id="landingsOther" name="landingsOther" type="number" step="1" min="0" value="" required>
                 </div>
               </div>
             </div>
@@ -448,7 +405,6 @@
             <div class="card-header">Payment 💸</div>
             <div class="card-body">
               <div class="row g-3">
-
                 <div class="col-12 col-md-6">
                   <label class="form-label" for="payer">Who is paying for hire?</label>
                   <select class="form-select" id="payer" name="payer" required>
@@ -488,6 +444,7 @@
                     <option value="Yes">Yes</option>
                   </select>
                 </div>
+
                 <div class="col-12 col-md-6">
                   <label class="form-label" for="rescueFlight">Rescue flight?</label>
                   <select class="form-select" id="rescueFlight" name="rescueFlight" required>
@@ -501,46 +458,39 @@
           </div>
         </div>
       </div>
- 
-      
-      <!-- Payment Sumamry-->
+
+      <!-- Payment Summary-->
       <div class="card section-card alt mb-3 pt-3">
-        <div class="card-header">Payment Summary </div>
+        <div class="card-header">Payment Summary</div>
         <div class="card-body">
-          <div class=" row g-3">
-          
-        
-          <div class="col-12 col-lg-3">
-            <label class="form-label" for="aircraftHireCost">Aircraft Hire Cost</label>
-            <input class="form-control" id="aircraftHireCost" name="aircraftHireCost" type="number" readonly>
-          </div>
+          <div class="row g-3">
+            <div class="col-12 col-lg-3">
+              <label class="form-label" for="aircraftHireCost">Aircraft Hire Cost</label>
+              <input class="form-control" id="aircraftHireCost" name="aircraftHireCost" type="number" readonly>
+            </div>
 
-          <div class="col-12 col-lg-3">
-            <label class="form-label" for="landingFees">Landing Fees</label>
-            <input class="form-control" id="landingFees" name="landingFees" type="number" readonly>
-          </div>
+            <div class="col-12 col-lg-3">
+              <label class="form-label" for="landingFees">Landing Fees</label>
+              <input class="form-control" id="landingFees" name="landingFees" type="number" readonly>
+            </div>
 
-          <div class="col-12 col-lg-3">
-            <label class="form-label" for="instrucCost">Instructor Cost</label>
-            <input class="form-control" id="instrucCost" name="instrucCost" type="number" readonly>
-          </div>
+            <div class="col-12 col-lg-3">
+              <label class="form-label" for="instrucCost">Instructor Cost</label>
+              <input class="form-control" id="instrucCost" name="instrucCost" type="number" readonly>
+            </div>
 
-          <div class="col-12 col-lg-3">
-            <label class="form-label" for="surcharge">Surcharge</label>
-            <input class="form-control" id="surcharge" name="surcharge" type="number" readonly>
-          </div>
+            <div class="col-12 col-lg-3">
+              <label class="form-label" for="surcharge">Surcharge</label>
+              <input class="form-control" id="surcharge" name="surcharge" type="number" readonly>
+            </div>
 
-          <div class="col-12 col-lg-12">
-            <label class="form-label" for="lfcTotal">Total to Pay LFC (£)</label>
-            <input class="form-control" id="lfcTotal" name="lfcTotal" type="number" readonly>
+            <div class="col-12 col-lg-12">
+              <label class="form-label" for="lfcTotal">Total to Pay LFC (£)</label>
+              <input class="form-control" id="lfcTotal" name="lfcTotal" type="number" readonly>
+            </div>
           </div>
-
-      
         </div>
       </div>
-      </div>
-
-  
 
       <!-- Confirmation + submit -->
       <div class="card section-card alt mt-3">
@@ -594,6 +544,21 @@
       return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : null;
     }
 
+    // -------------------------
+    // Small helper: make programmatic value changes trigger listeners
+    // -------------------------
+    function fireChange(el) {
+      if (!el) return;
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
+    function recalcPayment() {
+      if (typeof refreshPaymentOverview === "function") {
+        refreshPaymentOverview();
+      }
+    }
+
     // ---------- Times logic (single source of truth) ----------
     const TIME_IDS = ["offChocks", "takeoff", "land", "onChocks"];
 
@@ -638,138 +603,137 @@
     let hasAttemptedSubmit = false;
     let timesToastShown = false;
 
-  function validateAndCalcTimes({ finalCheck = false } = {}) {
-  const blockEl = document.getElementById("blockTime");
-  const airEl = document.getElementById("airTime");
+    function validateAndCalcTimes({ finalCheck = false } = {}) {
+      const blockEl = document.getElementById("blockTime");
+      const airEl = document.getElementById("airTime");
 
-  if (!allTimesPresent()) {
-    if (!finalCheck) clearInvalidTimes();
-    if (blockEl) blockEl.value = "";
-    if (airEl) airEl.value = "";
-    return finalCheck ? false : true;
-  }
+      if (!allTimesPresent()) {
+        if (!finalCheck) clearInvalidTimes();
 
-  const offEl = document.getElementById("offChocks");
-  const toEl = document.getElementById("takeoff");
-  const landEl = document.getElementById("land");
-  const onEl = document.getElementById("onChocks");
+        if (blockEl) { blockEl.value = ""; fireChange(blockEl); }
+        if (airEl) { airEl.value = ""; fireChange(airEl); }
 
-  const off = parseHHMM(offEl.value);
-  const to = parseHHMM(toEl.value);
-  const land = parseHHMM(landEl.value);
-  const on = parseHHMM(onEl.value);
+        recalcPayment();
+        return finalCheck ? false : true;
+      }
 
-  const snapped = {
-    off: snapMinutesTo5(off),
-    to: snapMinutesTo5(to),
-    land: snapMinutesTo5(land),
-    on: snapMinutesTo5(on)
-  };
+      const offEl = document.getElementById("offChocks");
+      const toEl = document.getElementById("takeoff");
+      const landEl = document.getElementById("land");
+      const onEl = document.getElementById("onChocks");
 
-  // snap UI values to nearest 5 minutes
-  offEl.value = minutesToHHMM(snapped.off);
-  toEl.value = minutesToHHMM(snapped.to);
-  landEl.value = minutesToHHMM(snapped.land);
-  onEl.value = minutesToHHMM(snapped.on);
+      const off = parseHHMM(offEl.value);
+      const to = parseHHMM(toEl.value);
+      const land = parseHHMM(landEl.value);
+      const on = parseHHMM(onEl.value);
 
-  const block = duration(snapped.off, snapped.on);
-  const air = duration(snapped.to, snapped.land);
+      const snapped = {
+        off: snapMinutesTo5(off),
+        to: snapMinutesTo5(to),
+        land: snapMinutesTo5(land),
+        on: snapMinutesTo5(on)
+      };
 
-  let invalid = false;
+      // snap UI values to nearest 5 minutes
+      offEl.value = minutesToHHMM(snapped.off);
+      toEl.value = minutesToHHMM(snapped.to);
+      landEl.value = minutesToHHMM(snapped.land);
+      onEl.value = minutesToHHMM(snapped.on);
 
-  // basic sanity checks
-  if (air > block) invalid = true;
-  if (block <= 0) invalid = true;
-  if (block > 16 * 60) invalid = true;
+      const block = duration(snapped.off, snapped.on);
+      const air = duration(snapped.to, snapped.land);
 
-  // taxi sanity checks
-  const taxiOut = duration(snapped.off, snapped.to);
-  const taxiIn = duration(snapped.land, snapped.on);
-  if (taxiOut > 6 * 60 || taxiIn > 6 * 60) invalid = true;
+      let invalid = false;
 
-  // IMPORTANT: only show red + toast during final submit check
-  
-    if (finalCheck) {
-      setInvalidTimes(invalid);
+      // sanity checks
+      if (air > block) invalid = true;
+      if (block <= 0) invalid = true;
+      if (block > 16 * 60) invalid = true;
 
-      if (invalid) {
-        if (!timesToastShown && typeof showToast === "function") {
-          showToast("Check time order: Off chocks → Takeoff → Land → On chocks", { variant: "danger" });
-          timesToastShown = true;
+      // taxi sanity checks
+      const taxiOut = duration(snapped.off, snapped.to);
+      const taxiIn = duration(snapped.land, snapped.on);
+      if (taxiOut > 6 * 60 || taxiIn > 6 * 60) invalid = true;
+
+      if (finalCheck) {
+        setInvalidTimes(invalid);
+        if (invalid) {
+          if (!timesToastShown && typeof showToast === "function") {
+            showToast("Check time order: Off chocks → Takeoff → Land → On chocks", { variant: "danger" });
+            timesToastShown = true;
+          }
+        } else {
+          timesToastShown = false;
         }
       } else {
-        timesToastShown = false; // reset once valid again
+        clearInvalidTimes();
+        timesToastShown = false;
       }
-    } else {
-      clearInvalidTimes();       // keep it clean before submit attempt
-      timesToastShown = false;   // don't latch before submit
+
+      if (invalid) {
+        if (blockEl) { blockEl.value = ""; fireChange(blockEl); }
+        if (airEl) { airEl.value = ""; fireChange(airEl); }
+        recalcPayment();
+        return false;
+      }
+
+      if (blockEl) { blockEl.value = minutesToHHMM(block); fireChange(blockEl); }
+      if (airEl) { airEl.value = minutesToHHMM(air); fireChange(airEl); }
+
+      recalcPayment();
+      return true;
     }
 
+    // Fire time calc when user changes any time
+    TIME_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener("change", () => {
+        validateAndCalcTimes({ finalCheck: hasAttemptedSubmit });
+      });
+    });
 
-  if (invalid) {
-    if (blockEl) blockEl.value = "";
-    if (airEl) airEl.value = "";
-    return false;
-  }
+    // ---------- Tacho helper functions ----------
+    function clampDigitChar(ch) {
+      return /[0-9]/.test(ch) ? ch : "";
+    }
 
-  if (blockEl) blockEl.value = minutesToHHMM(block);
-  if (airEl) airEl.value = minutesToHHMM(air);
-  return true;
-}
+    function getDigits(container) {
+      return Array.from(container.querySelectorAll(".tacho-digit"));
+    }
 
-TIME_IDS.forEach(id => {
-  const el = document.getElementById(id);
-  if (!el) return;
+    function buildTachoString(container) {
+      const digits = getDigits(container).map(i => (i.value || "0"));
+      return `${digits[0]}${digits[1]}${digits[2]}${digits[3]}.${digits[4]}`;
+    }
 
-  el.addEventListener("change", () => {
-    // Before submit: calc only, no red/toast
-    // After submit attempt: full validation feedback while fixing
-    validateAndCalcTimes({ finalCheck: hasAttemptedSubmit });
-  });
-});
+    function isComplete(container) {
+      return getDigits(container).every(i => /^[0-9]$/.test(i.value));
+    }
 
+    function tachoToTenths(tachoStr) {
+      if (!/^\d{4}\.\d$/.test(tachoStr)) return null;
+      const whole = parseInt(tachoStr.slice(0, 4), 10);
+      const tenth = parseInt(tachoStr.slice(5, 6), 10);
+      if (Number.isNaN(whole) || Number.isNaN(tenth)) return null;
+      return whole * 10 + tenth;
+    }
 
-// ---------- Tacho helper functions ----------
-function clampDigitChar(ch) {
-  return /[0-9]/.test(ch) ? ch : "";
-}
+    function tenthsToHoursTenths(tenths) {
+      const hours = Math.floor(tenths / 10);
+      const t = tenths % 10;
+      return `${hours}.${t}`;
+    }
 
-function getDigits(container) {
-  return Array.from(container.querySelectorAll(".tacho-digit"));
-}
+    function syncHidden(container) {
+      const kind = container.getAttribute("data-tacho");
+      const hidden = document.getElementById(kind === "start" ? "startTacho" : "endTacho");
+      if (!hidden) return;
 
-function buildTachoString(container) {
-  const digits = getDigits(container).map(i => (i.value || "0"));
-  return `${digits[0]}${digits[1]}${digits[2]}${digits[3]}.${digits[4]}`;
-}
-
-function isComplete(container) {
-  return getDigits(container).every(i => /^[0-9]$/.test(i.value));
-}
-
-function tachoToTenths(tachoStr) {
-  if (!/^\d{4}\.\d$/.test(tachoStr)) return null;
-  const whole = parseInt(tachoStr.slice(0, 4), 10);
-  const tenth = parseInt(tachoStr.slice(5, 6), 10);
-  if (Number.isNaN(whole) || Number.isNaN(tenth)) return null;
-  return whole * 10 + tenth;
-}
-
-function tenthsToHoursTenths(tenths) {
-  const hours = Math.floor(tenths / 10);
-  const t = tenths % 10;
-  return `${hours}.${t}`;
-}
-
-function syncHidden(container) {
-  const kind = container.getAttribute("data-tacho");
-  const hidden = document.getElementById(kind === "start" ? "startTacho" : "endTacho");
-  if (!hidden) return;
-  hidden.value = isComplete(container) ? buildTachoString(container) : "";
-}
-
-
-
+      hidden.value = isComplete(container) ? buildTachoString(container) : "";
+      fireChange(hidden);
+      recalcPayment();
+    }
 
     function validateAndCalcTacho() {
       const startBox = document.querySelector('.tacho[data-tacho="start"]');
@@ -778,11 +742,11 @@ function syncHidden(container) {
 
       if (!startBox || !endBox) return true;
 
-      // Only validate once BOTH are complete
       if (!isComplete(startBox) || !isComplete(endBox)) {
         startBox.classList.remove("invalid");
         endBox.classList.remove("invalid");
-        diffOut.value = "";
+        if (diffOut) { diffOut.value = ""; fireChange(diffOut); }
+        recalcPayment();
         return true;
       }
 
@@ -795,15 +759,20 @@ function syncHidden(container) {
       endBox.classList.toggle("invalid", invalid);
 
       if (invalid) {
-        diffOut.value = "";
+        if (diffOut) { diffOut.value = ""; fireChange(diffOut); }
         if (typeof showToast === "function") {
           showToast("End tacho must be greater than or equal to start tacho.", { variant: "danger" });
         }
+        recalcPayment();
         return false;
       }
 
       const diffTenths = endT - startT;
-      diffOut.value = tenthsToHoursTenths(diffTenths);
+      if (diffOut) {
+        diffOut.value = tenthsToHoursTenths(diffTenths);
+        fireChange(diffOut);
+      }
+      recalcPayment();
       return true;
     }
 
@@ -862,7 +831,7 @@ function syncHidden(container) {
     function setTachoDigits(container, tachoStr) {
       if (!/^\d{4}\.\d$/.test(tachoStr)) return false;
       const digits = getDigits(container);
-      const raw = tachoStr.replace(".", ""); // "01234"
+      const raw = tachoStr.replace(".", "");
       for (let i = 0; i < 5; i++) digits[i].value = raw[i];
       syncHidden(container);
       validateAndCalcTacho();
@@ -890,6 +859,26 @@ function syncHidden(container) {
       }
     }
 
+    // Landings auto-fill (runs after prefill too)
+    function setLandingsFromTo() {
+      const toVal = (document.getElementById("to")?.value || "").trim();
+      const kemble = document.getElementById("landingsKemble");
+      const other = document.getElementById("landingsOther");
+      if (!kemble || !other) return;
+
+      if (toVal === "Kemble" || toVal === "EGBP") {
+        kemble.value = "1";
+        other.value = "0";
+      } else {
+        kemble.value = "0";
+        other.value = "1";
+      }
+
+      fireChange(kemble);
+      fireChange(other);
+      recalcPayment();
+    }
+
     // ---------- Prefill + submit ----------
     async function prefillFromBooking() {
       if (!bookingId) {
@@ -909,27 +898,26 @@ function syncHidden(container) {
 
       const b = await res.json();
 
-      // Best-effort mapping
       document.getElementById("picName").value = b.picName || b.pic || b.PIC || localStorage.getItem("username") || "";
       document.getElementById("from").value = b.from ?? "";
       document.getElementById("to").value = b.to ?? "";
       document.getElementById("authorised").value = b.authorised ?? b.authorized ?? "";
       document.getElementById("aircraft").value = b.aircraft ?? "";
 
-      // Date from booking ETA if available, otherwise today
       const etaDate = toISODateFromEta(b.eta);
       document.getElementById("flightDate").value = etaDate || new Date().toISOString().slice(0, 10);
 
-      // P2–P4 from passengers array
       const pax = Array.isArray(b.passengers) ? b.passengers : [];
       document.getElementById("p2").value = pax[0]?.name || "";
       document.getElementById("p3").value = pax[1]?.name || "";
       document.getElementById("p4").value = pax[2]?.name || "";
 
-      // Prefill start tacho from last known per aircraft
       if (b.aircraft) {
         await prefillStartTachoFromLast(b.aircraft);
       }
+
+      // IMPORTANT: to field is now known, so set landings defaults now
+      setLandingsFromTo();
 
       setPrefillVisible(true);
     }
@@ -938,26 +926,22 @@ function syncHidden(container) {
       e.preventDefault();
       hasAttemptedSubmit = true;
 
-      // Bootstrap validation
       if (!form.checkValidity()) {
         form.classList.add("was-validated");
         showToast("Please complete the required fields", { variant: "warning" });
         return;
       }
 
-      // End tacho mandatory (matches server-side)
       const endTacho = document.getElementById("endTacho")?.value || "";
       if (!/^\d{4}\.\d$/.test(endTacho)) {
         showToast("Please enter End tacho (4 digits + . + 1 digit)", { variant: "warning" });
         return;
       }
 
-      // Validate times group (only meaningful if all four entered)
       const timesOk = validateAndCalcTimes({ finalCheck: true });
-       if (!timesOk) return;
+      if (!timesOk) return;
 
-      // Validate tacho group (if both complete, must be ordered)
-       const tachoOk = validateAndCalcTacho();
+      const tachoOk = validateAndCalcTacho();
       if (!tachoOk) return;
 
       const payload = Object.fromEntries(new FormData(form).entries());
@@ -991,7 +975,6 @@ function syncHidden(container) {
       .then(html => {
         const mount = document.getElementById("navbar-placeholder");
         if (mount) mount.innerHTML = html;
-        // Re-run logout wiring after injecting navbar
         const s = document.createElement("script");
         s.src = "js/logout.js";
         document.body.appendChild(s);
@@ -999,38 +982,20 @@ function syncHidden(container) {
       .catch(err => console.error("Navbar load failed", err));
 
     document.addEventListener("DOMContentLoaded", () => {
-      refreshPaymentOverview();
-      
+      recalcPayment();
+
       document.querySelectorAll(".tacho").forEach(wireTacho);
+
+      // If user manually changes "to", update landings too
+      document.getElementById("to")?.addEventListener("change", setLandingsFromTo);
+
       withLoading(async () => {
         setPrefillVisible(false);
         await prefillFromBooking();
-        refreshPaymentOverview();
+        recalcPayment();
       });
     });
-
-
   </script>
-
-
-
-  <script>
-
-   if (document.getElementById("to").value == "Kemble" || "EGBP")
-   
-    {document.getElementById("landingsKemble").value = "1";
-    document.getElementById("landingsOther").value = "0";
-    
-   } 
-   
-   else {document.getElementById("landingsKemble").value = "0";
-   document.getElementById("landingsOther").value = "1";
-    
-   }
-
-  </script>
-
-
 </body>
 
 </html>
