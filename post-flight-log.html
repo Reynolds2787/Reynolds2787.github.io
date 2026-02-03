@@ -718,6 +718,49 @@ TIME_IDS.forEach(id => {
 });
 
 
+
+// ---------- Tacho helper functions ----------
+function clampDigitChar(ch) {
+  return /[0-9]/.test(ch) ? ch : "";
+}
+
+function getDigits(container) {
+  return Array.from(container.querySelectorAll(".tacho-digit"));
+}
+
+function buildTachoString(container) {
+  const digits = getDigits(container).map(i => (i.value || "0"));
+  return `${digits[0]}${digits[1]}${digits[2]}${digits[3]}.${digits[4]}`;
+}
+
+function isComplete(container) {
+  return getDigits(container).every(i => /^[0-9]$/.test(i.value));
+}
+
+function tachoToTenths(tachoStr) {
+  if (!/^\d{4}\.\d$/.test(tachoStr)) return null;
+  const whole = parseInt(tachoStr.slice(0, 4), 10);
+  const tenth = parseInt(tachoStr.slice(5, 6), 10);
+  if (Number.isNaN(whole) || Number.isNaN(tenth)) return null;
+  return whole * 10 + tenth;
+}
+
+function tenthsToHoursTenths(tenths) {
+  const hours = Math.floor(tenths / 10);
+  const t = tenths % 10;
+  return `${hours}.${t}`;
+}
+
+function syncHidden(container) {
+  const kind = container.getAttribute("data-tacho");
+  const hidden = document.getElementById(kind === "start" ? "startTacho" : "endTacho");
+  if (!hidden) return;
+  hidden.value = isComplete(container) ? buildTachoString(container) : "";
+}
+
+
+
+
     function validateAndCalcTacho() {
       const startBox = document.querySelector('.tacho[data-tacho="start"]');
       const endBox = document.querySelector('.tacho[data-tacho="end"]');
