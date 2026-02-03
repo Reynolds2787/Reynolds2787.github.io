@@ -635,38 +635,19 @@
       TIME_IDS.forEach(id => document.getElementById(id)?.classList.toggle("is-invalid", flag));
     }
 
-    function validateAndCalcTimes() {
+    let hasAttemptedSubmit = false;
+
+    function validateAndCalcTimes({ finalCheck = false } = {}) {
       if (!allTimesPresent()) {
-        clearInvalidTimes();
+        if (!finalCheck) {
+          clearInvalidTimes();
+        }
         document.getElementById("blockTime").value = "";
         document.getElementById("airTime").value = "";
-        return;
+        return finalCheck ? false : true;
       }
 
-      const offEl = document.getElementById("offChocks");
-      const toEl = document.getElementById("takeoff");
-      const landEl = document.getElementById("land");
-      const onEl = document.getElementById("onChocks");
-
-      const off = parseHHMM(offEl.value);
-      const to = parseHHMM(toEl.value);
-      const land = parseHHMM(landEl.value);
-      const on = parseHHMM(onEl.value);
-
-      const snapped = {
-        off: snapMinutesTo5(off),
-        to: snapMinutesTo5(to),
-        land: snapMinutesTo5(land),
-        on: snapMinutesTo5(on)
-      };
-
-      offEl.value = minutesToHHMM(snapped.off);
-      toEl.value = minutesToHHMM(snapped.to);
-      landEl.value = minutesToHHMM(snapped.land);
-      onEl.value = minutesToHHMM(snapped.on);
-
-      const block = duration(snapped.off, snapped.on);
-      const air = duration(snapped.to, snapped.land);
+      // ... existing parsing + snapping logic ...
 
       let invalid = false;
       if (air > block) invalid = true;
@@ -677,14 +658,22 @@
       const taxiIn = duration(snapped.land, snapped.on);
       if (taxiOut > 6 * 60 || taxiIn > 6 * 60) invalid = true;
 
-      setInvalidTimes(invalid);
+      if (finalCheck) {
+        setInvalidTimes(invalid);
+
+        if (invalid && typeof showToast === "function") {
+          showToast(
+            "Check time order: Off chocks → Takeoff → Land → On chocks",
+            { variant: "danger" }
+          );
+        }
+      } else {
+        clearInvalidTimes(); // never show red while typing
+      }
 
       if (invalid) {
         document.getElementById("blockTime").value = "";
         document.getElementById("airTime").value = "";
-        if (typeof showToast === "function") {
-          showToast("Check time order: Off chocks → Takeoff → Land → On chocks", { variant: "danger" });
-        }
         return false;
       }
 
@@ -697,7 +686,7 @@
       const el = document.getElementById(id);
       if (!el) return;
       el.addEventListener("change", validateAndCalcTimes);
-      el.addEventListener("blur", validateAndCalcTimes);
+      
     });
 
     // ---------- Tacho logic ----------
@@ -921,12 +910,12 @@
       }
 
       // Validate times group (only meaningful if all four entered)
-      const timesOk = validateAndCalcTimes();
-      if (timesOk === false) return;
+      const timesOk = validateAndCalcTimes({ finalCheck: true });
+       if (!timesOk) return;
 
       // Validate tacho group (if both complete, must be ordered)
-      const tachoOk = validateAndCalcTacho();
-      if (tachoOk === false) return;
+       const tachoOk = validateAndCalcTacho();
+      if (!tachoOk) return;
 
       const payload = Object.fromEntries(new FormData(form).entries());
 
