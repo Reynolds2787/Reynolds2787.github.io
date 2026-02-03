@@ -637,97 +637,86 @@
 
     let hasAttemptedSubmit = false;
 
-    function validateAndCalcTimes({ finalCheck = false } = {}) {
-      if (!allTimesPresent()) {
-        if (!finalCheck) {
-          clearInvalidTimes();
-        }
-        document.getElementById("blockTime").value = "";
-        document.getElementById("airTime").value = "";
-        return finalCheck ? false : true;
-      }
+  function validateAndCalcTimes({ finalCheck = false } = {}) {
+  const blockEl = document.getElementById("blockTime");
+  const airEl = document.getElementById("airTime");
 
-      // ... existing parsing + snapping logic ...
+  if (!allTimesPresent()) {
+    if (!finalCheck) clearInvalidTimes();
+    if (blockEl) blockEl.value = "";
+    if (airEl) airEl.value = "";
+    return finalCheck ? false : true;
+  }
 
-      let invalid = false;
-      if (air > block) invalid = true;
-      if (block <= 0) invalid = true;
-      if (block > 16 * 60) invalid = true;
+  const offEl = document.getElementById("offChocks");
+  const toEl = document.getElementById("takeoff");
+  const landEl = document.getElementById("land");
+  const onEl = document.getElementById("onChocks");
 
-      const taxiOut = duration(snapped.off, snapped.to);
-      const taxiIn = duration(snapped.land, snapped.on);
-      if (taxiOut > 6 * 60 || taxiIn > 6 * 60) invalid = true;
+  const off = parseHHMM(offEl.value);
+  const to = parseHHMM(toEl.value);
+  const land = parseHHMM(landEl.value);
+  const on = parseHHMM(onEl.value);
 
-      if (finalCheck) {
-        setInvalidTimes(invalid);
+  const snapped = {
+    off: snapMinutesTo5(off),
+    to: snapMinutesTo5(to),
+    land: snapMinutesTo5(land),
+    on: snapMinutesTo5(on)
+  };
 
-        if (invalid && typeof showToast === "function") {
-          showToast(
-            "Check time order: Off chocks → Takeoff → Land → On chocks",
-            { variant: "danger" }
-          );
-        }
-      } else {
-        clearInvalidTimes(); // never show red while typing
-      }
+  // snap UI values to nearest 5 minutes
+  offEl.value = minutesToHHMM(snapped.off);
+  toEl.value = minutesToHHMM(snapped.to);
+  landEl.value = minutesToHHMM(snapped.land);
+  onEl.value = minutesToHHMM(snapped.on);
 
-      if (invalid) {
-        document.getElementById("blockTime").value = "";
-        document.getElementById("airTime").value = "";
-        return false;
-      }
+  const block = duration(snapped.off, snapped.on);
+  const air = duration(snapped.to, snapped.land);
 
-      document.getElementById("blockTime").value = minutesToHHMM(block);
-      document.getElementById("airTime").value = minutesToHHMM(air);
-      return true;
+  let invalid = false;
+
+  // basic sanity checks
+  if (air > block) invalid = true;
+  if (block <= 0) invalid = true;
+  if (block > 16 * 60) invalid = true;
+
+  // taxi sanity checks
+  const taxiOut = duration(snapped.off, snapped.to);
+  const taxiIn = duration(snapped.land, snapped.on);
+  if (taxiOut > 6 * 60 || taxiIn > 6 * 60) invalid = true;
+
+  // IMPORTANT: only show red + toast during final submit check
+  if (finalCheck) {
+    setInvalidTimes(invalid);
+
+    if (invalid && typeof showToast === "function") {
+      showToast(
+        "Check time order: Off chocks → Takeoff → Land → On chocks",
+        { variant: "danger" }
+      );
     }
+  } else {
+    clearInvalidTimes(); // never show red while typing
+  }
 
-    TIME_IDS.forEach(id => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.addEventListener("change", validateAndCalcTimes);
-      
-    });
+  if (invalid) {
+    if (blockEl) blockEl.value = "";
+    if (airEl) airEl.value = "";
+    return false;
+  }
 
-    // ---------- Tacho logic ----------
-    function clampDigitChar(ch) {
-      return /[0-9]/.test(ch) ? ch : "";
-    }
+  if (blockEl) blockEl.value = minutesToHHMM(block);
+  if (airEl) airEl.value = minutesToHHMM(air);
+  return true;
+}
 
-    function getDigits(container) {
-      return Array.from(container.querySelectorAll(".tacho-digit"));
-    }
+TIME_IDS.forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener("change", () => validateAndCalcTimes());
+});
 
-    function buildTachoString(container) {
-      const digits = getDigits(container).map(i => (i.value || "0"));
-      return `${digits[0]}${digits[1]}${digits[2]}${digits[3]}.${digits[4]}`;
-    }
-
-    function isComplete(container) {
-      return getDigits(container).every(i => /^[0-9]$/.test(i.value));
-    }
-
-    function tachoToTenths(tachoStr) {
-      if (!/^\d{4}\.\d$/.test(tachoStr)) return null;
-      const whole = parseInt(tachoStr.slice(0, 4), 10);
-      const tenth = parseInt(tachoStr.slice(5, 6), 10);
-      if (Number.isNaN(whole) || Number.isNaN(tenth)) return null;
-      return whole * 10 + tenth;
-    }
-
-    function tenthsToHoursTenths(tenths) {
-      const hours = Math.floor(tenths / 10);
-      const t = tenths % 10;
-      return `${hours}.${t}`;
-    }
-
-    function syncHidden(container) {
-      const kind = container.getAttribute("data-tacho");
-      const hidden = document.getElementById(kind === "start" ? "startTacho" : "endTacho");
-      if (!hidden) return;
-
-      hidden.value = isComplete(container) ? buildTachoString(container) : "";
-    }
 
     function validateAndCalcTacho() {
       const startBox = document.querySelector('.tacho[data-tacho="start"]');
