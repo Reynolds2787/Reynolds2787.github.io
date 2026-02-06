@@ -39,26 +39,48 @@ function paintBadge(count, worstDays) {
   const badge = document.getElementById("dueSoonBadge");
   if (!badge) return;
 
+  // Hide if nothing due
   if (!count || count <= 0) {
     badge.classList.add("d-none");
     badge.textContent = "0";
     badge.classList.remove("bg-danger", "bg-warning", "bg-success");
+    badge.removeAttribute("title");
     return;
   }
 
+  // Show badge
   badge.classList.remove("d-none");
   badge.textContent = String(count);
 
-  // Color rules:
-  // overdue (<=0) => red
-  // due in <=7 => red
-  // due in <=30 => amber
-  // else => green
+  // Reset colours
   badge.classList.remove("bg-danger", "bg-warning", "bg-success");
 
-  if (worstDays <= 7) badge.classList.add("bg-danger");
-  else if (worstDays <= DUE_WINDOW_DAYS) badge.classList.add("bg-warning");
-  else badge.classList.add("bg-success");
+  // Colour + tooltip logic
+  if (worstDays <= 0) {
+    badge.classList.add("bg-danger");
+    badge.setAttribute(
+      "title",
+      `${count} aircraft overdue for maintenance`
+    );
+  } else if (worstDays <= 7) {
+    badge.classList.add("bg-danger");
+    badge.setAttribute(
+      "title",
+      `${count} aircraft due within 7 days`
+    );
+  } else if (worstDays <= DUE_WINDOW_DAYS) {
+    badge.classList.add("bg-warning");
+    badge.setAttribute(
+      "title",
+      `${count} aircraft due within ${DUE_WINDOW_DAYS} days`
+    );
+  } else {
+    badge.classList.add("bg-success");
+    badge.setAttribute(
+      "title",
+      `${count} upcoming maintenance items`
+    );
+  }
 }
 
 async function updateDueSoonBadge() {
