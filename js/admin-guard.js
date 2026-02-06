@@ -1,15 +1,9 @@
-// js/admin-guard.js
+// /js/admin-guard.js
 
-async function getAccessToken() {
-  return localStorage.getItem("access_token"); // adjust if you store elsewhere
-}
+const PROFILE_URL = "https://hwjx5fihi5.execute-api.eu-west-2.amazonaws.com/profile";
 
 async function fetchUserProfile() {
-  // IMPORTANT: replace with your real endpoint that returns user profile
-  // e.g. https://api.efmapp.co.uk/profile
-  const PROFILE_URL = "https://hwjx5fihi5.execute-api.eu-west-2.amazonaws.com/profile";
-
-  const token = await getAccessToken();
+  const token = localStorage.getItem("access_token");
   if (!token) return null;
 
   const res = await fetch(PROFILE_URL, {
@@ -21,18 +15,18 @@ async function fetchUserProfile() {
   return await res.json();
 }
 
-async function isAdminUser() {
+// Expose globally so admin pages can call it
+window.isAdminUser = async function isAdminUser() {
   const profile = await fetchUserProfile();
-  // Expecting something like { isAdmin: true } in the returned profile
-  return !!profile?.isAdmin;
-}
+  return (profile?.role || "").toLowerCase() === "admin";
+};
 
-async function setupAdminMenu() {
+window.setupAdminMenu = async function setupAdminMenu() {
   const adminMenu = document.getElementById("adminMenu");
   if (!adminMenu) return;
 
-  const admin = await isAdminUser();
-  if (admin) adminMenu.classList.remove("d-none");
-}
+  const isAdmin = await window.isAdminUser();
+  if (isAdmin) adminMenu.classList.remove("d-none");
+};
 
-document.addEventListener("DOMContentLoaded", setupAdminMenu);
+document.addEventListener("DOMContentLoaded", window.setupAdminMenu);

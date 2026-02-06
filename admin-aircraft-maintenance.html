@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin - Aircraft Maintenance</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+</head>
+
+<body class="bg-light">
+
+  <!-- your existing navbar here (with the adminMenu <li> added) -->
+
+  <div class="container py-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h1 class="h4 mb-0">Aircraft Maintenance (Admin)</h1>
+      <div id="saveStatus" class="small text-muted"></div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="row g-3 align-items-end">
+          <div class="col-12 col-md-4">
+            <label class="form-label" for="aircraft">Aircraft</label>
+            <select id="aircraft" class="form-select">
+              <option value="">Select...</option>
+              <option>G-AZWS</option>
+              <option>G-BPAF</option>
+              <option>G-EDGI</option>
+              <option>G-AVYL</option>
+              <option>G-BULL</option>
+              <!-- ideally load this list dynamically -->
+            </select>
+          </div>
+
+          <div class="col-12 col-md-8 text-md-end">
+            <button id="loadBtn" class="btn btn-outline-primary">Load</button>
+            <button id="saveBtn" class="btn btn-primary">Save</button>
+          </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="tachoNext">Tacho Hours to next service</label>
+            <input id="tachoNext" type="number" step="0.1" class="form-control" placeholder="e.g. 12.5">
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="flightHoursNext">Flight Hours to next service</label>
+            <input id="flightHoursNext" type="number" step="0.1" class="form-control" placeholder="e.g. 8.0">
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="arcDue">ARC Due Date</label>
+            <input id="arcDue" type="date" class="form-control">
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="insuranceDue">Insurance Due Date</label>
+            <input id="insuranceDue" type="date" class="form-control">
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="modWaiverDue">MOD Waiver Due Date</label>
+            <input id="modWaiverDue" type="date" class="form-control">
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="annualDue">Annual Due Date</label>
+            <input id="annualDue" type="date" class="form-control">
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="js/admin-guard.js"></script>
+  <script>
+    // Redirect if not admin
+    document.addEventListener("DOMContentLoaded", async () => {
+      const admin = await isAdminUser();
+      if (!admin) window.location.href = "index.html";
+    });
+
+    const API_BASE = "https://YOUR_API_DOMAIN"; // e.g. https://api.efmapp.co.uk
+    const statusEl = document.getElementById("saveStatus");
+
+    const el = (id) => document.getElementById(id);
+    const setStatus = (msg) => statusEl.textContent = msg || "";
+
+    async function authHeader() {
+      const token = localStorage.getItem("access_token");
+      return { Authorization: `Bearer ${token}` };
+    }
+
+    function fillForm(data) {
+      el("tachoNext").value = data?.tachoHoursToNextService ?? "";
+      el("flightHoursNext").value = data?.flightHoursToNextService ?? "";
+      el("arcDue").value = data?.arcDueDate ?? "";
+      el("insuranceDue").value = data?.insuranceDueDate ?? "";
+      el("modWaiverDue").value = data?.modWaiverDueDate ?? "";
+      el("annualDue").value = data?.annualDueDate ?? "";
+    }
+
+    function readForm() {
+      return {
+        tachoHoursToNextService: el("tachoNext").value === "" ? null : Number(el("tachoNext").value),
+        flightHoursToNextService: el("flightHoursNext").value === "" ? null : Number(el("flightHoursNext").value),
+        arcDueDate: el("arcDue").value || null,
+        insuranceDueDate: el("insuranceDue").value || null,
+        modWaiverDueDate: el("modWaiverDue").value || null,
+        annualDueDate: el("annualDue").value || null
+      };
+    }
+
+    async function loadAircraft() {
+      const aircraft = el("aircraft").value;
+      if (!aircraft) return alert("Select an aircraft first.");
+
+      setStatus("Loading...");
+      const res = await fetch(`${API_BASE}/admin/aircraft-maintenance?aircraft=${encodeURIComponent(aircraft)}`, {
+        method: "GET",
+        headers: { ...(await authHeader()) }
+      });
+
+      if (!res.ok) {
+        setStatus("");
+        return alert(`Load failed (${res.status})`);
+      }
+
+      const data = await res.json();
+      fillForm(data);
+      setStatus("Loaded.");
+      setTimeout(() => setStatus(""), 1500);
+    }
+
+    async function saveAircraft() {
+      const aircraft = el("aircraft").value;
+      if (!aircraft) return alert("Select an aircraft first.");
+
+      setStatus("Saving...");
+      const payload = { aircraft, ...readForm() };
+
+      const res = await fetch(`${API_BASE}/admin/aircraft-maintenance`, {
+        method: "PUT",
+        headers: {
+          ...(await authHeader()),
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        setStatus("");
+        const txt = await res.text().catch(() => "");
+        return alert(`Save failed (${res.status})\n${txt}`);
+      }
+
+      setStatus("Saved.");
+      setTimeout(() => setStatus(""), 1500);
+    }
+
+    el("loadBtn").addEventListener("click", loadAircraft);
+    el("saveBtn").addEventListener("click", saveAircraft);
+  </script>
+</body>
+</html>
