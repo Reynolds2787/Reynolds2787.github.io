@@ -104,7 +104,6 @@
 </div>
 
 
-
 <div class="container mt-2">
   <div class="alert alert-info py-2 mb-2">
     Active Flights - Auto-refreshing every <strong>30 seconds</strong>
@@ -142,30 +141,32 @@ document.addEventListener("DOMContentLoaded", () => {
 <script src="js/fetch-qnh.js"></script>
 
 <script>
-    fetch("/partials/navbar.html")
-      .then(res => {
-        if (!res.ok) throw new Error("Failed to load navbar.html");
-        return res.text();
-      })
-      .then(html => {
-        const mount = document.getElementById("navbar-placeholder");
-        if (!mount) return;
+  fetch("/partials/navbar.html")
+    .then(res => {
+      if (!res.ok) throw new Error("Failed to load navbar.html");
+      return res.text();
+    })
+    .then(async html => {
+      const mount = document.getElementById("navbar-placeholder");
+      if (!mount) return;
 
-        mount.innerHTML = html;
+      mount.innerHTML = html;
 
-        const currentPath = window.location.pathname.replace(/\/$/, "");
-        document.querySelectorAll(".nav-link").forEach(link => {
-          const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
-          if (linkPath === currentPath) {
-            link.classList.add("active");
-            link.setAttribute("aria-current", "page");
-          }
-        });
+      // Highlight current link
+      const currentPath = window.location.pathname.replace(/\/$/, "");
+      document.querySelectorAll(".nav-link").forEach(link => {
+        const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
+        if (linkPath === currentPath) {
+          link.classList.add("active");
+          link.setAttribute("aria-current", "page");
+        }
+      });
 
-        window.dispatchEvent(new Event("navbar:loaded"));
-      })
-      .catch(err => console.error(err));
-  </script>
+      // ✅ IMPORTANT: now that navbar exists, reveal Admin if applicable
+      if (window.setupAdminMenu) await window.setupAdminMenu();
+    })
+    .catch(err => console.error(err));
+</script>
 
  
 
