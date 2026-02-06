@@ -16,7 +16,7 @@ function renderPaymentSummary(data) {
   setPaymentField("aircraftHireCost", data?.aircraftHireCost);
   setPaymentField("landingFees", data?.landingFees);
   setPaymentField("instrucCost", data?.instructorCost);
-  setPaymentField("surcharge", data?.surcharge);
+  setPaymentField("surcharge", data?.surchargeFee);
   setPaymentField("lfcTotal", data?.lfcTotal);
 }
 
@@ -61,10 +61,9 @@ function buildPaymentPayload() {
   // Rescue Flight is a select "Yes"/"No"
   const rescueFlight = document.getElementById("rescueFlight")?.value === "Yes";
 
-  // no surcharge input yet; keep zero for now
-  const surcharge = 0;
 
-  return { aircraft, blockMinutes, instructional, landingCount, tachDiff, tempMember, surcharge, maintFlight, rescueFlight };
+
+  return { aircraft, blockMinutes, instructional, landingCount, tachDiff, tempMember, maintFlight, rescueFlight };
 }
 
 async function fetchPaymentSummary() {

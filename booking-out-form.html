@@ -46,12 +46,12 @@
 
         .form-control,
     .form-select {
-      background-color: #d1d1d8;
+      background-color: #e7e7eb;
     }
 
     .form-control:focus,
     .form-select:focus {
-      background-color: #c4c4c7;
+      background-color: #e0e0e4;
       box-shadow: 0 0 0 0.15rem rgba(13,110,253,.15);
     }
 
@@ -481,7 +481,7 @@
           // Redirect if returning to Kemble
           const toVal = (document.getElementById("to").value || "").trim().toLowerCase();
           if (toVal === "kemble") {
-            setTimeout(() => { window.location.href = "index.html"; }, 900);
+            setTimeout(() => { window.location.href = "pre-flight-checks.html"; }, 900);
             return;
           }
 
