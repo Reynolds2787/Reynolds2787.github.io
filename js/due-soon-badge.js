@@ -1,6 +1,6 @@
 const DUE_SOON_URL =
   "https://dssjr33iy8.execute-api.eu-west-2.amazonaws.com/admin/aircraft-maintenance/due-soon?limit=50";
-
+ 
 const DUE_WINDOW_DAYS = 30;
 
 function daysUntil(dateStr) {
