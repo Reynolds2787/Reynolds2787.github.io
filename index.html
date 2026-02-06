@@ -137,16 +137,10 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
- <script src="js/admin-guard.js"></script>
+<script src="js/admin-guard.js"></script>
 <script src="js/fetch-flight.js"></script>
 <script src="js/fetch-qnh.js"></script>
 <script src="js/due-soon-badge.js"></script>
-
-
-
-<script>
- window.addEventListener("navbar:loaded", updateDueSoonBadge);
-</script>
 
 <script>
   fetch("/partials/navbar.html")
@@ -159,16 +153,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!mount) return;
 
       mount.innerHTML = html;
-      window.dispatchEvent(new Event("navbar:loaded"));
-      
 
-      // ✅ Update username (navbar loads after DOMContentLoaded)
+      // update username
       const userEl = document.getElementById("loggedInUser");
-      if (userEl) {
-        userEl.textContent = localStorage.getItem("username") || "User";
-      }
+      if (userEl) userEl.textContent = localStorage.getItem("username") || "User";
 
-      // Highlight current link
+      // highlight current link
       const currentPath = window.location.pathname.replace(/\/$/, "");
       document.querySelectorAll(".nav-link").forEach(link => {
         const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
@@ -178,12 +168,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      // Reveal Admin if applicable
+      // reveal Admin first
       if (window.setupAdminMenu) await window.setupAdminMenu();
+
+      // notify other scripts that navbar exists + admin visibility settled
+      window.dispatchEvent(new Event("navbar:loaded"));
     })
     .catch(err => console.error(err));
-
 </script>
+
+
+
+
+
 
 </body>
 </html>
