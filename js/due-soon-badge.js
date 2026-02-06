@@ -120,3 +120,18 @@ window.addEventListener("navbar:loaded", updateDueSoonBadge);
 
 // Optional: refresh every 5 minutes while page is open
 setInterval(updateDueSoonBadge, 5 * 60 * 1000);
+
+
+function wireBadgeClick() {
+  const badge = document.getElementById("dueSoonBadge");
+  if (!badge) return;
+
+  badge.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation(); // prevents dropdown toggle
+    window.location.href = badge.getAttribute("href") || "admin-due-soon.html";
+  });
+}
+
+window.addEventListener("navbar:loaded", wireBadgeClick);
+document.addEventListener("DOMContentLoaded", wireBadgeClick);
