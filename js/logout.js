@@ -22,3 +22,11 @@ document.addEventListener("click", (e) => {
     window.location.href = logoutUrl;
   });
 
+
+  window.updateNavbarUser = function () {
+  const userEl = document.getElementById("loggedInUser");
+  if (userEl) userEl.textContent = localStorage.getItem("username") || "User";
+};
+
+document.addEventListener("DOMContentLoaded", window.updateNavbarUser);
+

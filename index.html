@@ -152,6 +152,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       mount.innerHTML = html;
 
+      // ✅ Update username (navbar loads after DOMContentLoaded)
+      const userEl = document.getElementById("loggedInUser");
+      if (userEl) {
+        userEl.textContent = localStorage.getItem("username") || "User";
+      }
+
       // Highlight current link
       const currentPath = window.location.pathname.replace(/\/$/, "");
       document.querySelectorAll(".nav-link").forEach(link => {
@@ -162,12 +168,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      // ✅ IMPORTANT: now that navbar exists, reveal Admin if applicable
+      // Reveal Admin if applicable
       if (window.setupAdminMenu) await window.setupAdminMenu();
     })
     .catch(err => console.error(err));
 </script>
-
 
 </body>
 </html>
