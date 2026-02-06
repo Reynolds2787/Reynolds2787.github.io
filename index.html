@@ -175,6 +175,11 @@ document.addEventListener("DOMContentLoaded", () => {
       window.dispatchEvent(new Event("navbar:loaded"));
     })
     .catch(err => console.error(err));
+
+    // enable tooltips in injected navbar
+      document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+        new bootstrap.Tooltip(el);
+      });
 </script>
 
 
