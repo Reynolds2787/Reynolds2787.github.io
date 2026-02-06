@@ -122,14 +122,23 @@ window.addEventListener("navbar:loaded", updateDueSoonBadge);
 setInterval(updateDueSoonBadge, 5 * 60 * 1000);
 
 
+
 function wireBadgeClick() {
   const badge = document.getElementById("dueSoonBadge");
   if (!badge) return;
 
   badge.addEventListener("click", (e) => {
     e.preventDefault();
-    e.stopPropagation(); // prevents dropdown toggle
-    window.location.href = badge.getAttribute("href") || "admin-due-soon.html";
+    e.stopPropagation(); // don’t toggle dropdown
+    window.location.href = "admin-due-soon.html";
+  });
+
+  badge.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      e.stopPropagation();
+      window.location.href = "admin-due-soon.html";
+    }
   });
 }
 
