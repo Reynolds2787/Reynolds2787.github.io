@@ -151,6 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!mount) return;
 
       mount.innerHTML = html;
+      window.dispatchEvent(new Event("navbar:loaded"));
 
       // ✅ Update username (navbar loads after DOMContentLoaded)
       const userEl = document.getElementById("loggedInUser");
@@ -172,6 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (window.setupAdminMenu) await window.setupAdminMenu();
     })
     .catch(err => console.error(err));
+
 </script>
 
 </body>

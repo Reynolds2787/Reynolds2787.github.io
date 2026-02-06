@@ -1,9 +1,18 @@
-// /js/admin-guard.js
-
 const PROFILE_URL = "https://hwjx5fihi5.execute-api.eu-west-2.amazonaws.com/profile";
 
+// Wait for access_token to appear (auth.js may still be finishing)
+async function waitForToken(maxMs = 2500) {
+  const start = Date.now();
+  while (Date.now() - start < maxMs) {
+    const t = localStorage.getItem("access_token");
+    if (t) return t;
+    await new Promise(r => setTimeout(r, 100));
+  }
+  return null;
+}
+
 async function fetchUserProfile() {
-  const token = localStorage.getItem("access_token");
+  const token = await waitForToken();
   if (!token) return null;
 
   const res = await fetch(PROFILE_URL, {
@@ -15,18 +24,28 @@ async function fetchUserProfile() {
   return await res.json();
 }
 
-// Expose globally so admin pages can call it
-window.isAdminUser = async function isAdminUser() {
+window.isAdminUser = async function () {
   const profile = await fetchUserProfile();
   return (profile?.role || "").toLowerCase() === "admin";
 };
 
-window.setupAdminMenu = async function setupAdminMenu() {
+window.setupAdminMenu = async function () {
   const adminMenu = document.getElementById("adminMenu");
   if (!adminMenu) return;
 
-  const isAdmin = await window.isAdminUser();
-  if (isAdmin) adminMenu.classList.remove("d-none");
+  // retry a couple times in case profile endpoint is temporarily 401 while auth settles
+  for (let i = 0; i < 3; i++) {
+    const ok = await window.isAdminUser();
+    if (ok) {
+      adminMenu.classList.remove("d-none");
+      return;
+    }
+    await new Promise(r => setTimeout(r, 250));
+  }
 };
 
+// Run on normal load
 document.addEventListener("DOMContentLoaded", window.setupAdminMenu);
+
+// Also run when navbar is injected
+window.addEventListener("navbar:loaded", window.setupAdminMenu);
