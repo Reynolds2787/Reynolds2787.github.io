@@ -11,6 +11,13 @@
 
 <body class="bg-light">
 
+<div class="container-fluid p-2 bg-primary text-white text-center">
+  <h2>Aircraft Maintenance</h2>
+</div>
+
+<div id="navbar-placeholder"></div>
+
+
   <!-- your existing navbar here (with the adminMenu <li> added) -->
 
   <div class="container py-4">
@@ -168,5 +175,35 @@
     el("loadBtn").addEventListener("click", loadAircraft);
     el("saveBtn").addEventListener("click", saveAircraft);
   </script>
+
+
+<script>
+  fetch("/partials/navbar.html")
+    .then(res => {
+      if (!res.ok) throw new Error("Failed to load navbar.html");
+      return res.text();
+    })
+    .then(async html => {
+      const mount = document.getElementById("navbar-placeholder");
+      if (!mount) return;
+
+      mount.innerHTML = html;
+
+      // Highlight current link
+      const currentPath = window.location.pathname.replace(/\/$/, "");
+      document.querySelectorAll(".nav-link").forEach(link => {
+        const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
+        if (linkPath === currentPath) {
+          link.classList.add("active");
+          link.setAttribute("aria-current", "page");
+        }
+      });
+
+      // ✅ IMPORTANT: now that navbar exists, reveal Admin if applicable
+      if (window.setupAdminMenu) await window.setupAdminMenu();
+    })
+    .catch(err => console.error(err));
+</script>
+
 </body>
 </html>
