@@ -32,7 +32,8 @@
         <li class="nav-item dropdown d-none" id="adminMenu">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Admin
-            <span id="dueSoonBadge" class="badge rounded-pill ms-1 d-none">0</span>
+            <span id="dueSoonBadge" class="badge rounded-pill ms-1 d-none" data-bs-toggle="tooltip"
+              data-bs-placement="bottom" title="Maintenance due soon">0</span>
           </a>
 
           <ul class="dropdown-menu">
@@ -44,21 +45,22 @@
           </ul>
         </li>
 
-      </ul>
-
-      <!-- Right nav -->
-      <ul class="navbar-nav">
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#" role="button" data-bs-toggle="dropdown">
-            👤 <span id="loggedInUser">User</span>
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="profile.html">Profile</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><button class="dropdown-item text-danger" id="logoutBtn">Logout</button></li>
-          </ul>
-        </li>
-      </ul>
+        <!-- Right nav -->
+        <ul class="navbar-nav">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#" role="button"
+              data-bs-toggle="dropdown">
+              👤 <span id="loggedInUser">User</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="profile.html">Profile</a></li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li><button class="dropdown-item text-danger" id="logoutBtn">Logout</button></li>
+            </ul>
+          </li>
+        </ul>
 
     </div>
   </div>
