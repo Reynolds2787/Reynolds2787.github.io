@@ -1,133 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <title>Admin - Due Soon</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+  <meta charset="UTF-8" />
+  <title>Admin - Due Soon</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 </head>
 
 <body class="bg-light">
-    <div id="navbar-placeholder"></div>
+  <div id="navbar-placeholder"></div>
 
-    <div class="container py-4">
-        <div class="d-flex align-items-center justify-content-between mb-3">
-            <h1 class="h4 mb-0">Maintenance Due Soon</h1>
-            <div class="d-flex gap-2 align-items-center">
-                <select id="windowDays" class="form-select form-select-sm" style="width: 140px;">
-                    <option value="7">Next 7 days</option>
-                    <option value="30" selected>Next 30 days</option>
-                    <option value="60">Next 60 days</option>
-                    <option value="90">Next 90 days</option>
-                </select>
-                <button id="refreshBtn" class="btn btn-sm btn-outline-primary">Refresh</button>
-            </div>
-        </div>
-
-        <div id="status" class="small text-muted mb-2"></div>
-
-        <div class="card shadow-sm">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0 align-middle">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Aircraft</th>
-                                <th>Next Due</th>
-                                <th>Type</th>
-                                <th class="text-end">Days</th>
-                                <th class="text-end">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="rows">
-                            <tr>
-                                <td colspan="5" class="p-3">Loading…</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <div class="mt-3">
-            <a class="btn btn-sm btn-primary" href="admin-aircraft-maintenance.html">Go to Maintenance Editor</a>
-        </div>
+  <div class="container py-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h1 class="h4 mb-0">Maintenance Due Soon</h1>
+      <div class="d-flex gap-2 align-items-center">
+        <select id="windowDays" class="form-select form-select-sm" style="width: 140px;">
+          <option value="7">Next 7 days</option>
+          <option value="30" selected>Next 30 days</option>
+          <option value="60">Next 60 days</option>
+          <option value="90">Next 90 days</option>
+        </select>
+        <button id="refreshBtn" class="btn btn-sm btn-outline-primary">Refresh</button>
+      </div>
     </div>
 
-    <script src="js/auth.js"></script>
-    <script src="js/logout.js"></script>
-    <script src="js/admin-guard.js"></script>
-    <script src="js/due-soon-badge.js"></script>
+    <div id="status" class="small text-muted mb-2"></div>
 
-    <script>
+    <div class="card shadow-sm">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0 align-middle">
+            <thead class="table-dark">
+              <tr>
+                <th>Aircraft</th>
+                <th>Next Due</th>
+                <th>Type</th>
+                <th class="text-end">Days</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody id="rows">
+              <tr><td colspan="5" class="p-3">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
-    
+    <div class="mt-3">
+      <a class="btn btn-sm btn-primary" href="admin-aircraft-maintenance.html">Go to Maintenance Editor</a>
+    </div>
+  </div>
 
-        function daysUntil(dateStr) {
-            if (!dateStr || typeof dateStr !== "string") return null;
-            const d = new Date(dateStr + "T00:00:00Z");
-            if (Number.isNaN(d.getTime())) return null;
-            const now = new Date();
-            return Math.floor((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-        }
+  <script src="js/auth.js"></script>
+  <script src="js/logout.js"></script>
+  <script src="js/admin-guard.js"></script>
+  <script src="js/due-soon-badge.js"></script>
 
-        async function waitForToken(maxMs = 2500) {
-            const start = Date.now();
-            while (Date.now() - start < maxMs) {
-                const t = localStorage.getItem("access_token");
-                if (t) return t;
-                await new Promise(r => setTimeout(r, 100));
-            }
-            return null;
-        }
+  <script>
+    function daysUntil(dateStr) {
+      if (!dateStr || typeof dateStr !== "string") return null;
+      const d = new Date(dateStr + "T00:00:00Z");
+      if (Number.isNaN(d.getTime())) return null;
+      const now = new Date();
+      return Math.floor((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    }
 
-        async function fetchDueSoon() {
-            const token = await waitForToken();
-            if (!token) throw new Error("No access token");
+    function badgeClass(days) {
+      if (days === null) return "bg-secondary";
+      if (days <= 0) return "bg-danger";
+      if (days <= 7) return "bg-danger";
+      if (days <= 30) return "bg-warning text-dark";
+      return "bg-success";
+    }
 
-            if (!window.DUE_SOON_URL) {
-                throw new Error("DUE_SOON_URL not defined");
-            }
+    async function waitForToken(maxMs = 2500) {
+      const start = Date.now();
+      while (Date.now() - start < maxMs) {
+        const t = localStorage.getItem("access_token");
+        if (t) return t;
+        await new Promise(r => setTimeout(r, 100));
+      }
+      return null;
+    }
 
-            const res = await fetch(window.DUE_SOON_URL, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+    async function fetchDueSoon() {
+      const token = await waitForToken();
+      if (!token) throw new Error("No access token");
 
-            if (!res.ok) throw new Error(`Due-soon request failed (${res.status})`);
-            return await res.json();
-        }
+      if (!window.DUE_SOON_URL) throw new Error("DUE_SOON_URL not defined");
 
-        function actionLink(aircraft) {
-            // If you want deep-linking later, add ?aircraft=... to your maintenance editor
-            return `<a class="btn btn-sm btn-outline-primary" href="admin-aircraft-maintenance.html">Edit</a>`;
-        }
+      const res = await fetch(window.DUE_SOON_URL, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
-        async function render() {
-            const rows = document.getElementById("rows");
-            const status = document.getElementById("status");
-            const windowDays = Number(document.getElementById("windowDays").value);
+      if (!res.ok) throw new Error(`Due-soon request failed (${res.status})`);
+      return await res.json(); // { items: [...] }
+    }
 
-            rows.innerHTML = `<tr><td colspan="5" class="p-3">Loading…</td></tr>`;
-            status.textContent = "Fetching due-soon list…";
+    function actionLink(aircraft) {
+      // Optional: deep-link later as admin-aircraft-maintenance.html?aircraft=G-AZWS
+      return `<a class="btn btn-sm btn-outline-primary" href="admin-aircraft-maintenance.html">Edit</a>`;
+    }
 
-            const data = await fetchDueSoon();
-            const items = (data.items || [])
-                .map(it => ({ ...it, days: daysUntil(it.nextDueDate) }))
-                .filter(it => it.days !== null && it.days <= windowDays)
-                .sort((a, b) => a.days - b.days);
+    async function render() {
+      const rows = document.getElementById("rows");
+      const status = document.getElementById("status");
+      const windowDays = Number(document.getElementById("windowDays").value);
 
-            if (items.length === 0) {
-                rows.innerHTML = `<tr><td colspan="5" class="p-3">Nothing due within ${windowDays} days 🎉</td></tr>`;
-                status.textContent = "";
-                return;
-            }
+      rows.innerHTML = `<tr><td colspan="5" class="p-3">Loading…</td></tr>`;
+      status.textContent = "Fetching due-soon list…";
 
-            status.textContent = `${items.length} aircraft due within ${windowDays} days.`;
+      const data = await fetchDueSoon();
+      const items = (data.items || [])
+        .map(it => ({ ...it, days: daysUntil(it.nextDueDate) }))
+        .filter(it => it.days !== null && it.days <= windowDays)
+        .sort((a, b) => a.days - b.days);
 
-            rows.innerHTML = items.map(it => `
+      if (items.length === 0) {
+        rows.innerHTML = `<tr><td colspan="5" class="p-3">Nothing due within ${windowDays} days 🎉</td></tr>`;
+        status.textContent = "";
+        return;
+      }
+
+      status.textContent = `${items.length} aircraft due within ${windowDays} days.`;
+
+      rows.innerHTML = items.map(it => `
         <tr>
           <td class="fw-semibold">${it.aircraft || "—"}</td>
           <td>${it.nextDueDate || "—"}</td>
@@ -136,44 +136,51 @@
           <td class="text-end">${actionLink(it.aircraft)}</td>
         </tr>
       `).join("");
-        }
+    }
 
-        // Navbar loader (same pattern as your other pages)
-        fetch("/partials/navbar.html")
-            .then(r => r.text())
-            .then(async html => {
-                document.getElementById("navbar-placeholder").innerHTML = html;
+    // Navbar loader (same pattern as your other pages)
+    fetch("/partials/navbar.html")
+      .then(r => {
+        if (!r.ok) throw new Error("Failed to load navbar.html");
+        return r.text();
+      })
+      .then(async html => {
+        const mount = document.getElementById("navbar-placeholder");
+        if (!mount) return;
 
-                // username
-                const userEl = document.getElementById("loggedInUser");
-                if (userEl) userEl.textContent = localStorage.getItem("username") || "User";
+        mount.innerHTML = html;
 
-                // admin menu + badge
-                if (window.setupAdminMenu) await window.setupAdminMenu();
-                window.dispatchEvent(new Event("navbar:loaded"));
+        // username
+        const userEl = document.getElementById("loggedInUser");
+        if (userEl) userEl.textContent = localStorage.getItem("username") || "User";
 
-                // tooltips in injected navbar
-                document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
-                    new bootstrap.Tooltip(el);
-                });
-            });
+        // admin menu + badge
+        if (window.setupAdminMenu) await window.setupAdminMenu();
 
-        // Guard page
-        document.addEventListener("DOMContentLoaded", async () => {
-            const ok = await window.isAdminUser?.();
-            if (!ok) window.location.href = "index.html";
+        // enable tooltips in injected navbar
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+          new bootstrap.Tooltip(el);
         });
 
-        document.getElementById("refreshBtn").addEventListener("click", () => render());
-        document.getElementById("windowDays").addEventListener("change", () => render());
+        // notify other scripts that navbar exists + admin visibility settled
+        window.dispatchEvent(new Event("navbar:loaded"));
+      })
+      .catch(err => console.error(err));
 
-        // Initial render
-        render().catch(err => {
-            console.error(err);
-            document.getElementById("rows").innerHTML =
-                `<tr><td colspan="5" class="p-3 text-danger">Failed to load due-soon list.</td></tr>`;
-        });
-    </script>
+    // Guard page (redirect non-admins)
+    document.addEventListener("DOMContentLoaded", async () => {
+      const ok = await window.isAdminUser?.();
+      if (!ok) window.location.href = "index.html";
+    });
+
+    document.getElementById("refreshBtn").addEventListener("click", () => render());
+    document.getElementById("windowDays").addEventListener("change", () => render());
+
+    render().catch(err => {
+      console.error(err);
+      document.getElementById("rows").innerHTML =
+        `<tr><td colspan="5" class="p-3 text-danger">Failed to load due-soon list.</td></tr>`;
+    });
+  </script>
 </body>
-
 </html>
