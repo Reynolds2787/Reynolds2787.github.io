@@ -75,6 +75,7 @@
 <div id="navbar-placeholder"></div>
 
 
+
 <div class="container mt-3 pb-3">
   <h2>Quick Access Bar</h2>
   <a href="booking-out-form.html" class="btn btn-success">Book Out</a>
@@ -141,6 +142,12 @@ document.addEventListener("DOMContentLoaded", () => {
 <script src="js/fetch-qnh.js"></script>
 <script src="js/due-soon-badge.js"></script>
 
+
+
+<script>
+ window.addEventListener("navbar:loaded", updateDueSoonBadge);
+</script>
+
 <script>
   fetch("/partials/navbar.html")
     .then(res => {
@@ -153,6 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       mount.innerHTML = html;
       window.dispatchEvent(new Event("navbar:loaded"));
+      
 
       // ✅ Update username (navbar loads after DOMContentLoaded)
       const userEl = document.getElementById("loggedInUser");
