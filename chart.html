@@ -143,5 +143,16 @@ new Chart(document.getElementById("cumulativeHours"), {
 });
 </script>
 
+<script src="js/admin-guard.js"></script>
+
+<script src="js/admin-guard.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    // uses isAdminUser() from admin-guard.js
+    const admin = await isAdminUser();
+    if (!admin) window.location.href = "index.html"; // or a "not-authorized.html"
+  });
+</script>
+
 </body>
 </html>
