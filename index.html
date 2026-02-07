@@ -143,44 +143,52 @@ document.addEventListener("DOMContentLoaded", () => {
 <script src="js/due-soon-badge.js"></script>
 
 <script>
-  fetch("/partials/navbar.html")
-    .then(res => {
-      if (!res.ok) throw new Error("Failed to load navbar.html");
-      return res.text();
-    })
-    .then(async html => {
-      const mount = document.getElementById("navbar-placeholder");
-      if (!mount) return;
+ // Navbar loader (same pattern as your other pages)
+    fetch("/partials/navbar.html")
+      .then(r => {
+        if (!r.ok) throw new Error("Failed to load navbar.html");
+        return r.text();
+      })
+      .then(async html => {
+        const mount = document.getElementById("navbar-placeholder");
+        if (!mount) return;
 
-      mount.innerHTML = html;
+        mount.innerHTML = html;
 
-      // highlight current link
-      const currentPath = window.location.pathname.replace(/\/$/, "");
-      document.querySelectorAll(".nav-link").forEach(link => {
-        const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
-        if (linkPath === currentPath) {
-          link.classList.add("active");
-          link.setAttribute("aria-current", "page");
-        }
-      });
+        // username
+        const userEl = document.getElementById("loggedInUser");
+        if (userEl) userEl.textContent = localStorage.getItem("username") || "User";
 
-      // 1) tell auth.js the navbar exists (it can refresh id_token + render username)
-      window.dispatchEvent(new Event("navbar:loaded"));
+        // admin menu + badge
+        if (window.setupAdminMenu) await window.setupAdminMenu();
 
-      // 2) now that auth.js has had a chance to refresh, set up admin menu visibility
-      if (window.setupAdminMenu) await window.setupAdminMenu();
+        // enable tooltips in injected navbar
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+          new bootstrap.Tooltip(el);
+        });
 
-      // 3) enable tooltips (now that navbar DOM exists)
-      document
-        .querySelectorAll('[data-bs-toggle="tooltip"]')
-        .forEach(el => new bootstrap.Tooltip(el));
-    })
-    .catch(err => console.error(err));
+        // notify other scripts that navbar exists + admin visibility settled
+        window.dispatchEvent(new Event("navbar:loaded"));
+      })
+      .catch(err => console.error(err));
+
+    // Guard page (redirect non-admins)
+    document.addEventListener("DOMContentLoaded", async () => {
+      const ok = await window.isAdminUser?.();
+      if (!ok) window.location.href = "index.html";
+    });
+
+    document.getElementById("refreshBtn").addEventListener("click", () => render());
+    document.getElementById("windowDays").addEventListener("change", () => render());
+
+    render().catch(err => {
+      console.error(err);
+      document.getElementById("rows").innerHTML =
+        `<tr><td colspan="5" class="p-3 text-danger">Failed to load due-soon list.</td></tr>`;
+    });
+  </script>
+
 </script>
-
-
-
-
 
 
 
