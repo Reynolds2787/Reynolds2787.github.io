@@ -154,10 +154,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       mount.innerHTML = html;
 
-      // update username
-      const userEl = document.getElementById("loggedInUser");
-      if (userEl) userEl.textContent = localStorage.getItem("username") || "User";
-
       // highlight current link
       const currentPath = window.location.pathname.replace(/\/$/, "");
       document.querySelectorAll(".nav-link").forEach(link => {
@@ -168,23 +164,20 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      // reveal Admin first
+      // 1) tell auth.js the navbar exists (it can refresh id_token + render username)
+      window.dispatchEvent(new Event("navbar:loaded"));
+
+      // 2) now that auth.js has had a chance to refresh, set up admin menu visibility
       if (window.setupAdminMenu) await window.setupAdminMenu();
 
-      // notify other scripts that navbar exists + admin visibility settled
-      window.dispatchEvent(new Event("navbar:loaded"));
+      // 3) enable tooltips (now that navbar DOM exists)
+      document
+        .querySelectorAll('[data-bs-toggle="tooltip"]')
+        .forEach(el => new bootstrap.Tooltip(el));
     })
     .catch(err => console.error(err));
-
-    // enable tooltips in injected navbar
-      document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
-        new bootstrap.Tooltip(el);
-      });
-
-      document
-          .querySelectorAll('[data-bs-toggle="tooltip"]')
-          .forEach(el => new bootstrap.Tooltip(el));
 </script>
+
 
 
 

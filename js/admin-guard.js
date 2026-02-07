@@ -1,26 +1,23 @@
 const PROFILE_URL = "https://hwjx5fihi5.execute-api.eu-west-2.amazonaws.com/profile";
 
-// Wait for access_token to appear (auth.js may still be finishing)
-async function waitForToken(maxMs = 2500) {
+// Wait for authFetch to exist (auth.js may still be loading)
+async function waitForAuthFetch(maxMs = 2500) {
   const start = Date.now();
   while (Date.now() - start < maxMs) {
-    const t = localStorage.getItem("access_token");
-    if (t) return t;
-    await new Promise(r => setTimeout(r, 100));
+    if (typeof window.authFetch === "function") return true;
+    await new Promise(r => setTimeout(r, 50));
   }
-  return null;
+  return false;
 }
 
 async function fetchUserProfile() {
-  const token = await waitForToken();
-  if (!token) return null;
+  // Ensure auth.js is ready so we get refresh-on-expiry behaviour
+  const ok = await waitForAuthFetch();
+  if (!ok) return null;
 
-  const res = await fetch(PROFILE_URL, {
-    method: "GET",
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  const res = await window.authFetch(PROFILE_URL, { method: "GET" });
+  if (!res || !res.ok) return null;
 
-  if (!res.ok) return null;
   return await res.json();
 }
 
@@ -33,7 +30,10 @@ window.setupAdminMenu = async function () {
   const adminMenu = document.getElementById("adminMenu");
   if (!adminMenu) return;
 
-  // retry a couple times in case profile endpoint is temporarily 401 while auth settles
+  // Default hidden until confirmed admin (prevents flashing)
+  adminMenu.classList.add("d-none");
+
+  // Retry a couple times while auth/nav settles
   for (let i = 0; i < 3; i++) {
     const ok = await window.isAdminUser();
     if (ok) {
