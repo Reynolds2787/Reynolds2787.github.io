@@ -178,37 +178,50 @@
 
 
 <script>
-  fetch("/partials/navbar.html")
-    .then(res => {
-      if (!res.ok) throw new Error("Failed to load navbar.html");
-      return res.text();
-    })
-    .then(async html => {
-      const mount = document.getElementById("navbar-placeholder");
-      if (!mount) return;
+ // Navbar loader (same pattern as your other pages)
+    fetch("/partials/navbar.html")
+      .then(r => {
+        if (!r.ok) throw new Error("Failed to load navbar.html");
+        return r.text();
+      })
+      .then(async html => {
+        const mount = document.getElementById("navbar-placeholder");
+        if (!mount) return;
 
-      mount.innerHTML = html;
+        mount.innerHTML = html;
 
-      // ✅ Update username (navbar loads after DOMContentLoaded)
-      const userEl = document.getElementById("loggedInUser");
-      if (userEl) {
-        userEl.textContent = localStorage.getItem("username") || "User";
-      }
+        // username
+        const userEl = document.getElementById("loggedInUser");
+        if (userEl) userEl.textContent = localStorage.getItem("username") || "User";
 
-      // Highlight current link
-      const currentPath = window.location.pathname.replace(/\/$/, "");
-      document.querySelectorAll(".nav-link").forEach(link => {
-        const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
-        if (linkPath === currentPath) {
-          link.classList.add("active");
-          link.setAttribute("aria-current", "page");
-        }
-      });
+        // admin menu + badge
+        if (window.setupAdminMenu) await window.setupAdminMenu();
 
-      // Reveal Admin if applicable
-      if (window.setupAdminMenu) await window.setupAdminMenu();
-    })
-    .catch(err => console.error(err));
+        // enable tooltips in injected navbar
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+          new bootstrap.Tooltip(el);
+        });
+
+        // notify other scripts that navbar exists + admin visibility settled
+        window.dispatchEvent(new Event("navbar:loaded"));
+      })
+      .catch(err => console.error(err));
+
+    // Guard page (redirect non-admins)
+    document.addEventListener("DOMContentLoaded", async () => {
+      const ok = await window.isAdminUser?.();
+      if (!ok) window.location.href = "index.html";
+    });
+
+    document.getElementById("refreshBtn").addEventListener("click", () => render());
+    document.getElementById("windowDays").addEventListener("change", () => render());
+
+    render().catch(err => {
+      console.error(err);
+      document.getElementById("rows").innerHTML =
+        `<tr><td colspan="5" class="p-3 text-danger">Failed to load due-soon list.</td></tr>`;
+    });
+  </script>
 
 </script>
 
