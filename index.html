@@ -53,9 +53,12 @@
   }
 </style>
 
-<script src="js/auth.js"></script>
-<script src="js/logout.js"></script>
-
+<script src="js/auth.js" defer></script>
+<script src="js/logout.js" defer></script>
+<script src="js/admin-guard.js" defer></script>
+<script src="js/due-soon-badge.js" defer></script>
+<script src="js/fetch-flight.js" defer></script>
+<script src="js/fetch-qnh.js" defer></script>
 
 
 </head>
@@ -88,7 +91,7 @@
     <div class="d-flex justify-content-center align-items-center gap-2"
          id="qnhDisplay"
          data-bs-toggle="tooltip"
-         data-bs-placement="bvottom"
+         data-bs-placement="bottom"
          title="Loading METAR…"
          style="cursor: default;">
 
@@ -126,69 +129,46 @@
 </div>
 
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".nav-link").forEach(link => {
-    if (link.href === window.location.href) {
-      link.classList.add("active");
-      link.setAttribute("aria-current", "page");
-    }
-  });
-});
-</script>
-
 <script src="js/admin-guard.js"></script>
 <script src="js/due-soon-badge.js"></script>
-<script src="js/fetch-flight.js"></script>
-<script src="js/fetch-qnh.js"></script>
-
 
 <script>
- // Navbar loader (same pattern as your other pages)
-    fetch("/partials/navbar.html")
-      .then(r => {
-        if (!r.ok) throw new Error("Failed to load navbar.html");
-        return r.text();
-      })
-      .then(async html => {
-        const mount = document.getElementById("navbar-placeholder");
-        if (!mount) return;
+  fetch("/partials/navbar.html")
+    .then(r => {
+      if (!r.ok) throw new Error("Failed to load navbar.html");
+      return r.text();
+    })
+    .then(async html => {
+      const mount = document.getElementById("navbar-placeholder");
+      if (!mount) return;
 
-        mount.innerHTML = html;
+      mount.innerHTML = html;
 
-        // username
-        const userEl = document.getElementById("loggedInUser");
-        if (userEl) userEl.textContent = localStorage.getItem("username") || "User";
+      // username
+      const userEl = document.getElementById("loggedInUser");
+      if (userEl) userEl.textContent = localStorage.getItem("username") || "User";
 
-        // admin menu + badge
-        if (window.setupAdminMenu) await window.setupAdminMenu();
+      // highlight current link (NOW the links exist)
+      const currentPath = window.location.pathname.replace(/\/$/, "");
+      document.querySelectorAll(".nav-link").forEach(link => {
+        const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
+        if (linkPath === currentPath) {
+          link.classList.add("active");
+          link.setAttribute("aria-current", "page");
+        }
+      });
 
-        // enable tooltips in injected navbar
-        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
-          new bootstrap.Tooltip(el);
-        });
+      // admin menu visibility
+      if (window.setupAdminMenu) await window.setupAdminMenu();
 
-        // notify other scripts that navbar exists + admin visibility settled
-        window.dispatchEvent(new Event("navbar:loaded"));
-      })
-      .catch(err => console.error(err));
+      // enable tooltips in injected navbar
+      document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+        new bootstrap.Tooltip(el);
+      });
 
-    // Guard page (redirect non-admins)
-    document.addEventListener("DOMContentLoaded", async () => {
-      const ok = await window.isAdminUser?.();
-      if (!ok) window.location.href = "index.html";
-    });
-
-    document.getElementById("refreshBtn").addEventListener("click", () => render());
-    document.getElementById("windowDays").addEventListener("change", () => render());
-
-    render().catch(err => {
-      console.error(err);
-      document.getElementById("rows").innerHTML =
-        `<tr><td colspan="5" class="p-3 text-danger">Failed to load due-soon list.</td></tr>`;
-    });
-  </script>
-
+      window.dispatchEvent(new Event("navbar:loaded"));
+    })
+    .catch(console.error);
 </script>
 
 

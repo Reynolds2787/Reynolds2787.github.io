@@ -82,6 +82,8 @@ function paintBadge(count, worstDays) {
   }
 }
 
+
+
 async function updateDueSoonBadge() {
   // Only show badge if Admin menu exists AND is visible
   const adminMenu = document.getElementById("adminMenu");
@@ -143,3 +145,5 @@ function wireBadgeClick() {
 
 window.addEventListener("navbar:loaded", wireBadgeClick);
 document.addEventListener("DOMContentLoaded", wireBadgeClick);
+
+
