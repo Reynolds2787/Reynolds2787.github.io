@@ -11,14 +11,11 @@
 
 <body class="bg-light">
 
-<div class="container-fluid p-2 bg-primary text-white text-center">
-  <h2>Aircraft Maintenance</h2>
-</div>
+  <div class="container-fluid p-2 bg-primary text-white text-center">
+    <h2>Aircraft Maintenance</h2>
+  </div>
 
-<div id="navbar-placeholder"></div>
-
-
-  <!-- your existing navbar here (with the adminMenu <li> added) -->
+  <div id="navbar-placeholder"></div>
 
   <div class="container py-4">
     <div class="d-flex align-items-center justify-content-between mb-3">
@@ -38,7 +35,6 @@
               <option>G-EDGI</option>
               <option>G-AVYL</option>
               <option>G-BULL</option>
-              <!-- ideally load this list dynamically -->
             </select>
           </div>
 
@@ -87,23 +83,24 @@
   </div>
 
   <script src="js/admin-guard.js"></script>
+
   <script>
-    // Redirect if not admin
-    document.addEventListener("DOMContentLoaded", async () => {
-      const admin = await isAdminUser();
-      if (!admin) window.location.href = "index.html";
-    });
-
-    const API_BASE = "https://dssjr33iy8.execute-api.eu-west-2.amazonaws.com"; // e.g. https://api.efmapp.co.uk
-    const statusEl = document.getElementById("saveStatus");
-
+    const API_BASE = "https://dssjr33iy8.execute-api.eu-west-2.amazonaws.com";
     const el = (id) => document.getElementById(id);
-    const setStatus = (msg) => statusEl.textContent = msg || "";
+
+    const statusEl = el("saveStatus");
+    const setStatus = (msg) => { if (statusEl) statusEl.textContent = msg || ""; };
 
     async function authHeader() {
       const token = localStorage.getItem("access_token");
       return { Authorization: `Bearer ${token}` };
     }
+
+    // Guard page (redirect non-admins)
+    document.addEventListener("DOMContentLoaded", async () => {
+      const ok = await window.isAdminUser?.();
+      if (!ok) window.location.href = "index.html";
+    });
 
     function fillForm(data) {
       el("tachoNext").value = data?.tachoHoursToNextService ?? "";
@@ -176,9 +173,8 @@
     el("saveBtn").addEventListener("click", saveAircraft);
   </script>
 
-
-<script>
- // Navbar loader (same pattern as your other pages)
+  <script>
+    // Navbar loader
     fetch("/partials/navbar.html")
       .then(r => {
         if (!r.ok) throw new Error("Failed to load navbar.html");
@@ -194,7 +190,7 @@
         const userEl = document.getElementById("loggedInUser");
         if (userEl) userEl.textContent = localStorage.getItem("username") || "User";
 
-        // admin menu + badge
+        // admin menu visibility
         if (window.setupAdminMenu) await window.setupAdminMenu();
 
         // enable tooltips in injected navbar
@@ -202,28 +198,10 @@
           new bootstrap.Tooltip(el);
         });
 
-        // notify other scripts that navbar exists + admin visibility settled
         window.dispatchEvent(new Event("navbar:loaded"));
       })
       .catch(err => console.error(err));
-
-    // Guard page (redirect non-admins)
-    document.addEventListener("DOMContentLoaded", async () => {
-      const ok = await window.isAdminUser?.();
-      if (!ok) window.location.href = "index.html";
-    });
-
-    document.getElementById("refreshBtn").addEventListener("click", () => render());
-    document.getElementById("windowDays").addEventListener("change", () => render());
-
-    render().catch(err => {
-      console.error(err);
-      document.getElementById("rows").innerHTML =
-        `<tr><td colspan="5" class="p-3 text-danger">Failed to load due-soon list.</td></tr>`;
-    });
   </script>
-
-</script>
 
 </body>
 </html>
