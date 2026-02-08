@@ -99,8 +99,17 @@ function paintBadge(count, worstDays) {
 // ---------- Core update ----------
 async function updateDueSoonBadge() {
   // Only show badge if Admin menu exists AND is visible
-  const adminMenu = document.getElementById("adminMenu");
-  if (!adminMenu || adminMenu.classList.contains("d-none")) return { status: "not-ready" };
+ const badge = document.getElementById("dueSoonBadge");
+if (!badge) return { status: "not-ready" };
+
+// If you only want admins to see it:
+if (typeof window.isAdminUser === "function") {
+  const ok = await window.isAdminUser();
+  if (!ok) {
+    badge.classList.add("d-none");
+    return { status: "ok" };
+  }
+}
 
   const data = await fetchDueSoon();
   if (!data?.items || !Array.isArray(data.items)) return { status: "not-ready" };
