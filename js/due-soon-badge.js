@@ -9,9 +9,7 @@ const DUE_WINDOW_DAYS = 30;
 // ---------- Date helpers ----------
 function daysUntil(dateStr) {
   if (!dateStr || typeof dateStr !== "string") return null;
-
-  // Expect YYYY-MM-DD; use local midnight to avoid UTC/local off-by-one weirdness
-  const d = new Date(dateStr + "T00:00:00");
+  const d = new Date(dateStr + "T00:00:00"); // local midnight
   if (Number.isNaN(d.getTime())) return null;
 
   const now = new Date();
@@ -48,11 +46,9 @@ function setBadgeTooltip(badge, msg) {
 
   const inst = bootstrap.Tooltip.getInstance(badge);
   if (inst) {
-    // Bootstrap 5.3 supports setContent
     try {
       inst.setContent({ ".tooltip-inner": msg });
     } catch {
-      // fallback: recreate
       inst.dispose();
       new bootstrap.Tooltip(badge);
     }
@@ -66,7 +62,6 @@ function paintBadge(count, worstDays) {
   const badge = document.getElementById("dueSoonBadge");
   if (!badge) return;
 
-  // Hide if nothing due
   if (!count || count <= 0) {
     badge.classList.add("d-none");
     badge.textContent = "0";
@@ -78,14 +73,11 @@ function paintBadge(count, worstDays) {
     return;
   }
 
-  // Show badge
   badge.classList.remove("d-none");
   badge.textContent = String(count);
 
-  // Reset colours
   badge.classList.remove("bg-danger", "bg-warning", "bg-success");
 
-  // Colour + tooltip logic
   let msg = "";
   if (worstDays <= 0) {
     badge.classList.add("bg-danger");
@@ -108,12 +100,11 @@ function paintBadge(count, worstDays) {
 async function updateDueSoonBadge() {
   // Only show badge if Admin menu exists AND is visible
   const adminMenu = document.getElementById("adminMenu");
-  if (!adminMenu || adminMenu.classList.contains("d-none")) return;
+  if (!adminMenu || adminMenu.classList.contains("d-none")) return { status: "not-ready" };
 
   const data = await fetchDueSoon();
-  if (!data?.items || !Array.isArray(data.items)) return;
+  if (!data?.items || !Array.isArray(data.items)) return { status: "not-ready" };
 
-  // Count only items due within window (or overdue)
   let count = 0;
   let worstDays = Infinity;
 
@@ -129,10 +120,11 @@ async function updateDueSoonBadge() {
 
   if (count === 0) {
     paintBadge(0, Infinity);
-    return;
+    return { status: "ok" };
   }
 
   paintBadge(count, worstDays);
+  return { status: "ok" };
 }
 
 // ---------- Click wiring ----------
@@ -140,11 +132,9 @@ function wireBadgeClick() {
   const badge = document.getElementById("dueSoonBadge");
   if (!badge) return;
 
-  // Avoid double-binding if called multiple times
   if (badge.dataset.wired === "1") return;
   badge.dataset.wired = "1";
 
-  // Some browsers toggle dropdown on mousedown; stop it early
   badge.addEventListener("mousedown", (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -152,7 +142,7 @@ function wireBadgeClick() {
 
   badge.addEventListener("click", (e) => {
     e.preventDefault();
-    e.stopPropagation(); // don’t toggle dropdown
+    e.stopPropagation();
     window.location.href = "admin-due-soon.html";
   });
 
@@ -165,23 +155,61 @@ function wireBadgeClick() {
   });
 }
 
-// ---------- Scheduling ----------
-// We run on DOMContentLoaded and on navbar:loaded.
-// Also re-run shortly after navbar inject to allow adminMenu to be revealed by setupAdminMenu.
-function scheduleBadgeUpdate() {
-  updateDueSoonBadge().catch(console.error);
-  setTimeout(() => updateDueSoonBadge().catch(console.error), 400);
+// ---------- Bootstrap retry (fixes the “badge appears late”) ----------
+let bootstrapRetryTimer = null;
+let periodicTimer = null;
+
+function clearBootstrapRetry() {
+  if (bootstrapRetryTimer) {
+    clearTimeout(bootstrapRetryTimer);
+    bootstrapRetryTimer = null;
+  }
 }
 
+async function bootstrapUpdateLoop(maxMs = 10000) {
+  clearBootstrapRetry();
+
+  const start = Date.now();
+  let delay = 150;
+
+  const tick = async () => {
+    try {
+      wireBadgeClick();
+
+      const res = await updateDueSoonBadge();
+      if (res?.status === "ok") return; // ✅ done
+
+      // not ready yet: keep trying (with backoff) until maxMs
+      if (Date.now() - start >= maxMs) return;
+
+      delay = Math.min(Math.floor(delay * 1.35), 1200);
+      bootstrapRetryTimer = setTimeout(tick, delay);
+    } catch (e) {
+      console.error(e);
+      if (Date.now() - start >= maxMs) return;
+      delay = Math.min(Math.floor(delay * 1.35), 1200);
+      bootstrapRetryTimer = setTimeout(tick, delay);
+    }
+  };
+
+  tick();
+}
+
+function ensurePeriodicRefresh() {
+  if (periodicTimer) return;
+  periodicTimer = setInterval(() => updateDueSoonBadge().catch(console.error), 5 * 60 * 1000);
+}
+
+// ---------- Init ----------
 document.addEventListener("DOMContentLoaded", () => {
+  // Might not have navbar yet, but harmless
   wireBadgeClick();
-  scheduleBadgeUpdate();
+  bootstrapUpdateLoop(10000);
+  ensurePeriodicRefresh();
 });
 
 window.addEventListener("navbar:loaded", () => {
   wireBadgeClick();
-  scheduleBadgeUpdate();
+  bootstrapUpdateLoop(10000);
+  ensurePeriodicRefresh();
 });
-
-// Optional periodic refresh (5 minutes)
-setInterval(() => updateDueSoonBadge().catch(console.error), 5 * 60 * 1000);
