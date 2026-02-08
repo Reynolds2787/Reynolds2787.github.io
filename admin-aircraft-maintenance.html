@@ -84,7 +84,10 @@
 
   
   <script src="js/auth.js"></script>
+  <script src="js/logout.js"></script>
   <script src="js/admin-guard.js"></script>
+  <script src="js/admin-guard.js" defer></script>
+  <script src="js/due-soon-badge.js" defer></script>
 
   <script>
     const API_BASE = "https://dssjr33iy8.execute-api.eu-west-2.amazonaws.com";
@@ -175,9 +178,9 @@
     el("saveBtn").addEventListener("click", saveAircraft);
   </script>
 
-  <script>
-    // Navbar loader
-    fetch("/partials/navbar.html")
+   <script>
+
+      fetch("/partials/navbar.html")
       .then(r => {
         if (!r.ok) throw new Error("Failed to load navbar.html");
         return r.text();
@@ -192,6 +195,16 @@
         const userEl = document.getElementById("loggedInUser");
         if (userEl) userEl.textContent = localStorage.getItem("username") || "User";
 
+        // highlight current link (NOW the links exist)
+        const currentPath = window.location.pathname.replace(/\/$/, "");
+        document.querySelectorAll(".nav-link").forEach(link => {
+          const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
+          if (linkPath === currentPath) {
+            link.classList.add("active");
+            link.setAttribute("aria-current", "page");
+          }
+        });
+
         // admin menu visibility
         if (window.setupAdminMenu) await window.setupAdminMenu();
 
@@ -202,8 +215,9 @@
 
         window.dispatchEvent(new Event("navbar:loaded"));
       })
-      .catch(err => console.error(err));
+      .catch(console.error);
   </script>
+
 
 </body>
 </html>
