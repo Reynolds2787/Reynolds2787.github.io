@@ -38,7 +38,9 @@ window.setupAdminMenu = async function () {
     const ok = await window.isAdminUser();
     if (ok) {
       adminMenu.classList.remove("d-none");
+      window.dispatchEvent(new Event("admin:ready"));
       return;
+      
     }
     await new Promise(r => setTimeout(r, 250));
   }
