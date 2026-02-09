@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <title>EFM Web App</title>
   <meta charset="utf-8" />
@@ -12,26 +11,25 @@
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
 
   <style>
+
     body {
-      background: linear-gradient(180deg, #d8d9db 100%, #d8d9db 100%);
+    background: linear-gradient(180deg, #d8d9db 100%,#d8d9db 100%);
     }
 
-    body.loading {
-      cursor: wait;
-    }
+    body.loading { cursor: wait; }
 
     /* Slightly tighter, nicer on mobile */
     .page-title {
       letter-spacing: 0.02em;
     }
 
-    .section-card {
+      .section-card {
       border-radius: 1rem;
       background-color: #dbcdcde7;
       box-shadow:
-        0 1px 2px rgba(0, 0, 0, .04),
-        0 8px 24px rgba(0, 0, 0, .06);
-      border: 1px solid rgba(0, 0, 0, .06);
+        0 1px 2px rgba(0,0,0,.04),
+        0 8px 24px rgba(0,0,0,.06);
+      border: 1px solid rgba(0,0,0,.06);
     }
 
     .fade-in {
@@ -46,7 +44,7 @@
     }
 
 
-    .form-control,
+        .form-control,
     .form-select {
       background-color: #e7e7eb;
     }
@@ -54,27 +52,20 @@
     .form-control:focus,
     .form-select:focus {
       background-color: #e0e0e4;
-      box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, .15);
+      box-shadow: 0 0 0 0.15rem rgba(13,110,253,.15);
     }
 
-    .border-top {
-      border-color: rgba(0, 0, 0, .08) !important;
+        .border-top {
+      border-color: rgba(0,0,0,.08) !important;
     }
 
-    .passenger-block[hidden] {
-      display: none !important;
-    }
+    .passenger-block[hidden] { display: none !important; }
   </style>
 
   <!-- Auth + Logout + shared UI helpers -->
-
-
-  <script src="js/auth.js" defer></script>
-  <script src="js/logout.js" defer></script>
+  <script src="js/auth.js"></script>
+  <script src="js/logout.js"></script>
   <script src="js/ui.js"></script>
-  <script src="js/admin-guard.js" defer></script>
-  <script src="js/due-soon-badge.js" defer></script>
-
 </head>
 
 <body>
@@ -85,8 +76,8 @@
   <div id="navbar-placeholder"></div>
 
   <div class="alert alert-warning">
-    <strong>Warning</strong> Test Mode Only - feel free to experiment!
-  </div>
+  <strong>Warning</strong> Test Mode Only - feel free to experiment!
+</div>
 
 
   <main class="container py-3">
@@ -99,14 +90,14 @@
       </div>
 
       <form id="bookingForm" class="needs-validation" novalidate>
+       
+         <div class="col-12 col-md-4 mb-2">
+            <label class="form-label" for="pic_name">PIC Name</label>
+            <input id="pic_name" class="form-control" required />
+            <div class="invalid-feedback">PIC required</div>
+          </div>
 
-        <div class="col-12 col-md-4 mb-2">
-          <label class="form-label" for="pic_name">PIC Name</label>
-          <input id="pic_name" class="form-control" required />
-          <div class="invalid-feedback">PIC required</div>
-        </div>
-
-
+       
         <div class="row g-3">
           <div class="col-12 col-md-4">
             <label class="form-label" for="aircraft">Aircraft</label>
@@ -121,7 +112,7 @@
             <div class="invalid-feedback">Aircraft required</div>
           </div>
 
-
+        
           <div class="col-12 col-md-4">
             <label class="form-label" for="reason">Reason</label>
             <select id="reason" class="form-select" required>
@@ -295,6 +286,31 @@
     </div>
   </main>
 
+  <script>
+    // Navbar active link highlighting (once navbar is mounted)
+    fetch("/partials/navbar.html")
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to load navbar.html");
+        return res.text();
+      })
+      .then(html => {
+        const mount = document.getElementById("navbar-placeholder");
+        if (!mount) return;
+        mount.innerHTML = html;
+
+        const currentPath = window.location.pathname.replace(/\/$/, "");
+        document.querySelectorAll(".nav-link").forEach(link => {
+          const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
+          if (linkPath === currentPath) {
+            link.classList.add("active");
+            link.setAttribute("aria-current", "page");
+          }
+        });
+
+        window.dispatchEvent(new Event("navbar:loaded"));
+      })
+      .catch(err => console.error(err));
+  </script>
 
 
   <script>
@@ -487,48 +503,7 @@
     });
   </script>
 
-  <script>
-
-    fetch("/partials/navbar.html")
-      .then(r => {
-        if (!r.ok) throw new Error("Failed to load navbar.html");
-        return r.text();
-      })
-      .then(async html => {
-        const mount = document.getElementById("navbar-placeholder");
-        if (!mount) return;
-
-        mount.innerHTML = html;
-
-        // username
-        const userEl = document.getElementById("loggedInUser");
-        if (userEl) userEl.textContent = localStorage.getItem("username") || "User";
-
-        // highlight current link (NOW the links exist)
-        const currentPath = window.location.pathname.replace(/\/$/, "");
-        document.querySelectorAll(".nav-link").forEach(link => {
-          const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
-          if (linkPath === currentPath) {
-            link.classList.add("active");
-            link.setAttribute("aria-current", "page");
-          }
-        });
-
-        // admin menu visibility
-        if (window.setupAdminMenu) await window.setupAdminMenu();
-
-        // enable tooltips in injected navbar
-        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
-          new bootstrap.Tooltip(el);
-        });
-
-        window.dispatchEvent(new Event("navbar:loaded"));
-      })
-      .catch(console.error);
-  </script>
-
-
-  <script src="js/admin-guard.js"></script>
+  
+<script src="js/admin-guard.js"></script>
 </body>
-
 </html>

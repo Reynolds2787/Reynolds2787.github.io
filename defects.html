@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Defects</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+  <style>
+    body { background: #e4e5e7; }
+
+    .topbar { background: #f6f7f8; border-bottom: 3px solid #dc3545; }
+    .panel {
+      background: #0b0b5f;
+      border-radius: 10px;
+      padding: 10px;
+      box-shadow: 0 0.5rem 1rem rgba(0,0,0,.12);
+    }
+    .defect-row {
+      background: #0b0b5f;
+      border: 2px solid rgba(255,255,255,.25);
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    .defect-label { color: #fff; font-weight: 700; font-size: .9rem; margin-bottom: 6px; }
+    .defect-input {
+      background: #fff;
+      border-radius: 4px;
+      border: 1px solid rgba(0,0,0,.2);
+      padding: 8px;
+      min-height: 40px;
+      white-space: pre-wrap;
+    }
+    .scroll-area { max-height: calc(100vh - 280px); overflow: auto; padding-right: 6px; }
+    .count-text { font-size: 2.2rem; font-weight: 300; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+  </style>
+</head>
+
+<body>
+  <!-- If your site injects navbar via JS/partials, keep your existing include mechanism.
+       Otherwise, paste your navbar here. -->
+
+  <div class="topbar">
+    <div class="container-fluid py-3">
+      <div class="d-flex align-items-center justify-content-between gap-3">
+        <div class="d-flex flex-wrap align-items-end gap-3">
+          <div>
+            <div class="fw-bold">Select Aircraft</div>
+
+            <!-- ✅ Hardcoded aircraft list (no aircraft endpoint needed) -->
+            <select class="form-select form-select-lg" id="aircraftSelect" style="min-width: 220px;">
+              <option value="">Choose...</option>
+              <option>G-AZWS</option>
+              <option>G-BPAF</option>
+              <option>G-EDGI</option>
+              <option>G-AVYL</option>
+              <option>G-BULL</option>
+            </select>
+          </div>
+
+          <div class="count-text" id="defectCount">0 Defects</div>
+
+          <div class="ms-2">
+            <label class="form-label mb-1 fw-bold">Show</label>
+            <select class="form-select" id="statusFilter" style="min-width: 180px;">
+              <option value="open">Open defects</option>
+              <option value="all">All defects</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+          <div class="text-muted small">
+            API:
+            <span class="mono" id="apiBaseText"></span>
+          </div>
+          <img src="/images/lfc-logo.png" alt="LFC" style="height: 52px;" onerror="this.style.display='none'">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid py-3">
+    <div class="panel">
+      <div class="alert alert-danger d-none mb-2" id="errorBox"></div>
+
+      <div class="scroll-area" id="defectsList">
+        <div class="text-white-50 p-3">Select an aircraft to view defects.</div>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mt-2">
+        <button class="btn btn-light" id="addBtn" data-bs-toggle="modal" data-bs-target="#addModal" disabled>
+          Insert New Defect
+        </button>
+        <a class="btn btn-light" href="index.html">Done</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add modal -->
+  <div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Insert New Defect</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              <label class="form-label">Aircraft</label>
+              <input class="form-control mono" id="newAircraft" readonly>
+            </div>
+
+            <div class="col-12 col-md-4">
+              <label class="form-label">Date</label>
+              <input class="form-control" id="newDate" type="datetime-local">
+            </div>
+
+            <div class="col-12 col-md-4">
+              <label class="form-label">Full Name</label>
+              <input class="form-control" id="newName" placeholder="e.g. Sam">
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Defect</label>
+              <textarea class="form-control" id="newDefect" rows="3" placeholder="Describe the defect..."></textarea>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Effect on Flight</label>
+              <textarea class="form-control" id="newEffect" rows="3" placeholder="Operational effect / limitations..."></textarea>
+            </div>
+          </div>
+
+          <div class="alert alert-danger d-none mt-3 mb-0" id="addErr"></div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-primary" id="saveBtn">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ✅ Your real API base (NOT including /defects)
+    const API_BASE = "https://fm5h9wwozc.execute-api.eu-west-2.amazonaws.com";
+
+    const el = (id) => document.getElementById(id);
+
+    const getToken = () => localStorage.getItem("access_token") || "";
+    const getUser  = () => localStorage.getItem("username") || "";
+
+    function showError(msg) {
+      el("errorBox").textContent = msg;
+      el("errorBox").classList.remove("d-none");
+    }
+    function clearError() {
+      el("errorBox").classList.add("d-none");
+      el("errorBox").textContent = "";
+    }
+
+    async function api(url, opts = {}) {
+      const headers = { "Content-Type": "application/json", ...(opts.headers || {}) };
+      const t = getToken();
+      if (t) headers.Authorization = `Bearer ${t}`;
+
+      const res = await fetch(url, { ...opts, headers });
+      const txt = await res.text();
+      let data = null;
+      try { data = txt ? JSON.parse(txt) : null; } catch {}
+
+      if (!res.ok) throw new Error(data?.message || data?.error || `Request failed (${res.status})`);
+      return data;
+    }
+
+    function toLocalInputValue(d) {
+      const pad = (n) => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function fmt(iso) {
+      const d = new Date(iso);
+      return Number.isNaN(d.getTime()) ? (iso || "") : d.toLocaleString();
+    }
+
+    function normalizeReg(v) {
+      return (v || "").trim().toUpperCase();
+    }
+
+    function render(defects) {
+      el("defectCount").textContent = `${defects.length} Defects`;
+
+      const host = el("defectsList");
+      host.innerHTML = "";
+
+      if (!defects.length) {
+        host.innerHTML = `<div class="text-white-50 p-3">No defects found for this aircraft/filter.</div>`;
+        return;
+      }
+
+      for (const d of defects) {
+        const row = document.createElement("div");
+        row.className = "defect-row";
+
+        row.innerHTML = `
+          <div class="row g-3">
+            <div class="col-12 col-md-2">
+              <div class="defect-label">Date</div>
+              <div class="defect-input">${fmt(d.reportedAt)}</div>
+            </div>
+            <div class="col-12 col-md-2">
+              <div class="defect-label">Full Name</div>
+              <div class="defect-input">${(d.reportedBy || "")}</div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="defect-label">Defect</div>
+              <div class="defect-input">${(d.defect || "")}</div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="defect-label">Effect on Flight</div>
+              <div class="defect-input">${(d.effectOnFlight || "")}</div>
+            </div>
+          </div>
+        `;
+        host.appendChild(row);
+      }
+    }
+
+    async function loadDefects(aircraft) {
+      clearError();
+      const reg = normalizeReg(aircraft);
+      if (!reg) return;
+
+      const status = el("statusFilter").value || "open";
+      const url = new URL(`${API_BASE}/defects`);
+      url.searchParams.set("aircraft", reg);
+      url.searchParams.set("status", status);
+
+      try {
+        const data = await api(url.toString(), { method: "GET" });
+        const items = (data?.items || []);
+        items.sort((a,b) => (b.reportedAt || "").localeCompare(a.reportedAt || ""));
+        render(items);
+      } catch (e) {
+        showError(e.message || "Failed to load defects.");
+      }
+    }
+
+    async function saveDefect() {
+      el("addErr").classList.add("d-none");
+
+      const aircraft = normalizeReg(el("newAircraft").value);
+      const defect = (el("newDefect").value || "").trim();
+      const effectOnFlight = (el("newEffect").value || "").trim();
+      const reportedBy = (el("newName").value || "").trim();
+
+      const dtLocal = el("newDate").value;
+      const reportedAt = dtLocal ? new Date(dtLocal).toISOString() : new Date().toISOString();
+
+      if (!aircraft) return showAddErr("No aircraft selected.");
+      if (!defect) return showAddErr("Please enter a defect.");
+      if (!effectOnFlight) return showAddErr("Please enter the effect on flight.");
+
+      const btn = el("saveBtn");
+      btn.disabled = true;
+      btn.textContent = "Saving…";
+
+      try {
+        await api(`${API_BASE}/defects`, {
+          method: "POST",
+          body: JSON.stringify({ aircraft, reportedBy, defect, effectOnFlight, reportedAt })
+        });
+
+        // reset fields for next entry
+        el("newDefect").value = "";
+        el("newEffect").value = "";
+
+        await loadDefects(aircraft);
+
+        const modal = bootstrap.Modal.getInstance(el("addModal"));
+        modal?.hide();
+      } catch (e) {
+        showAddErr(e.message || "Failed to save defect.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Save";
+      }
+    }
+
+    function showAddErr(msg) {
+      el("addErr").textContent = msg;
+      el("addErr").classList.remove("d-none");
+    }
+
+    function syncModalFields(reg) {
+      el("newAircraft").value = reg;
+      el("newName").value = getUser();
+      el("newDate").value = toLocalInputValue(new Date());
+      el("addErr").classList.add("d-none");
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      el("apiBaseText").textContent = API_BASE;
+
+      // Aircraft selection
+      el("aircraftSelect").addEventListener("change", async () => {
+        const reg = normalizeReg(el("aircraftSelect").value);
+        el("addBtn").disabled = !reg;
+        if (!reg) {
+          el("defectCount").textContent = "0 Defects";
+          el("defectsList").innerHTML = `<div class="text-white-50 p-3">Select an aircraft to view defects.</div>`;
+          return;
+        }
+        syncModalFields(reg);
+        await loadDefects(reg);
+      });
+
+      // Filter
+      el("statusFilter").addEventListener("change", async () => {
+        const reg = normalizeReg(el("aircraftSelect").value);
+        if (reg) await loadDefects(reg);
+      });
+
+      // Modal open: ensure it reflects current selection
+      el("addModal").addEventListener("show.bs.modal", () => {
+        const reg = normalizeReg(el("aircraftSelect").value);
+        syncModalFields(reg);
+      });
+
+      // Save
+      el("saveBtn").addEventListener("click", saveDefect);
+    });
+  </script>
+</body>
+</html>

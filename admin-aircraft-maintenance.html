@@ -11,11 +11,14 @@
 
 <body class="bg-light">
 
-  <div class="container-fluid p-2 bg-primary text-white text-center">
-    <h2>Aircraft Maintenance</h2>
-  </div>
+<div class="container-fluid p-2 bg-primary text-white text-center">
+  <h2>Aircraft Maintenance</h2>
+</div>
 
-  <div id="navbar-placeholder"></div>
+<div id="navbar-placeholder"></div>
+
+
+  <!-- your existing navbar here (with the adminMenu <li> added) -->
 
   <div class="container py-4">
     <div class="d-flex align-items-center justify-content-between mb-3">
@@ -35,6 +38,7 @@
               <option>G-EDGI</option>
               <option>G-AVYL</option>
               <option>G-BULL</option>
+              <!-- ideally load this list dynamically -->
             </select>
           </div>
 
@@ -82,30 +86,24 @@
     </div>
   </div>
 
-  
-  <script src="js/auth.js"></script>
-  <script src="js/logout.js"></script>
   <script src="js/admin-guard.js"></script>
-  <script src="js/admin-guard.js" defer></script>
-  <script src="js/due-soon-badge.js" defer></script>
-
   <script>
-    const API_BASE = "https://dssjr33iy8.execute-api.eu-west-2.amazonaws.com";
-    const el = (id) => document.getElementById(id);
+    // Redirect if not admin
+    document.addEventListener("DOMContentLoaded", async () => {
+      const admin = await isAdminUser();
+      if (!admin) window.location.href = "index.html";
+    });
 
-    const statusEl = el("saveStatus");
-    const setStatus = (msg) => { if (statusEl) statusEl.textContent = msg || ""; };
+    const API_BASE = "https://dssjr33iy8.execute-api.eu-west-2.amazonaws.com"; // e.g. https://api.efmapp.co.uk
+    const statusEl = document.getElementById("saveStatus");
+
+    const el = (id) => document.getElementById(id);
+    const setStatus = (msg) => statusEl.textContent = msg || "";
 
     async function authHeader() {
       const token = localStorage.getItem("access_token");
       return { Authorization: `Bearer ${token}` };
     }
-
-    // Guard page (redirect non-admins)
-    document.addEventListener("DOMContentLoaded", async () => {
-      const ok = await window.isAdminUser?.();
-      if (!ok) window.location.href = "index.html";
-    });
 
     function fillForm(data) {
       el("tachoNext").value = data?.tachoHoursToNextService ?? "";
@@ -178,46 +176,41 @@
     el("saveBtn").addEventListener("click", saveAircraft);
   </script>
 
-   <script>
 
-      fetch("/partials/navbar.html")
-      .then(r => {
-        if (!r.ok) throw new Error("Failed to load navbar.html");
-        return r.text();
-      })
-      .then(async html => {
-        const mount = document.getElementById("navbar-placeholder");
-        if (!mount) return;
+<script>
+  fetch("/partials/navbar.html")
+    .then(res => {
+      if (!res.ok) throw new Error("Failed to load navbar.html");
+      return res.text();
+    })
+    .then(async html => {
+      const mount = document.getElementById("navbar-placeholder");
+      if (!mount) return;
 
-        mount.innerHTML = html;
+      mount.innerHTML = html;
 
-        // username
-        const userEl = document.getElementById("loggedInUser");
-        if (userEl) userEl.textContent = localStorage.getItem("username") || "User";
+      // ✅ Update username (navbar loads after DOMContentLoaded)
+      const userEl = document.getElementById("loggedInUser");
+      if (userEl) {
+        userEl.textContent = localStorage.getItem("username") || "User";
+      }
 
-        // highlight current link (NOW the links exist)
-        const currentPath = window.location.pathname.replace(/\/$/, "");
-        document.querySelectorAll(".nav-link").forEach(link => {
-          const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
-          if (linkPath === currentPath) {
-            link.classList.add("active");
-            link.setAttribute("aria-current", "page");
-          }
-        });
+      // Highlight current link
+      const currentPath = window.location.pathname.replace(/\/$/, "");
+      document.querySelectorAll(".nav-link").forEach(link => {
+        const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
+        if (linkPath === currentPath) {
+          link.classList.add("active");
+          link.setAttribute("aria-current", "page");
+        }
+      });
 
-        // admin menu visibility
-        if (window.setupAdminMenu) await window.setupAdminMenu();
+      // Reveal Admin if applicable
+      if (window.setupAdminMenu) await window.setupAdminMenu();
+    })
+    .catch(err => console.error(err));
 
-        // enable tooltips in injected navbar
-        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
-          new bootstrap.Tooltip(el);
-        });
-
-        window.dispatchEvent(new Event("navbar:loaded"));
-      })
-      .catch(console.error);
-  </script>
-
+</script>
 
 </body>
 </html>

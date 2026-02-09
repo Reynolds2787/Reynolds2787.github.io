@@ -9,16 +9,12 @@
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 </head>
 
-<div class="container-fluid p-2 bg-primary text-white text-center">
-    <h2>Due Soon List</h2>
-</div>
-
 <body class="bg-light">
   <div id="navbar-placeholder"></div>
 
   <div class="container py-4">
     <div class="d-flex align-items-center justify-content-between mb-3">
-      
+      <h1 class="h4 mb-0">Maintenance Due Soon</h1>
       <div class="d-flex gap-2 align-items-center">
         <select id="windowDays" class="form-select form-select-sm" style="width: 140px;">
           <option value="7">Next 7 days</option>
@@ -171,8 +167,20 @@
       })
       .catch(err => console.error(err));
 
-  </script>
+    // Guard page (redirect non-admins)
+    document.addEventListener("DOMContentLoaded", async () => {
+      const ok = await window.isAdminUser?.();
+      if (!ok) window.location.href = "index.html";
+    });
 
-   <script src="js/admin-due-soon.js"></script>
+    document.getElementById("refreshBtn").addEventListener("click", () => render());
+    document.getElementById("windowDays").addEventListener("change", () => render());
+
+    render().catch(err => {
+      console.error(err);
+      document.getElementById("rows").innerHTML =
+        `<tr><td colspan="5" class="p-3 text-danger">Failed to load due-soon list.</td></tr>`;
+    });
+  </script>
 </body>
 </html>
