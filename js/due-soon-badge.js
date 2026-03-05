@@ -2,7 +2,7 @@
 
 // Endpoint returns: { items: [{ aircraft, nextDueDate, ... }, ...] }
 window.DUE_SOON_URL =
-  "https://dssjr33iy8.execute-api.eu-west-2.amazonaws.com/admin/aircraft-maintenance/due-soon?limit=50";
+  "https://dssjr33iy8.execute-api.eu-west-2.amazonaws.com/aircraft-maintenance/due-soon?limit=50";
 
 const DUE_WINDOW_DAYS = 30;
 
@@ -102,14 +102,6 @@ async function updateDueSoonBadge()
   const badge = document.getElementById("dueSoonBadge");
   if (!badge) return { status: "not-ready" };
 
-  // admin-only behavior based on actual role, not CSS timing
-  if (typeof window.isAdminUser === "function") {
-    const ok = await window.isAdminUser();
-    if (!ok) {
-      badge.classList.add("d-none");
-      return { status: "ok" };
-    }
-  }
 
   const data = await fetchDueSoon();
   if (!data?.items || !Array.isArray(data.items)) return { status: "not-ready" };
