@@ -9,95 +9,91 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 
-  <style>
-    body { background: #e4e5e7; }
+  <!-- Shared helpers used across your site -->
+  <script src="js/auth.js"></script>
+  <script src="js/logout.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/admin-guard.js" defer></script>
+  <script src="js/due-soon-badge.js" defer></script>
 
-    .topbar { background: #f6f7f8; border-bottom: 3px solid #dc3545; }
-    .panel {
-      background: #0b0b5f;
-      border-radius: 10px;
-      padding: 10px;
-      box-shadow: 0 0.5rem 1rem rgba(0,0,0,.12);
+  <style>
+    body {
+      background: linear-gradient(180deg, #d8d9db 100%,#d8d9db 100%);
     }
-    .defect-row {
-      background: #0b0b5f;
-      border: 2px solid rgba(255,255,255,.25);
-      border-radius: 10px;
-      padding: 10px;
-      margin-bottom: 10px;
+
+    body.loading { cursor: wait; }
+
+    .fade-in { opacity: 0; transform: translateY(2px); transition: opacity .18s ease, transform .18s ease; }
+    .fade-in.ready { opacity: 1; transform: none; }
+
+    .skeleton {
+      border-radius: .75rem;
+      background: linear-gradient(90deg,#e9ecef 25%,#f8f9fa 37%,#e9ecef 63%);
+      background-size: 400% 100%;
+      animation: shimmer 1.4s ease infinite;
     }
-    .defect-label { color: #fff; font-weight: 700; font-size: .9rem; margin-bottom: 6px; }
-    .defect-input {
-      background: #fff;
-      border-radius: 4px;
-      border: 1px solid rgba(0,0,0,.2);
-      padding: 8px;
-      min-height: 40px;
-      white-space: pre-wrap;
-    }
-    .scroll-area { max-height: calc(100vh - 280px); overflow: auto; padding-right: 6px; }
-    .count-text { font-size: 2.2rem; font-weight: 300; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    @keyframes shimmer { 0% { background-position: 100% 0 } 100% { background-position: 0 0 } }
   </style>
 </head>
 
 <body>
-  <!-- If your site injects navbar via JS/partials, keep your existing include mechanism.
-       Otherwise, paste your navbar here. -->
-
-  <div class="topbar">
-    <div class="container-fluid py-3">
-      <div class="d-flex align-items-center justify-content-between gap-3">
-        <div class="d-flex flex-wrap align-items-end gap-3">
-          <div>
-            <div class="fw-bold">Select Aircraft</div>
-
-            <!-- ✅ Hardcoded aircraft list (no aircraft endpoint needed) -->
-            <select class="form-select form-select-lg" id="aircraftSelect" style="min-width: 220px;">
-              <option value="">Choose...</option>
-              <option>G-AZWS</option>
-              <option>G-BPAF</option>
-              <option>G-EDGI</option>
-              <option>G-AVYL</option>
-              <option>G-BULL</option>
-            </select>
-          </div>
-
-          <div class="count-text" id="defectCount">0 Defects</div>
-
-          <div class="ms-2">
-            <label class="form-label mb-1 fw-bold">Show</label>
-            <select class="form-select" id="statusFilter" style="min-width: 180px;">
-              <option value="open">Open defects</option>
-              <option value="all">All defects</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="d-flex align-items-center gap-3">
-          <div class="text-muted small">
-            API:
-            <span class="mono" id="apiBaseText"></span>
-          </div>
-          <img src="/images/lfc-logo.png" alt="LFC" style="height: 52px;" onerror="this.style.display='none'">
-        </div>
-      </div>
-    </div>
+  <div class="container-fluid p-2 bg-primary text-white text-center">
+    <h2 class="mb-0">DEFECTS</h2>
   </div>
 
-  <div class="container-fluid py-3">
-    <div class="panel">
-      <div class="alert alert-danger d-none mb-2" id="errorBox"></div>
+  <div id="navbar-placeholder"></div>
 
-      <div class="scroll-area" id="defectsList">
-        <div class="text-white-50 p-3">Select an aircraft to view defects.</div>
-      </div>
+  <div class="container my-3">
+    <div class="card shadow-sm fade-in" id="pageCard">
+      <div class="card-body">
+        <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-3">
+          <div class="d-flex flex-wrap gap-3 align-items-end">
+            <div>
+              <label class="form-label fw-semibold mb-1" for="aircraftSelect">Aircraft</label>
+              <select class="form-select" id="aircraftSelect" style="min-width: 220px;">
+                <option value="">Choose...</option>
+                <option>G-AZWS</option>
+                <option>G-BPAF</option>
+                <option>G-EDGI</option>
+                <option>G-AVYL</option>
+                <option>G-BULL</option>
+              </select>
+            </div>
 
-      <div class="d-flex justify-content-between align-items-center mt-2">
-        <button class="btn btn-light" id="addBtn" data-bs-toggle="modal" data-bs-target="#addModal" disabled>
-          Insert New Defect
-        </button>
-        <a class="btn btn-light" href="index.html">Done</a>
+            <div>
+              <label class="form-label fw-semibold mb-1" for="statusFilter">Show</label>
+              <select class="form-select" id="statusFilter" style="min-width: 180px;">
+                <option value="open">Open defects</option>
+                <option value="all">All defects</option>
+              </select>
+            </div>
+
+            <div class="text-muted">
+              <div class="fw-semibold">Count</div>
+              <div class="fs-5" id="defectCount">0</div>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button class="btn btn-primary" id="addBtn" data-bs-toggle="modal" data-bs-target="#addModal" disabled>
+              Add defect
+            </button>
+            <a class="btn btn-outline-secondary" href="index.html">Done</a>
+          </div>
+        </div>
+
+        <div class="alert alert-danger d-none mb-3" id="errorBox"></div>
+
+        <!-- Skeleton list while loading -->
+        <div id="listSkeleton" class="d-none">
+          <div class="skeleton mb-2" style="height: 84px;"></div>
+          <div class="skeleton mb-2" style="height: 84px;"></div>
+          <div class="skeleton mb-2" style="height: 84px;"></div>
+        </div>
+
+        <div id="defectsList" class="vstack gap-2">
+          <div class="text-muted">Select an aircraft to view defects.</div>
+        </div>
       </div>
     </div>
   </div>
@@ -107,7 +103,7 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Insert New Defect</h5>
+          <h5 class="modal-title">Add defect</h5>
           <button class="btn-close" data-bs-dismiss="modal"></button>
         </div>
 
@@ -115,7 +111,7 @@
           <div class="row g-3">
             <div class="col-12 col-md-4">
               <label class="form-label">Aircraft</label>
-              <input class="form-control mono" id="newAircraft" readonly>
+              <input class="form-control" id="newAircraft" readonly>
             </div>
 
             <div class="col-12 col-md-4">
@@ -151,13 +147,12 @@
   </div>
 
   <script>
-    // ✅ Your real API base (NOT including /defects)
+    // Use the same base your existing defects page uses
     const API_BASE = "https://fm5h9wwozc.execute-api.eu-west-2.amazonaws.com";
 
     const el = (id) => document.getElementById(id);
 
-    const getToken = () => localStorage.getItem("access_token") || "";
-    const getUser  = () => localStorage.getItem("username") || "";
+    function normalizeReg(v) { return (v || "").trim().toUpperCase(); }
 
     function showError(msg) {
       el("errorBox").textContent = msg;
@@ -168,18 +163,9 @@
       el("errorBox").textContent = "";
     }
 
-    async function api(url, opts = {}) {
-      const headers = { "Content-Type": "application/json", ...(opts.headers || {}) };
-      const t = getToken();
-      if (t) headers.Authorization = `Bearer ${t}`;
-
-      const res = await fetch(url, { ...opts, headers });
-      const txt = await res.text();
-      let data = null;
-      try { data = txt ? JSON.parse(txt) : null; } catch {}
-
-      if (!res.ok) throw new Error(data?.message || data?.error || `Request failed (${res.status})`);
-      return data;
+    function showAddErr(msg) {
+      el("addErr").textContent = msg;
+      el("addErr").classList.remove("d-none");
     }
 
     function toLocalInputValue(d) {
@@ -192,46 +178,42 @@
       return Number.isNaN(d.getTime()) ? (iso || "") : d.toLocaleString();
     }
 
-    function normalizeReg(v) {
-      return (v || "").trim().toUpperCase();
+    function setLoadingList(isLoading) {
+      document.body.classList.toggle("loading", isLoading);
+      el("listSkeleton").classList.toggle("d-none", !isLoading);
     }
 
     function render(defects) {
-      el("defectCount").textContent = `${defects.length} Defects`;
+      el("defectCount").textContent = String(defects.length);
 
       const host = el("defectsList");
       host.innerHTML = "";
 
       if (!defects.length) {
-        host.innerHTML = `<div class="text-white-50 p-3">No defects found for this aircraft/filter.</div>`;
+        host.innerHTML = `<div class="text-muted">No defects found for this aircraft/filter.</div>`;
         return;
       }
 
       for (const d of defects) {
-        const row = document.createElement("div");
-        row.className = "defect-row";
+        const card = document.createElement("div");
+        card.className = "card shadow-sm";
 
-        row.innerHTML = `
-          <div class="row g-3">
-            <div class="col-12 col-md-2">
-              <div class="defect-label">Date</div>
-              <div class="defect-input">${fmt(d.reportedAt)}</div>
-            </div>
-            <div class="col-12 col-md-2">
-              <div class="defect-label">Full Name</div>
-              <div class="defect-input">${(d.reportedBy || "")}</div>
-            </div>
-            <div class="col-12 col-md-4">
-              <div class="defect-label">Defect</div>
-              <div class="defect-input">${(d.defect || "")}</div>
-            </div>
-            <div class="col-12 col-md-4">
-              <div class="defect-label">Effect on Flight</div>
-              <div class="defect-input">${(d.effectOnFlight || "")}</div>
+        card.innerHTML = `
+          <div class="card-body">
+            <div class="d-flex flex-wrap justify-content-between gap-2">
+              <div>
+                <div class="fw-semibold">${(d.defect || "").trim() || "—"}</div>
+                <div class="text-muted small">${(d.effectOnFlight || "").trim() || "—"}</div>
+              </div>
+              <div class="text-end">
+                <div class="small text-muted">Reported</div>
+                <div class="fw-semibold">${fmt(d.reportedAt)}</div>
+                <div class="small text-muted">${(d.reportedBy || "").trim()}</div>
+              </div>
             </div>
           </div>
         `;
-        host.appendChild(row);
+        host.appendChild(card);
       }
     }
 
@@ -240,18 +222,27 @@
       const reg = normalizeReg(aircraft);
       if (!reg) return;
 
-      const status = el("statusFilter").value || "open";
-      const url = new URL(`${API_BASE}/defects`);
-      url.searchParams.set("aircraft", reg);
-      url.searchParams.set("status", status);
+      setLoadingList(true);
 
       try {
-        const data = await api(url.toString(), { method: "GET" });
+        const status = el("statusFilter").value || "open";
+        const url = new URL(`${API_BASE}/defects`);
+        url.searchParams.set("aircraft", reg);
+        url.searchParams.set("status", status);
+
+        // Prefer your shared authFetch pattern (same as bookings/profile etc.)
+        const res = await authFetch(url.toString(), { method: "GET" });
+        if (!res || !res.ok) throw new Error(`Load failed (${res?.status || "no response"})`);
+
+        const data = await res.json();
         const items = (data?.items || []);
         items.sort((a,b) => (b.reportedAt || "").localeCompare(a.reportedAt || ""));
         render(items);
       } catch (e) {
+        console.error(e);
         showError(e.message || "Failed to load defects.");
+      } finally {
+        setLoadingList(false);
       }
     }
 
@@ -262,7 +253,6 @@
       const defect = (el("newDefect").value || "").trim();
       const effectOnFlight = (el("newEffect").value || "").trim();
       const reportedBy = (el("newName").value || "").trim();
-
       const dtLocal = el("newDate").value;
       const reportedAt = dtLocal ? new Date(dtLocal).toISOString() : new Date().toISOString();
 
@@ -275,12 +265,19 @@
       btn.textContent = "Saving…";
 
       try {
-        await api(`${API_BASE}/defects`, {
+        const res = await authFetch(`${API_BASE}/defects`, {
           method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ aircraft, reportedBy, defect, effectOnFlight, reportedAt })
         });
 
-        // reset fields for next entry
+        if (!res || !res.ok) {
+          const txt = await res.text().catch(() => "");
+          throw new Error(txt || `Save failed (${res?.status || "no response"})`);
+        }
+
+        showToast?.("Defect saved", { variant: "success" });
+
         el("newDefect").value = "";
         el("newEffect").value = "";
 
@@ -289,6 +286,7 @@
         const modal = bootstrap.Modal.getInstance(el("addModal"));
         modal?.hide();
       } catch (e) {
+        console.error(e);
         showAddErr(e.message || "Failed to save defect.");
       } finally {
         btn.disabled = false;
@@ -296,49 +294,83 @@
       }
     }
 
-    function showAddErr(msg) {
-      el("addErr").textContent = msg;
-      el("addErr").classList.remove("d-none");
-    }
-
     function syncModalFields(reg) {
       el("newAircraft").value = reg;
-      el("newName").value = getUser();
+      el("newName").value = localStorage.getItem("username") || "";
       el("newDate").value = toLocalInputValue(new Date());
       el("addErr").classList.add("d-none");
     }
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      el("apiBaseText").textContent = API_BASE;
+    document.addEventListener("DOMContentLoaded", () => {
+      // fade in card like other pages
+      requestAnimationFrame(() => el("pageCard")?.classList.add("ready"));
 
-      // Aircraft selection
       el("aircraftSelect").addEventListener("change", async () => {
         const reg = normalizeReg(el("aircraftSelect").value);
         el("addBtn").disabled = !reg;
+
         if (!reg) {
-          el("defectCount").textContent = "0 Defects";
-          el("defectsList").innerHTML = `<div class="text-white-50 p-3">Select an aircraft to view defects.</div>`;
+          el("defectCount").textContent = "0";
+          el("defectsList").innerHTML = `<div class="text-muted">Select an aircraft to view defects.</div>`;
           return;
         }
+
         syncModalFields(reg);
         await loadDefects(reg);
       });
 
-      // Filter
       el("statusFilter").addEventListener("change", async () => {
         const reg = normalizeReg(el("aircraftSelect").value);
         if (reg) await loadDefects(reg);
       });
 
-      // Modal open: ensure it reflects current selection
       el("addModal").addEventListener("show.bs.modal", () => {
         const reg = normalizeReg(el("aircraftSelect").value);
         syncModalFields(reg);
       });
 
-      // Save
       el("saveBtn").addEventListener("click", saveDefect);
     });
+  </script>
+
+  <!-- Navbar include (same pattern you use on index/my-bookings/booking-out etc.) -->
+  <script>
+    fetch("/partials/navbar.html")
+      .then(r => {
+        if (!r.ok) throw new Error("Failed to load navbar.html");
+        return r.text();
+      })
+      .then(async html => {
+        const mount = document.getElementById("navbar-placeholder");
+        if (!mount) return;
+
+        mount.innerHTML = html;
+
+        // username
+        const userEl = document.getElementById("loggedInUser");
+        if (userEl) userEl.textContent = localStorage.getItem("username") || "User";
+
+        // highlight current link
+        const currentPath = window.location.pathname.replace(/\/$/, "");
+        document.querySelectorAll(".nav-link").forEach(link => {
+          const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
+          if (linkPath === currentPath) {
+            link.classList.add("active");
+            link.setAttribute("aria-current", "page");
+          }
+        });
+
+        // admin menu visibility
+        if (window.setupAdminMenu) await window.setupAdminMenu();
+
+        // tooltips in navbar
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+          new bootstrap.Tooltip(el);
+        });
+
+        window.dispatchEvent(new Event("navbar:loaded"));
+      })
+      .catch(console.error);
   </script>
 </body>
 </html>
