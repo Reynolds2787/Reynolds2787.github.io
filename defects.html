@@ -9,16 +9,9 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 
-  <!-- Shared helpers used across your site -->
-  <script src="js/auth.js"></script>
-  <script src="js/logout.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/admin-guard.js" defer></script>
-  <script src="js/due-soon-badge.js" defer></script>
-
   <style>
     body {
-      background: linear-gradient(180deg, #d8d9db 100%,#d8d9db 100%);
+      background: linear-gradient(180deg, #ecedef 100%,#f1f2f5 100%);
     }
 
     body.loading { cursor: wait; }
@@ -33,7 +26,16 @@
       animation: shimmer 1.4s ease infinite;
     }
     @keyframes shimmer { 0% { background-position: 100% 0 } 100% { background-position: 0 0 } }
+
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
   </style>
+
+  <!-- Shared helpers (same pattern as my-bookings.html) -->
+  <script src="js/auth.js"></script>
+  <script src="js/logout.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/admin-guard.js" defer></script>
+  <script src="js/due-soon-badge.js" defer></script>
 </head>
 
 <body>
@@ -43,7 +45,7 @@
 
   <div id="navbar-placeholder"></div>
 
-  <div class="container my-3">
+  <div class="container py-4">
     <div class="card shadow-sm fade-in" id="pageCard">
       <div class="card-body">
         <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-3">
@@ -86,9 +88,9 @@
 
         <!-- Skeleton list while loading -->
         <div id="listSkeleton" class="d-none">
-          <div class="skeleton mb-2" style="height: 84px;"></div>
-          <div class="skeleton mb-2" style="height: 84px;"></div>
-          <div class="skeleton mb-2" style="height: 84px;"></div>
+          <div class="skeleton mb-2" style="height: 92px;"></div>
+          <div class="skeleton mb-2" style="height: 92px;"></div>
+          <div class="skeleton mb-2" style="height: 92px;"></div>
         </div>
 
         <div id="defectsList" class="vstack gap-2">
@@ -98,7 +100,7 @@
     </div>
   </div>
 
-  <!-- Add modal -->
+  <!-- Add defect modal -->
   <div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
       <div class="modal-content">
@@ -109,19 +111,28 @@
 
         <div class="modal-body">
           <div class="row g-3">
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-3">
               <label class="form-label">Aircraft</label>
-              <input class="form-control" id="newAircraft" readonly>
+              <input class="form-control mono" id="newAircraft" readonly>
             </div>
 
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-3">
               <label class="form-label">Date</label>
               <input class="form-control" id="newDate" type="datetime-local">
             </div>
 
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-3">
               <label class="form-label">Full Name</label>
               <input class="form-control" id="newName" placeholder="e.g. Sam">
+            </div>
+
+            <div class="col-12 col-md-3">
+              <label class="form-label">Severity</label>
+              <select class="form-select" id="newSeverity">
+                <option value="MINOR" selected>Minor</option>
+                <option value="MAJOR">Major</option>
+                <option value="GROUNDED">Aircraft Grounded</option>
+              </select>
             </div>
 
             <div class="col-12">
@@ -146,8 +157,46 @@
     </div>
   </div>
 
+  <!-- Admin action modal (Defer / Rectify) -->
+  <div class="modal fade" id="actionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="actionTitle">Update defect</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              <label class="form-label">Aircraft</label>
+              <input class="form-control mono" id="actAircraft" readonly>
+            </div>
+            <div class="col-12 col-md-8">
+              <label class="form-label">Reported At (key)</label>
+              <input class="form-control mono" id="actReportedAt" readonly>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label" id="notesLabel">Notes</label>
+              <textarea class="form-control" id="actNotes" rows="4" placeholder="Enter notes..."></textarea>
+              <div class="form-text" id="notesHelp"></div>
+            </div>
+          </div>
+
+          <div class="alert alert-danger d-none mt-3 mb-0" id="actErr"></div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-primary" id="actConfirmBtn">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // Use the same base your existing defects page uses
+    // Your defects API base (same as your current file)
     const API_BASE = "https://fm5h9wwozc.execute-api.eu-west-2.amazonaws.com";
 
     const el = (id) => document.getElementById(id);
@@ -162,10 +211,26 @@
       el("errorBox").classList.add("d-none");
       el("errorBox").textContent = "";
     }
-
     function showAddErr(msg) {
       el("addErr").textContent = msg;
       el("addErr").classList.remove("d-none");
+    }
+    function hideAddErr() {
+      el("addErr").classList.add("d-none");
+      el("addErr").textContent = "";
+    }
+    function showActErr(msg) {
+      el("actErr").textContent = msg;
+      el("actErr").classList.remove("d-none");
+    }
+    function hideActErr() {
+      el("actErr").classList.add("d-none");
+      el("actErr").textContent = "";
+    }
+
+    function setLoadingList(isLoading) {
+      document.body.classList.toggle("loading", isLoading);
+      el("listSkeleton").classList.toggle("d-none", !isLoading);
     }
 
     function toLocalInputValue(d) {
@@ -178,10 +243,31 @@
       return Number.isNaN(d.getTime()) ? (iso || "") : d.toLocaleString();
     }
 
-    function setLoadingList(isLoading) {
-      document.body.classList.toggle("loading", isLoading);
-      el("listSkeleton").classList.toggle("d-none", !isLoading);
+    function badgeClassForStatus(st) {
+      st = (st || "OPEN").toUpperCase();
+      if (st === "RECTIFIED") return "bg-success";
+      if (st === "DEFERRED") return "bg-warning text-dark";
+      return "bg-danger";
     }
+
+    function badgeClassForSeverity(sev) {
+      sev = (sev || "MINOR").toUpperCase();
+      if (sev === "GROUNDED") return "bg-danger";
+      if (sev === "MAJOR") return "bg-warning text-dark";
+      return "bg-secondary";
+    }
+
+    async function waitForAuthFetch(maxMs = 2500) {
+      const start = Date.now();
+      while (Date.now() - start < maxMs) {
+        if (typeof window.authFetch === "function") return true;
+        await new Promise(r => setTimeout(r, 50));
+      }
+      return false;
+    }
+
+    let isAdmin = false;
+    let pendingAction = null; // { aircraft, reportedAt, status }
 
     function render(defects) {
       el("defectCount").textContent = String(defects.length);
@@ -195,26 +281,82 @@
       }
 
       for (const d of defects) {
+        const status = (d.status || "OPEN").toUpperCase();
+        const sev = (d.severity || "MINOR").toUpperCase();
+
         const card = document.createElement("div");
         card.className = "card shadow-sm";
 
+        const topBadges = `
+          <span class="badge ${badgeClassForSeverity(sev)} me-1">${sev}</span>
+          <span class="badge ${badgeClassForStatus(status)}">${status}</span>
+          ${d.grounded ? `<span class="badge bg-danger ms-1">GROUNDED</span>` : ``}
+        `;
+
+        const extra = status === "RECTIFIED"
+          ? `
+            <div class="mt-2 small text-muted">
+              <div><span class="fw-semibold">Rectified:</span> ${fmt(d.rectifiedAt || "")} ${d.rectifiedBy ? `— ${d.rectifiedBy}` : ""}</div>
+              ${d.rectificationNotes ? `<div class="mt-1"><span class="fw-semibold">Notes:</span> ${escapeHtml(d.rectificationNotes)}</div>` : ""}
+            </div>
+          `
+          : status === "DEFERRED"
+          ? `
+            <div class="mt-2 small text-muted">
+              ${d.deferredNotes ? `<div><span class="fw-semibold">Deferred notes:</span> ${escapeHtml(d.deferredNotes)}</div>` : ""}
+            </div>
+          `
+          : ``;
+
         card.innerHTML = `
           <div class="card-body">
-            <div class="d-flex flex-wrap justify-content-between gap-2">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
               <div>
-                <div class="fw-semibold">${(d.defect || "").trim() || "—"}</div>
-                <div class="text-muted small">${(d.effectOnFlight || "").trim() || "—"}</div>
+                <div class="mb-2">${topBadges}</div>
+                <div class="fw-semibold">${escapeHtml((d.defect || "").trim() || "—")}</div>
+                <div class="text-muted small">${escapeHtml((d.effectOnFlight || "").trim() || "—")}</div>
+                ${extra}
               </div>
+
               <div class="text-end">
                 <div class="small text-muted">Reported</div>
                 <div class="fw-semibold">${fmt(d.reportedAt)}</div>
-                <div class="small text-muted">${(d.reportedBy || "").trim()}</div>
+                <div class="small text-muted">${escapeHtml((d.reportedBy || "").trim())}</div>
               </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-3" ${(!isAdmin || status !== "OPEN") ? 'style="display:none"' : ""}>
+              <button class="btn btn-sm btn-outline-warning" data-action="DEFERRED">Defer</button>
+              <button class="btn btn-sm btn-outline-success" data-action="RECTIFIED">Rectify</button>
             </div>
           </div>
         `;
+
+        // Wire up admin buttons
+        if (isAdmin && status === "OPEN") {
+          card.querySelectorAll("button[data-action]").forEach(btn => {
+            btn.addEventListener("click", () => {
+              const actionStatus = btn.getAttribute("data-action");
+              openActionModal({
+                aircraft: d.aircraft,
+                reportedAt: d.reportedAt,
+                status: actionStatus
+              });
+            });
+          });
+        }
+
         host.appendChild(card);
       }
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
     }
 
     async function loadDefects(aircraft) {
@@ -230,7 +372,6 @@
         url.searchParams.set("aircraft", reg);
         url.searchParams.set("status", status);
 
-        // Prefer your shared authFetch pattern (same as bookings/profile etc.)
         const res = await authFetch(url.toString(), { method: "GET" });
         if (!res || !res.ok) throw new Error(`Load failed (${res?.status || "no response"})`);
 
@@ -247,12 +388,14 @@
     }
 
     async function saveDefect() {
-      el("addErr").classList.add("d-none");
+      hideAddErr();
 
       const aircraft = normalizeReg(el("newAircraft").value);
       const defect = (el("newDefect").value || "").trim();
       const effectOnFlight = (el("newEffect").value || "").trim();
       const reportedBy = (el("newName").value || "").trim();
+      const severity = (el("newSeverity").value || "MINOR").trim().toUpperCase();
+
       const dtLocal = el("newDate").value;
       const reportedAt = dtLocal ? new Date(dtLocal).toISOString() : new Date().toISOString();
 
@@ -268,7 +411,7 @@
         const res = await authFetch(`${API_BASE}/defects`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ aircraft, reportedBy, defect, effectOnFlight, reportedAt })
+          body: JSON.stringify({ aircraft, reportedBy, defect, effectOnFlight, reportedAt, severity })
         });
 
         if (!res || !res.ok) {
@@ -280,6 +423,7 @@
 
         el("newDefect").value = "";
         el("newEffect").value = "";
+        el("newSeverity").value = "MINOR";
 
         await loadDefects(aircraft);
 
@@ -294,16 +438,108 @@
       }
     }
 
-    function syncModalFields(reg) {
+    function syncAddModal(reg) {
       el("newAircraft").value = reg;
       el("newName").value = localStorage.getItem("username") || "";
       el("newDate").value = toLocalInputValue(new Date());
-      el("addErr").classList.add("d-none");
+      el("newSeverity").value = "MINOR";
+      hideAddErr();
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      // fade in card like other pages
+    function openActionModal({ aircraft, reportedAt, status }) {
+      pendingAction = { aircraft, reportedAt, status };
+
+      el("actAircraft").value = aircraft || "";
+      el("actReportedAt").value = reportedAt || "";
+      el("actNotes").value = "";
+      hideActErr();
+
+      if (status === "RECTIFIED") {
+        el("actionTitle").textContent = "Rectify defect";
+        el("notesLabel").textContent = "Rectification notes";
+        el("notesHelp").textContent = "Required. This will mark the defect as RECTIFIED.";
+        el("actConfirmBtn").className = "btn btn-success";
+        el("actConfirmBtn").textContent = "Mark rectified";
+      } else {
+        el("actionTitle").textContent = "Defer defect";
+        el("notesLabel").textContent = "Deferred notes";
+        el("notesHelp").textContent = "Optional. This will mark the defect as DEFERRED.";
+        el("actConfirmBtn").className = "btn btn-warning";
+        el("actConfirmBtn").textContent = "Mark deferred";
+      }
+
+      const modal = new bootstrap.Modal(el("actionModal"));
+      modal.show();
+    }
+
+    async function confirmAction() {
+      hideActErr();
+      if (!pendingAction) return;
+
+      const { aircraft, reportedAt, status } = pendingAction;
+      const notes = (el("actNotes").value || "").trim();
+      const username = (localStorage.getItem("username") || "").trim();
+
+      if (status === "RECTIFIED" && !notes) {
+        return showActErr("Rectification notes are required.");
+      }
+
+      const payload = {
+        aircraft,
+        reportedAt,
+        status,
+        rectifiedBy: username,
+        rectifiedAt: new Date().toISOString(),
+        rectificationNotes: status === "RECTIFIED" ? notes : undefined,
+        deferredNotes: status === "DEFERRED" ? notes : undefined
+      };
+      Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
+
+      const btn = el("actConfirmBtn");
+      btn.disabled = true;
+      const oldText = btn.textContent;
+      btn.textContent = "Saving…";
+
+      try {
+        const res = await authFetch(`${API_BASE}/defects`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res || !res.ok) {
+          const txt = await res.text().catch(() => "");
+          throw new Error(txt || `Update failed (${res?.status || "no response"})`);
+        }
+
+        showToast?.("Defect updated", { variant: "success" });
+
+        const modal = bootstrap.Modal.getInstance(el("actionModal"));
+        modal?.hide();
+
+        const currentReg = normalizeReg(el("aircraftSelect").value);
+        if (currentReg) await loadDefects(currentReg);
+      } catch (e) {
+        console.error(e);
+        showActErr(e.message || "Failed to update defect.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = oldText;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
       requestAnimationFrame(() => el("pageCard")?.classList.add("ready"));
+
+      // Ensure authFetch exists (auth.js may still be loading)
+      await waitForAuthFetch();
+
+      // Determine admin (admin-guard.js exposes isAdminUser)
+      try {
+        isAdmin = (typeof window.isAdminUser === "function") ? await window.isAdminUser() : false;
+      } catch {
+        isAdmin = false;
+      }
 
       el("aircraftSelect").addEventListener("change", async () => {
         const reg = normalizeReg(el("aircraftSelect").value);
@@ -315,7 +551,7 @@
           return;
         }
 
-        syncModalFields(reg);
+        syncAddModal(reg);
         await loadDefects(reg);
       });
 
@@ -326,14 +562,15 @@
 
       el("addModal").addEventListener("show.bs.modal", () => {
         const reg = normalizeReg(el("aircraftSelect").value);
-        syncModalFields(reg);
+        syncAddModal(reg);
       });
 
       el("saveBtn").addEventListener("click", saveDefect);
+      el("actConfirmBtn").addEventListener("click", confirmAction);
     });
   </script>
 
-  <!-- Navbar include (same pattern you use on index/my-bookings/booking-out etc.) -->
+  <!-- Navbar include (same pattern as your other pages) -->
   <script>
     fetch("/partials/navbar.html")
       .then(r => {
