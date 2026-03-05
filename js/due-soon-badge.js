@@ -2,7 +2,7 @@
 
 // Endpoint returns: { items: [{ aircraft, nextDueDate, ... }, ...] }
 window.DUE_SOON_URL =
-  "https://dssjr33iy8.execute-api.eu-west-2.amazonaws.com/aircraft-maintenance/due-soon?limit=50";
+  "https://dssjr33iy8.execute-api.eu-west-2.amazonaws.com/due-soon?limit=50";
 
 const DUE_WINDOW_DAYS = 30;
 
