@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Aircraft Tech Log</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+  <style>
+    body { background: linear-gradient(180deg, #ecedef 100%,#f1f2f5 100%); }
+    body.loading { cursor: wait; }
+
+    .fade-in { opacity: 0; transform: translateY(2px); transition: opacity .18s ease, transform .18s ease; }
+    .fade-in.ready { opacity: 1; transform: none; }
+
+    .skeleton {
+      border-radius: .75rem;
+      background: linear-gradient(90deg,#e9ecef 25%,#f8f9fa 37%,#e9ecef 63%);
+      background-size: 400% 100%;
+      animation: shimmer 1.4s ease infinite;
+    }
+    @keyframes shimmer { 0% { background-position: 100% 0 } 100% { background-position: 0 0 } }
+
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+  </style>
+
+  <!-- Shared helpers -->
+  <script src="js/auth.js"></script>
+  <script src="js/logout.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/admin-guard.js" defer></script>
+  <script src="js/due-soon-badge.js" defer></script>
+</head>
+
+<body>
+  <div class="container-fluid p-2 bg-primary text-white text-center">
+    <h2 class="mb-0">AIRCRAFT TECH LOG</h2>
+  </div>
+
+  <div id="navbar-placeholder"></div>
+
+  <div class="container py-4">
+    <div class="card shadow-sm fade-in" id="pageCard">
+      <div class="card-body">
+
+        <!-- Header controls -->
+        <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-3">
+          <div class="d-flex flex-wrap gap-3 align-items-end">
+            <div>
+              <label class="form-label fw-semibold mb-1" for="aircraftSelect">Aircraft</label>
+              <select class="form-select" id="aircraftSelect" style="min-width: 220px;">
+                <option value="">Choose...</option>
+                <option>G-AZWS</option>
+                <option>G-BPAF</option>
+                <option>G-EDGI</option>
+                <option>G-AVYL</option>
+                <option>G-BULL</option>
+              </select>
+            </div>
+
+            <div class="text-muted">
+              <div class="fw-semibold">Open defects</div>
+              <div class="fs-5" id="openDefectCount">—</div>
+            </div>
+
+            <div class="text-muted">
+              <div class="fw-semibold">Grounded</div>
+              <div class="fs-5" id="groundedFlag">—</div>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" href="index.html">Done</a>
+          </div>
+        </div>
+
+        <div class="alert alert-danger d-none mb-3" id="errorBox"></div>
+
+        <!-- Tabs -->
+        <ul class="nav nav-tabs" id="techlogTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="tab-defects" data-bs-toggle="tab" data-bs-target="#pane-defects" type="button" role="tab">
+              Defects <span class="badge bg-danger ms-1 d-none" id="tabDefectsBadge">0</span>
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-compliance" data-bs-toggle="tab" data-bs-target="#pane-compliance" type="button" role="tab">
+              Compliance
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-maintenance" data-bs-toggle="tab" data-bs-target="#pane-maintenance" type="button" role="tab">
+              Maintenance
+            </button>
+          </li>
+        </ul>
+
+        <div class="tab-content pt-3">
+          <!-- DEFECTS TAB -->
+          <div class="tab-pane fade show active" id="pane-defects" role="tabpanel" aria-labelledby="tab-defects">
+
+            <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-3">
+              <div class="d-flex flex-wrap gap-3 align-items-end">
+                <div>
+                  <label class="form-label fw-semibold mb-1" for="defStatusFilter">Show</label>
+                  <select class="form-select" id="defStatusFilter" style="min-width: 180px;">
+                    <option value="open">Open defects</option>
+                    <option value="all">All defects</option>
+                  </select>
+                </div>
+
+                <div class="text-muted">
+                  <div class="fw-semibold">Count</div>
+                  <div class="fs-5" id="defectCount">0</div>
+                </div>
+              </div>
+
+              <div class="d-flex gap-2">
+                <button class="btn btn-primary" id="addBtn" data-bs-toggle="modal" data-bs-target="#addModal" disabled>
+                  Add defect
+                </button>
+              </div>
+            </div>
+
+            <div id="listSkeleton" class="d-none">
+              <div class="skeleton mb-2" style="height: 92px;"></div>
+              <div class="skeleton mb-2" style="height: 92px;"></div>
+              <div class="skeleton mb-2" style="height: 92px;"></div>
+            </div>
+
+            <div id="defectsList" class="vstack gap-2">
+              <div class="text-muted">Select an aircraft to view defects.</div>
+            </div>
+          </div>
+
+          <!-- COMPLIANCE TAB (placeholder for next milestone) -->
+          <div class="tab-pane fade" id="pane-compliance" role="tabpanel" aria-labelledby="tab-compliance">
+            <div class="alert alert-info mb-0">
+              Compliance tab is next. We’ll pull ARC/Annual/Insurance/Service due data from your existing aircraft data endpoint/table and show due/overdue badges.
+            </div>
+          </div>
+
+          <!-- MAINTENANCE TAB (placeholder for next milestone) -->
+          <div class="tab-pane fade" id="pane-maintenance" role="tabpanel" aria-labelledby="tab-maintenance">
+            <div class="alert alert-info mb-0">
+              Maintenance tab is next. We’ll add a maintenance-events list (admin add-event modal) and hook it to a new table or your existing maintenance storage.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Add defect modal -->
+  <div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add defect</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-12 col-md-3">
+              <label class="form-label">Aircraft</label>
+              <input class="form-control mono" id="newAircraft" readonly>
+            </div>
+
+            <div class="col-12 col-md-3">
+              <label class="form-label">Date</label>
+              <input class="form-control" id="newDate" type="datetime-local">
+            </div>
+
+            <div class="col-12 col-md-3">
+              <label class="form-label">Full Name</label>
+              <input class="form-control" id="newName" placeholder="e.g. Sam">
+            </div>
+
+            <div class="col-12 col-md-3">
+              <label class="form-label">Severity</label>
+              <select class="form-select" id="newSeverity">
+                <option value="MINOR" selected>Minor</option>
+                <option value="MAJOR">Major</option>
+                <option value="GROUNDED">Aircraft Grounded</option>
+              </select>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Defect</label>
+              <textarea class="form-control" id="newDefect" rows="3" placeholder="Describe the defect..."></textarea>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Effect on Flight</label>
+              <textarea class="form-control" id="newEffect" rows="3" placeholder="Operational effect / limitations..."></textarea>
+            </div>
+          </div>
+
+          <div class="alert alert-danger d-none mt-3 mb-0" id="addErr"></div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-primary" id="saveBtn">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin action modal (Defer / Rectify) -->
+  <div class="modal fade" id="actionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="actionTitle">Update defect</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              <label class="form-label">Aircraft</label>
+              <input class="form-control mono" id="actAircraft" readonly>
+            </div>
+            <div class="col-12 col-md-8">
+              <label class="form-label">Reported At (key)</label>
+              <input class="form-control mono" id="actReportedAt" readonly>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label" id="notesLabel">Notes</label>
+              <textarea class="form-control" id="actNotes" rows="4" placeholder="Enter notes..."></textarea>
+              <div class="form-text" id="notesHelp"></div>
+            </div>
+          </div>
+
+          <div class="alert alert-danger d-none mt-3 mb-0" id="actErr"></div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-primary" id="actConfirmBtn">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Defects API base
+    const DEFECTS_API_BASE = "https://fm5h9wwozc.execute-api.eu-west-2.amazonaws.com";
+
+    const el = (id) => document.getElementById(id);
+
+    function normalizeReg(v) { return (v || "").trim().toUpperCase(); }
+    function escapeHtml(str) {
+      return String(str || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function showError(msg) { el("errorBox").textContent = msg; el("errorBox").classList.remove("d-none"); }
+    function clearError() { el("errorBox").classList.add("d-none"); el("errorBox").textContent = ""; }
+
+    function showAddErr(msg) { el("addErr").textContent = msg; el("addErr").classList.remove("d-none"); }
+    function hideAddErr() { el("addErr").classList.add("d-none"); el("addErr").textContent = ""; }
+
+    function showActErr(msg) { el("actErr").textContent = msg; el("actErr").classList.remove("d-none"); }
+    function hideActErr() { el("actErr").classList.add("d-none"); el("actErr").textContent = ""; }
+
+    function setLoadingList(isLoading) {
+      document.body.classList.toggle("loading", isLoading);
+      el("listSkeleton").classList.toggle("d-none", !isLoading);
+    }
+
+    function toLocalInputValue(d) {
+      const pad = (n) => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function fmt(iso) {
+      const d = new Date(iso);
+      return Number.isNaN(d.getTime()) ? (iso || "") : d.toLocaleString();
+    }
+
+    function badgeClassForStatus(st) {
+      st = (st || "OPEN").toUpperCase();
+      if (st === "RECTIFIED") return "bg-success";
+      if (st === "DEFERRED") return "bg-warning text-dark";
+      return "bg-danger";
+    }
+
+    function badgeClassForSeverity(sev) {
+      sev = (sev || "MINOR").toUpperCase();
+      if (sev === "GROUNDED") return "bg-danger";
+      if (sev === "MAJOR") return "bg-warning text-dark";
+      return "bg-secondary";
+    }
+
+    async function waitForAuthFetch(maxMs = 2500) {
+      const start = Date.now();
+      while (Date.now() - start < maxMs) {
+        if (typeof window.authFetch === "function") return true;
+        await new Promise(r => setTimeout(r, 50));
+      }
+      return false;
+    }
+
+    let isAdmin = false;
+    let pendingAction = null; // { aircraft, reportedAt, status }
+
+    // URL helpers: ?aircraft=G-AZWS&tab=defects|compliance|maintenance
+    function getQuery() { return new URLSearchParams(window.location.search); }
+    function setQuery(params) {
+      const q = new URLSearchParams(params);
+      const newUrl = `${window.location.pathname}?${q.toString()}`;
+      history.replaceState(null, "", newUrl);
+    }
+
+    function applyInitialTabFromUrl() {
+      const q = getQuery();
+      const tab = (q.get("tab") || "defects").toLowerCase();
+      const map = {
+        defects: "tab-defects",
+        compliance: "tab-compliance",
+        maintenance: "tab-maintenance"
+      };
+      const id = map[tab] || "tab-defects";
+      const btn = document.getElementById(id);
+      if (btn) bootstrap.Tab.getOrCreateInstance(btn).show();
+    }
+
+    function reflectTabToUrl(activeTabId) {
+      const q = getQuery();
+      const aircraft = q.get("aircraft") || "";
+      let tab = "defects";
+      if (activeTabId === "tab-compliance") tab = "compliance";
+      if (activeTabId === "tab-maintenance") tab = "maintenance";
+      setQuery({ aircraft, tab });
+    }
+
+    async function loadDefects(aircraft) {
+      clearError();
+      const reg = normalizeReg(aircraft);
+      if (!reg) return;
+
+      setLoadingList(true);
+      try {
+        const status = el("defStatusFilter").value || "open";
+        const url = new URL(`${DEFECTS_API_BASE}/defects`);
+        url.searchParams.set("aircraft", reg);
+        url.searchParams.set("status", status);
+
+        const res = await authFetch(url.toString(), { method: "GET" });
+        if (!res || !res.ok) throw new Error(`Load failed (${res?.status || "no response"})`);
+
+        const data = await res.json();
+        const items = (data?.items || []);
+        items.sort((a,b) => (b.reportedAt || "").localeCompare(a.reportedAt || ""));
+
+        renderDefects(items);
+
+        // update headline counters using OPEN only
+        const openItems = items.filter(x => String(x.status || "OPEN").toUpperCase() === "OPEN");
+        const openCount = openItems.length;
+        el("openDefectCount").textContent = String(openCount);
+        const grounded = openItems.some(x => String(x.severity || "MINOR").toUpperCase() === "GROUNDED" || x.grounded === true);
+        el("groundedFlag").textContent = grounded ? "YES" : "NO";
+        el("groundedFlag").classList.toggle("text-danger", grounded);
+        el("groundedFlag").classList.toggle("fw-semibold", grounded);
+
+        // tab badge
+        const badge = el("tabDefectsBadge");
+        if (openCount > 0) {
+          badge.textContent = String(openCount);
+          badge.classList.remove("d-none");
+        } else {
+          badge.classList.add("d-none");
+        }
+
+      } catch (e) {
+        console.error(e);
+        showError(e.message || "Failed to load defects.");
+      } finally {
+        setLoadingList(false);
+      }
+    }
+
+    function renderDefects(defects) {
+      el("defectCount").textContent = String(defects.length);
+
+      const host = el("defectsList");
+      host.innerHTML = "";
+
+      if (!defects.length) {
+        host.innerHTML = `<div class="text-muted">No defects found for this aircraft/filter.</div>`;
+        return;
+      }
+
+      for (const d of defects) {
+        const status = (d.status || "OPEN").toUpperCase();
+        const sev = (d.severity || "MINOR").toUpperCase();
+
+        const topBadges = `
+          <span class="badge ${badgeClassForSeverity(sev)} me-1">${sev}</span>
+          <span class="badge ${badgeClassForStatus(status)}">${status}</span>
+          ${d.grounded ? `<span class="badge bg-danger ms-1">GROUNDED</span>` : ``}
+        `;
+
+        const extra = status === "RECTIFIED"
+          ? `
+            <div class="mt-2 small text-muted">
+              <div><span class="fw-semibold">Rectified:</span> ${fmt(d.rectifiedAt || "")} ${d.rectifiedBy ? `— ${escapeHtml(d.rectifiedBy)}` : ""}</div>
+              ${d.rectificationNotes ? `<div class="mt-1"><span class="fw-semibold">Notes:</span> ${escapeHtml(d.rectificationNotes)}</div>` : ""}
+            </div>
+          `
+          : status === "DEFERRED"
+          ? `
+            <div class="mt-2 small text-muted">
+              ${d.deferredNotes ? `<div><span class="fw-semibold">Deferred notes:</span> ${escapeHtml(d.deferredNotes)}</div>` : ""}
+            </div>
+          `
+          : ``;
+
+        const card = document.createElement("div");
+        card.className = "card shadow-sm";
+
+        card.innerHTML = `
+          <div class="card-body">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+              <div>
+                <div class="mb-2">${topBadges}</div>
+                <div class="fw-semibold">${escapeHtml((d.defect || "").trim() || "—")}</div>
+                <div class="text-muted small">${escapeHtml((d.effectOnFlight || "").trim() || "—")}</div>
+                ${extra}
+              </div>
+
+              <div class="text-end">
+                <div class="small text-muted">Reported</div>
+                <div class="fw-semibold">${fmt(d.reportedAt)}</div>
+                <div class="small text-muted">${escapeHtml((d.reportedBy || "").trim())}</div>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-3" ${(!isAdmin || status !== "OPEN") ? 'style="display:none"' : ""}>
+              <button class="btn btn-sm btn-outline-warning" data-action="DEFERRED">Defer</button>
+              <button class="btn btn-sm btn-outline-success" data-action="RECTIFIED">Rectify</button>
+            </div>
+          </div>
+        `;
+
+        if (isAdmin && status === "OPEN") {
+          card.querySelectorAll("button[data-action]").forEach(btn => {
+            btn.addEventListener("click", () => {
+              const actionStatus = btn.getAttribute("data-action");
+              openActionModal({ aircraft: d.aircraft, reportedAt: d.reportedAt, status: actionStatus });
+            });
+          });
+        }
+
+        host.appendChild(card);
+      }
+    }
+
+    async function saveDefect() {
+      hideAddErr();
+
+      const aircraft = normalizeReg(el("newAircraft").value);
+      const defect = (el("newDefect").value || "").trim();
+      const effectOnFlight = (el("newEffect").value || "").trim();
+      const reportedBy = (el("newName").value || "").trim();
+      const severity = (el("newSeverity").value || "MINOR").trim().toUpperCase();
+
+      const dtLocal = el("newDate").value;
+      const reportedAt = dtLocal ? new Date(dtLocal).toISOString() : new Date().toISOString();
+
+      if (!aircraft) return showAddErr("No aircraft selected.");
+      if (!defect) return showAddErr("Please enter a defect.");
+      if (!effectOnFlight) return showAddErr("Please enter the effect on flight.");
+
+      const btn = el("saveBtn");
+      btn.disabled = true;
+      btn.textContent = "Saving…";
+
+      try {
+        const res = await authFetch(`${DEFECTS_API_BASE}/defects`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ aircraft, reportedBy, defect, effectOnFlight, reportedAt, severity })
+        });
+
+        if (!res || !res.ok) {
+          const txt = await res.text().catch(() => "");
+          throw new Error(txt || `Save failed (${res?.status || "no response"})`);
+        }
+
+        showToast?.("Defect saved", { variant: "success" });
+
+        el("newDefect").value = "";
+        el("newEffect").value = "";
+        el("newSeverity").value = "MINOR";
+
+        await loadDefects(aircraft);
+
+        const modal = bootstrap.Modal.getInstance(el("addModal"));
+        modal?.hide();
+      } catch (e) {
+        console.error(e);
+        showAddErr(e.message || "Failed to save defect.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Save";
+      }
+    }
+
+    function syncAddModal(reg) {
+      el("newAircraft").value = reg;
+      el("newName").value = localStorage.getItem("username") || "";
+      el("newDate").value = toLocalInputValue(new Date());
+      el("newSeverity").value = "MINOR";
+      hideAddErr();
+    }
+
+    function openActionModal({ aircraft, reportedAt, status }) {
+      pendingAction = { aircraft, reportedAt, status };
+
+      el("actAircraft").value = aircraft || "";
+      el("actReportedAt").value = reportedAt || "";
+      el("actNotes").value = "";
+      hideActErr();
+
+      if (status === "RECTIFIED") {
+        el("actionTitle").textContent = "Rectify defect";
+        el("notesLabel").textContent = "Rectification notes";
+        el("notesHelp").textContent = "Required. This will mark the defect as RECTIFIED.";
+        el("actConfirmBtn").className = "btn btn-success";
+        el("actConfirmBtn").textContent = "Mark rectified";
+      } else {
+        el("actionTitle").textContent = "Defer defect";
+        el("notesLabel").textContent = "Deferred notes";
+        el("notesHelp").textContent = "Optional. This will mark the defect as DEFERRED.";
+        el("actConfirmBtn").className = "btn btn-warning";
+        el("actConfirmBtn").textContent = "Mark deferred";
+      }
+
+      bootstrap.Modal.getOrCreateInstance(el("actionModal")).show();
+    }
+
+    async function confirmAction() {
+      hideActErr();
+      if (!pendingAction) return;
+
+      const { aircraft, reportedAt, status } = pendingAction;
+      const notes = (el("actNotes").value || "").trim();
+      const username = (localStorage.getItem("username") || "").trim();
+
+      if (status === "RECTIFIED" && !notes) return showActErr("Rectification notes are required.");
+
+      const payload = {
+        aircraft,
+        reportedAt,
+        status,
+        rectifiedBy: username,
+        rectifiedAt: new Date().toISOString(),
+        rectificationNotes: status === "RECTIFIED" ? notes : undefined,
+        deferredNotes: status === "DEFERRED" ? notes : undefined
+      };
+      Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
+
+      const btn = el("actConfirmBtn");
+      btn.disabled = true;
+      const oldText = btn.textContent;
+      btn.textContent = "Saving…";
+
+      try {
+        const res = await authFetch(`${DEFECTS_API_BASE}/defects`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res || !res.ok) {
+          const txt = await res.text().catch(() => "");
+          throw new Error(txt || `Update failed (${res?.status || "no response"})`);
+        }
+
+        showToast?.("Defect updated", { variant: "success" });
+
+        bootstrap.Modal.getInstance(el("actionModal"))?.hide();
+
+        const reg = normalizeReg(el("aircraftSelect").value);
+        if (reg) await loadDefects(reg);
+      } catch (e) {
+        console.error(e);
+        showActErr(e.message || "Failed to update defect.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = oldText;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      requestAnimationFrame(() => el("pageCard")?.classList.add("ready"));
+
+      await waitForAuthFetch();
+
+      // Determine admin (admin-guard.js provides isAdminUser)
+      try {
+        isAdmin = (typeof window.isAdminUser === "function") ? await window.isAdminUser() : false;
+      } catch {
+        isAdmin = false;
+      }
+
+      // Initial state from URL
+      const q = getQuery();
+      const aircraftFromUrl = normalizeReg(q.get("aircraft") || "");
+      if (aircraftFromUrl) {
+        el("aircraftSelect").value = aircraftFromUrl;
+        el("addBtn").disabled = false;
+        syncAddModal(aircraftFromUrl);
+        await loadDefects(aircraftFromUrl);
+      } else {
+        el("openDefectCount").textContent = "—";
+        el("groundedFlag").textContent = "—";
+      }
+
+      applyInitialTabFromUrl();
+
+      // Update URL when tab changes
+      document.querySelectorAll('#techlogTabs button[data-bs-toggle="tab"]').forEach(btn => {
+        btn.addEventListener("shown.bs.tab", (e) => {
+          reflectTabToUrl(e.target.id);
+        });
+      });
+
+      // Aircraft selection changes
+      el("aircraftSelect").addEventListener("change", async () => {
+        const reg = normalizeReg(el("aircraftSelect").value);
+        el("addBtn").disabled = !reg;
+
+        // Persist aircraft to URL (keep current tab)
+        const active = document.querySelector("#techlogTabs .nav-link.active")?.id || "tab-defects";
+        let tab = "defects";
+        if (active === "tab-compliance") tab = "compliance";
+        if (active === "tab-maintenance") tab = "maintenance";
+        setQuery({ aircraft: reg, tab });
+
+        if (!reg) {
+          el("defectCount").textContent = "0";
+          el("openDefectCount").textContent = "—";
+          el("groundedFlag").textContent = "—";
+          el("tabDefectsBadge").classList.add("d-none");
+          el("defectsList").innerHTML = `<div class="text-muted">Select an aircraft to view defects.</div>`;
+          return;
+        }
+
+        syncAddModal(reg);
+        await loadDefects(reg);
+      });
+
+      el("defStatusFilter").addEventListener("change", async () => {
+        const reg = normalizeReg(el("aircraftSelect").value);
+        if (reg) await loadDefects(reg);
+      });
+
+      el("addModal").addEventListener("show.bs.modal", () => {
+        const reg = normalizeReg(el("aircraftSelect").value);
+        syncAddModal(reg);
+      });
+
+      el("saveBtn").addEventListener("click", saveDefect);
+      el("actConfirmBtn").addEventListener("click", confirmAction);
+    });
+  </script>
+
+  <!-- Navbar include -->
+  <script>
+    fetch("/partials/navbar.html")
+      .then(r => {
+        if (!r.ok) throw new Error("Failed to load navbar.html");
+        return r.text();
+      })
+      .then(async html => {
+        const mount = document.getElementById("navbar-placeholder");
+        if (!mount) return;
+
+        mount.innerHTML = html;
+
+        const userEl = document.getElementById("loggedInUser");
+        if (userEl) userEl.textContent = localStorage.getItem("username") || "User";
+
+        const currentPath = window.location.pathname.replace(/\/$/, "");
+        document.querySelectorAll(".nav-link").forEach(link => {
+          const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
+          if (linkPath === currentPath) {
+            link.classList.add("active");
+            link.setAttribute("aria-current", "page");
+          }
+        });
+
+        if (window.setupAdminMenu) await window.setupAdminMenu();
+
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+          new bootstrap.Tooltip(el);
+        });
+
+        window.dispatchEvent(new Event("navbar:loaded"));
+      })
+      .catch(console.error);
+  </script>
+</body>
+</html>
