@@ -1,214 +1,452 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>Aircraft Status</title>
+  <title>Aircraft Status</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      background: linear-gradient(180deg, #ecedef 100%, #f1f2f5 100%);
+    }
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    .status-hero {
+      background: linear-gradient(135deg, rgba(13,110,253,.10), rgba(255,255,255,.75));
+      border: 1px solid rgba(13,110,253,.10);
+      border-radius: 1rem;
+    }
 
-<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    .aircraft-status-card {
+      border: 0;
+      border-radius: 1rem;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform .16s ease, box-shadow .16s ease;
+      background: #fff;
+    }
 
-<style>
+    .aircraft-status-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 .75rem 1.5rem rgba(0,0,0,.12);
+    }
 
-body{
-background: linear-gradient(180deg,#ecedef 100%,#f1f2f5 100%);
-}
+    .aircraft-status-card .card-body {
+      padding: 1rem;
+    }
 
-.clickable-card{
-cursor:pointer;
-transition: all .15s ease;
-}
+    .reg-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      font-size: 1rem;
+    }
 
-.clickable-card:hover{
-box-shadow:0 .5rem 1rem rgba(0,0,0,.15);
-transform:translateY(-1px);
-}
+    .reg-dot {
+      width: .7rem;
+      height: .7rem;
+      border-radius: 50%;
+      background: var(--bs-success);
+      box-shadow: 0 0 0 .18rem rgba(25,135,84,.16);
+      flex: 0 0 auto;
+    }
 
-</style>
+    .reg-dot.warning {
+      background: var(--bs-warning);
+      box-shadow: 0 0 0 .18rem rgba(255,193,7,.16);
+    }
 
-<script src="js/auth.js" defer></script>
-<script src="js/logout.js" defer></script>
-<script src="js/admin-guard.js" defer></script>
-<script src="js/due-soon-badge.js" defer></script>
+    .reg-dot.danger {
+      background: var(--bs-danger);
+      box-shadow: 0 0 0 .18rem rgba(220,53,69,.16);
+    }
 
+    .ops-label {
+      font-size: .74rem;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: #6c757d;
+    }
+
+    .metric-tile {
+      border: 1px solid #e9ecef;
+      border-radius: .9rem;
+      padding: .8rem .9rem;
+      background: #fbfcfd;
+      height: 100%;
+    }
+
+    .metric-value {
+      font-size: 1.35rem;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .metric-sub {
+      font-size: .8rem;
+      color: #6c757d;
+    }
+
+    .card-footer-link {
+      border-top: 1px solid #eef1f4;
+      padding-top: .85rem;
+      margin-top: .9rem;
+      color: #6c757d;
+      font-size: .92rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .overdue-strip {
+      border: 1px solid rgba(220,53,69,.18);
+      background: rgba(220,53,69,.06);
+      color: #b02a37;
+      border-radius: .8rem;
+      padding: .6rem .75rem;
+      font-size: .88rem;
+      font-weight: 600;
+    }
+
+    .skeleton {
+      border-radius: 1rem;
+      background: linear-gradient(90deg,#e9ecef 25%,#f8f9fa 37%,#e9ecef 63%);
+      background-size: 400% 100%;
+      animation: shimmer 1.4s ease infinite;
+      min-height: 220px;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 100% 0; }
+      100% { background-position: 0 0; }
+    }
+  </style>
+
+  <script src="js/auth.js" defer></script>
+  <script src="js/logout.js" defer></script>
+  <script src="js/admin-guard.js" defer></script>
+  <script src="js/due-soon-badge.js" defer></script>
 </head>
-
 <body>
-
-<div class="container-fluid p-2 bg-primary text-white text-center">
-<h2>AIRCRAFT STATUS</h2>
-</div>
-
-<div id="navbar-placeholder"></div>
-
-<div class="container mt-4">
-
-<div class="row g-3" id="aircraftCards"></div>
-
-</div>
-
-<script>
-
-const DEFECTS_API="https://fm5h9wwozc.execute-api.eu-west-2.amazonaws.com";
-
-const AIRCRAFT=[
-"G-AZWS",
-"G-BPAF",
-"G-EDGI",
-"G-AVYL",
-"G-BULL"
-];
-
-function normalize(v){
-return (v||"").trim().toUpperCase();
-}
-
-function daysUntil(dateStr){
-
-if(!dateStr)return null;
-
-const d=new Date(dateStr+"T00:00:00Z");
-const now=new Date();
-
-return Math.floor((d-now)/(1000*60*60*24));
-
-}
-
-async function fetchDefects(reg){
-
-const url=new URL(`${DEFECTS_API}/defects`);
-url.searchParams.set("aircraft",reg);
-url.searchParams.set("status","open");
-
-const res=await authFetch(url);
-
-if(!res.ok)return {open:0,grounded:false};
-
-const data=await res.json();
-
-const items=data.items||[];
-
-return{
-open:items.length,
-grounded:items.some(d=>d.severity==="GROUNDED")
-};
-
-}
-
-async function fetchDueSoon(){
-
-const res=await authFetch(window.DUE_SOON_URL);
-
-if(!res.ok)return [];
-
-const data=await res.json();
-
-return data.items||[];
-
-}
-
-function createCard(reg,data){
-
-const col=document.createElement("div");
-col.className="col-md-6 col-lg-4";
-
-const overdue=data.overdue;
-
-const overdueBadge=overdue>0
-?`<span class="badge bg-danger">OVERDUE ${overdue}</span>`
-:"";
-
-col.innerHTML=`
-
-<div class="card shadow-sm clickable-card">
-
-<div class="card-body">
-
-<div class="d-flex justify-content-between">
-
-<div>
-
-<div class="fw-semibold">${reg}</div>
-
-${data.grounded?'<span class="badge bg-danger">GROUNDED</span>':'<span class="badge bg-success">SERVICEABLE</span>'}
-
-</div>
-
-<div class="text-end">
-
-<div class="small text-muted">Open defects</div>
-
-<div class="fs-5"><span class="badge ${data.open>0?'bg-danger':'bg-secondary'}">${data.open}</span></div>
-
-</div>
-
-</div>
-
-<div class="mt-2">${overdueBadge}</div>
-
-</div>
-
-</div>
-
-`;
-
-col.onclick=()=>{
-
-window.location.href=`aircraft-tech-log.html?aircraft=${reg}&tab=defects`;
-
-};
-
-return col;
-
-}
-
-async function load(){
-
-const container=document.getElementById("aircraftCards");
-
-const dueSoon=await fetchDueSoon();
-
-for(const reg of AIRCRAFT){
-
-const defects=await fetchDefects(reg);
-
-const overdue=dueSoon.filter(d=>
-normalize(d.aircraft)===reg &&
-daysUntil(d.nextDueDate)<=0
-).length;
-
-container.appendChild(createCard(reg,{
-open:defects.open,
-grounded:defects.grounded,
-overdue
-}));
-
-}
-
-}
-
-document.addEventListener("DOMContentLoaded",load);
-
-</script>
-
-<script>
-
-/* navbar loader */
-
-fetch("/partials/navbar.html")
-
-.then(r=>r.text())
-
-.then(html=>{
-
-document.getElementById("navbar-placeholder").innerHTML=html;
-
-});
-
-</script>
-
+  <div class="container-fluid p-2 bg-primary text-white text-center">
+    <h2 class="mb-0">AIRCRAFT STATUS</h2>
+  </div>
+
+  <div id="navbar-placeholder"></div>
+
+  <div class="container py-4">
+    <div class="status-hero p-3 p-md-4 mb-4 shadow-sm">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div>
+          <h3 class="mb-1">Fleet Overview</h3>
+          <div class="text-muted">Open defects, overdue maintenance, and service hours remaining.</div>
+        </div>
+        <div class="text-muted small">Click any aircraft card to open the Tech Log</div>
+      </div>
+    </div>
+
+    <div id="statusError" class="alert alert-danger d-none"></div>
+
+    <div id="cardsSkeleton" class="row g-3">
+      <div class="col-12 col-md-6 col-xl-4"><div class="skeleton"></div></div>
+      <div class="col-12 col-md-6 col-xl-4"><div class="skeleton"></div></div>
+      <div class="col-12 col-md-6 col-xl-4"><div class="skeleton"></div></div>
+    </div>
+
+    <div id="aircraftCards" class="row g-3 d-none"></div>
+  </div>
+
+  <script>
+    const DEFECTS_API_BASE = "https://fm5h9wwozc.execute-api.eu-west-2.amazonaws.com";
+    const MAINT_API_BASE = "https://dssjr33iy8.execute-api.eu-west-2.amazonaws.com";
+
+    const AIRCRAFT_LIST = ["G-AZWS", "G-BPAF", "G-EDGI", "G-AVYL", "G-BULL"];
+    const USES_FLIGHT_HOURS = new Set(["G-AZWS", "G-BULL"]);
+
+    function normalizeReg(v) {
+      return (v || "").trim().toUpperCase();
+    }
+
+    function daysUntil(dateStr) {
+      if (!dateStr || typeof dateStr !== "string") return null;
+      const d = new Date(dateStr + "T00:00:00Z");
+      if (Number.isNaN(d.getTime())) return null;
+      const now = new Date();
+      return Math.floor((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    }
+
+    async function waitForAuthFetch(maxMs = 2500) {
+      const start = Date.now();
+      while (Date.now() - start < maxMs) {
+        if (typeof window.authFetch === "function") return true;
+        await new Promise(r => setTimeout(r, 50));
+      }
+      return false;
+    }
+
+    function setLoading(isLoading) {
+      document.getElementById("cardsSkeleton")?.classList.toggle("d-none", !isLoading);
+      document.getElementById("aircraftCards")?.classList.toggle("d-none", isLoading);
+    }
+
+    function setError(msg) {
+      const box = document.getElementById("statusError");
+      if (!box) return;
+      if (!msg) {
+        box.classList.add("d-none");
+        box.textContent = "";
+        return;
+      }
+      box.textContent = msg;
+      box.classList.remove("d-none");
+    }
+
+    async function fetchOpenDefectsSummary(aircraft) {
+      const reg = normalizeReg(aircraft);
+      const url = new URL(`${DEFECTS_API_BASE}/defects`);
+      url.searchParams.set("aircraft", reg);
+      url.searchParams.set("status", "open");
+
+      const res = await authFetch(url.toString(), { method: "GET" });
+      if (!res.ok) return { aircraft: reg, openCount: 0, grounded: false };
+
+      const data = await res.json();
+      const items = Array.isArray(data?.items) ? data.items : [];
+      return {
+        aircraft: reg,
+        openCount: items.length,
+        grounded: items.some(d => String(d?.severity || "").toUpperCase() === "GROUNDED" || d?.grounded === true)
+      };
+    }
+
+    async function fetchDueSoonGrouped() {
+      if (!window.DUE_SOON_URL) return new Map();
+
+      const res = await authFetch(window.DUE_SOON_URL, { method: "GET" });
+      if (!res.ok) return new Map();
+
+      const data = await res.json();
+      const byAircraft = new Map();
+
+      for (const it of (data?.items || [])) {
+        const reg = normalizeReg(it?.aircraft);
+        if (!reg) continue;
+        const days = daysUntil(it?.nextDueDate);
+        if (days === null) continue;
+
+        if (!byAircraft.has(reg)) byAircraft.set(reg, []);
+        byAircraft.get(reg).push({
+          nextDueDate: it?.nextDueDate || "",
+          nextDueType: it?.nextDueType || "",
+          days
+        });
+      }
+
+      for (const arr of byAircraft.values()) arr.sort((a, b) => a.days - b.days);
+      return byAircraft;
+    }
+
+    async function fetchMaintenanceSummary(aircraft) {
+      const reg = normalizeReg(aircraft);
+      const url = `${MAINT_API_BASE}/admin/aircraft-maintenance?aircraft=${encodeURIComponent(reg)}`;
+
+      const res = await authFetch(url, { method: "GET" });
+      if (!res.ok) {
+        return {
+          hoursLabel: USES_FLIGHT_HOURS.has(reg) ? "Flight hrs remaining" : "Tacho hrs remaining",
+          hoursValue: null
+        };
+      }
+
+      const data = await res.json();
+      const useFlight = USES_FLIGHT_HOURS.has(reg);
+      const value = useFlight ? data?.flightHoursToNextService : data?.tachoHoursToNextService;
+
+      return {
+        hoursLabel: useFlight ? "Flight hrs remaining" : "Tacho hrs remaining",
+        hoursValue: typeof value === "number" ? value : (value === null || value === undefined || value === "" ? null : Number(value))
+      };
+    }
+
+    function formatHours(value) {
+      if (value === null || value === undefined || Number.isNaN(Number(value))) return "—";
+      return Number(value).toFixed(1);
+    }
+
+    function regDotClass({ grounded, openCount, overdueCount }) {
+      if (grounded || overdueCount > 0) return "danger";
+      if (openCount > 0) return "warning";
+      return "";
+    }
+
+    function overallStatusText({ grounded, openCount, overdueCount }) {
+      if (grounded) return { text: "Grounded", badge: "bg-danger" };
+      if (overdueCount > 0) return { text: "Maintenance overdue", badge: "bg-danger" };
+      if (openCount > 0) return { text: "Open defects", badge: "bg-warning text-dark" };
+      return { text: "Serviceable", badge: "bg-success" };
+    }
+
+    function makeCard({ aircraft, openCount, grounded, overdueItems, hoursLabel, hoursValue }) {
+      const overdueCount = overdueItems.length;
+      const status = overallStatusText({ grounded, openCount, overdueCount });
+      const col = document.createElement("div");
+      col.className = "col-12 col-md-6 col-xl-4";
+
+      const overdueHtml = overdueCount > 0
+        ? `
+          <div class="overdue-strip mt-3">
+            OVERDUE${overdueCount > 1 ? ` (${overdueCount})` : ""}
+            <div class="small fw-normal mt-1">${overdueItems.map(x => x.nextDueType || "Maintenance").join(" • ")}</div>
+          </div>
+        `
+        : "";
+
+      col.innerHTML = `
+        <div class="card shadow-sm aircraft-status-card" role="button" tabindex="0">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start gap-3">
+              <div>
+                <div class="reg-chip">
+                  <span class="reg-dot ${regDotClass({ grounded, openCount, overdueCount })}"></span>
+                  <span>${aircraft}</span>
+                </div>
+                <div class="mt-2">
+                  <span class="badge ${status.badge}">${status.text.toUpperCase()}</span>
+                </div>
+              </div>
+
+              <div class="text-end">
+                <div class="ops-label">Tech Log</div>
+                <div class="small text-muted">Open</div>
+              </div>
+            </div>
+
+            <div class="row g-2 mt-2">
+              <div class="col-6">
+                <div class="metric-tile">
+                  <div class="ops-label">Open defects</div>
+                  <div class="metric-value">${openCount}</div>
+                  <div class="metric-sub">Current open items</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="metric-tile">
+                  <div class="ops-label">${hoursLabel}</div>
+                  <div class="metric-value">${formatHours(hoursValue)}</div>
+                  <div class="metric-sub">To next service</div>
+                </div>
+              </div>
+            </div>
+
+            ${overdueHtml}
+
+            <div class="card-footer-link">
+              <span>Open aircraft tech log</span>
+              <span>&rarr;</span>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const card = col.querySelector(".aircraft-status-card");
+      const href = `aircraft-tech-log.html?aircraft=${encodeURIComponent(aircraft)}&tab=defects`;
+      card.addEventListener("click", () => { window.location.href = href; });
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          window.location.href = href;
+        }
+      });
+
+      return col;
+    }
+
+    async function loadAircraftStatus() {
+      const host = document.getElementById("aircraftCards");
+      if (!host) return;
+
+      setError("");
+      setLoading(true);
+      host.innerHTML = "";
+
+      try {
+        const ok = await waitForAuthFetch();
+        if (!ok) throw new Error("Authentication helpers not ready.");
+
+        const dueMap = await fetchDueSoonGrouped();
+
+        const results = await Promise.all(
+          AIRCRAFT_LIST.map(async (reg) => {
+            const [defects, maint] = await Promise.all([
+              fetchOpenDefectsSummary(reg),
+              fetchMaintenanceSummary(reg)
+            ]);
+
+            const overdueItems = (dueMap.get(reg) || []).filter(x => x.days <= 0);
+
+            return {
+              aircraft: reg,
+              openCount: defects.openCount,
+              grounded: defects.grounded,
+              overdueItems,
+              hoursLabel: maint.hoursLabel,
+              hoursValue: maint.hoursValue
+            };
+          })
+        );
+
+        for (const item of results) host.appendChild(makeCard(item));
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load aircraft status.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadAircraftStatus();
+      setInterval(loadAircraftStatus, 60000);
+    });
+  </script>
+
+  <script>
+    fetch("/partials/navbar.html")
+      .then(r => {
+        if (!r.ok) throw new Error("Failed to load navbar.html");
+        return r.text();
+      })
+      .then(async html => {
+        const mount = document.getElementById("navbar-placeholder");
+        if (!mount) return;
+
+        mount.innerHTML = html;
+
+        const userEl = document.getElementById("loggedInUser");
+        if (userEl) userEl.textContent = localStorage.getItem("username") || "User";
+
+        const currentPath = window.location.pathname.replace(/\/$/, "");
+        document.querySelectorAll(".nav-link").forEach(link => {
+          const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
+          if (linkPath === currentPath) {
+            link.classList.add("active");
+            link.setAttribute("aria-current", "page");
+          }
+        });
+
+        if (window.setupAdminMenu) await window.setupAdminMenu();
+
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+          new bootstrap.Tooltip(el);
+        });
+
+        window.dispatchEvent(new Event("navbar:loaded"));
+      })
+      .catch(console.error);
+  </script>
 </body>
 </html>
