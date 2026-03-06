@@ -68,6 +68,7 @@
 <script src="js/due-soon-badge.js" defer></script>
 <script src="js/fetch-flight.js" defer></script>
 <script src="js/fetch-qnh.js" defer></script>
+<script src="js/loadNavbar.js" defer></script>
 
 
 </head>
@@ -132,49 +133,6 @@
     <tbody id="flightsTableBody"></tbody>
   </table>
 </div>
-
-
-<script>
-  fetch("/partials/navbar.html")
-    .then(r => {
-      if (!r.ok) throw new Error("Failed to load navbar.html");
-      return r.text();
-    })
-    .then(async html => {
-      const mount = document.getElementById("navbar-placeholder");
-      if (!mount) return;
-
-      mount.innerHTML = html;
-
-      // username
-      const userEl = document.getElementById("loggedInUser");
-      if (userEl) userEl.textContent = localStorage.getItem("username") || "User";
-
-      // highlight current link (NOW the links exist)
-      const currentPath = window.location.pathname.replace(/\/$/, "");
-      document.querySelectorAll(".nav-link").forEach(link => {
-        const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
-        if (linkPath === currentPath) {
-          link.classList.add("active");
-          link.setAttribute("aria-current", "page");
-        }
-      });
-
-      // admin menu visibility
-      if (window.setupAdminMenu) await window.setupAdminMenu();
-
-      // enable tooltips in injected navbar
-      document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
-        new bootstrap.Tooltip(el);
-      });
-
-      window.dispatchEvent(new Event("navbar:loaded"));
-    })
-    .catch(console.error);
-</script>
-
-<script></script>
-
 
 
 </body>
