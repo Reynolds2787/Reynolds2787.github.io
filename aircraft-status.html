@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Aircraft Status</title>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+<style>
+
+body{
+background: linear-gradient(180deg,#ecedef 100%,#f1f2f5 100%);
+}
+
+.clickable-card{
+cursor:pointer;
+transition: all .15s ease;
+}
+
+.clickable-card:hover{
+box-shadow:0 .5rem 1rem rgba(0,0,0,.15);
+transform:translateY(-1px);
+}
+
+</style>
+
+<script src="js/auth.js" defer></script>
+<script src="js/logout.js" defer></script>
+<script src="js/admin-guard.js" defer></script>
+<script src="js/due-soon-badge.js" defer></script>
+
+</head>
+
+<body>
+
+<div class="container-fluid p-2 bg-primary text-white text-center">
+<h2>AIRCRAFT STATUS</h2>
+</div>
+
+<div id="navbar-placeholder"></div>
+
+<div class="container mt-4">
+
+<div class="row g-3" id="aircraftCards"></div>
+
+</div>
+
+<script>
+
+const DEFECTS_API="https://fm5h9wwozc.execute-api.eu-west-2.amazonaws.com";
+
+const AIRCRAFT=[
+"G-AZWS",
+"G-BPAF",
+"G-EDGI",
+"G-AVYL",
+"G-BULL"
+];
+
+function normalize(v){
+return (v||"").trim().toUpperCase();
+}
+
+function daysUntil(dateStr){
+
+if(!dateStr)return null;
+
+const d=new Date(dateStr+"T00:00:00Z");
+const now=new Date();
+
+return Math.floor((d-now)/(1000*60*60*24));
+
+}
+
+async function fetchDefects(reg){
+
+const url=new URL(`${DEFECTS_API}/defects`);
+url.searchParams.set("aircraft",reg);
+url.searchParams.set("status","open");
+
+const res=await authFetch(url);
+
+if(!res.ok)return {open:0,grounded:false};
+
+const data=await res.json();
+
+const items=data.items||[];
+
+return{
+open:items.length,
+grounded:items.some(d=>d.severity==="GROUNDED")
+};
+
+}
+
+async function fetchDueSoon(){
+
+const res=await authFetch(window.DUE_SOON_URL);
+
+if(!res.ok)return [];
+
+const data=await res.json();
+
+return data.items||[];
+
+}
+
+function createCard(reg,data){
+
+const col=document.createElement("div");
+col.className="col-md-6 col-lg-4";
+
+const overdue=data.overdue;
+
+const overdueBadge=overdue>0
+?`<span class="badge bg-danger">OVERDUE ${overdue}</span>`
+:"";
+
+col.innerHTML=`
+
+<div class="card shadow-sm clickable-card">
+
+<div class="card-body">
+
+<div class="d-flex justify-content-between">
+
+<div>
+
+<div class="fw-semibold">${reg}</div>
+
+${data.grounded?'<span class="badge bg-danger">GROUNDED</span>':'<span class="badge bg-success">SERVICEABLE</span>'}
+
+</div>
+
+<div class="text-end">
+
+<div class="small text-muted">Open defects</div>
+
+<div class="fs-5"><span class="badge ${data.open>0?'bg-danger':'bg-secondary'}">${data.open}</span></div>
+
+</div>
+
+</div>
+
+<div class="mt-2">${overdueBadge}</div>
+
+</div>
+
+</div>
+
+`;
+
+col.onclick=()=>{
+
+window.location.href=`aircraft-tech-log.html?aircraft=${reg}&tab=defects`;
+
+};
+
+return col;
+
+}
+
+async function load(){
+
+const container=document.getElementById("aircraftCards");
+
+const dueSoon=await fetchDueSoon();
+
+for(const reg of AIRCRAFT){
+
+const defects=await fetchDefects(reg);
+
+const overdue=dueSoon.filter(d=>
+normalize(d.aircraft)===reg &&
+daysUntil(d.nextDueDate)<=0
+).length;
+
+container.appendChild(createCard(reg,{
+open:defects.open,
+grounded:defects.grounded,
+overdue
+}));
+
+}
+
+}
+
+document.addEventListener("DOMContentLoaded",load);
+
+</script>
+
+<script>
+
+/* navbar loader */
+
+fetch("/partials/navbar.html")
+
+.then(r=>r.text())
+
+.then(html=>{
+
+document.getElementById("navbar-placeholder").innerHTML=html;
+
+});
+
+</script>
+
+</body>
+</html>
