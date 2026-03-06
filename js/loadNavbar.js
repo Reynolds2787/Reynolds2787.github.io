@@ -17,13 +17,24 @@ async function loadNavbar() {
       userEl.textContent = localStorage.getItem("username") || "User";
     }
 
-    // Highlight current page
+    // Highlight current page safely
     const currentPath = window.location.pathname.replace(/\/$/, "");
+
     document.querySelectorAll(".nav-link").forEach(link => {
-      const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
-      if (linkPath === currentPath) {
-        link.classList.add("active");
-        link.setAttribute("aria-current", "page");
+      const rawHref = link.getAttribute("href");
+
+      if (!rawHref || rawHref === "#" || rawHref.startsWith("#") || rawHref.startsWith("javascript:")) {
+        return;
+      }
+
+      try {
+        const linkPath = new URL(rawHref, window.location.origin).pathname.replace(/\/$/, "");
+        if (linkPath === currentPath) {
+          link.classList.add("active");
+          link.setAttribute("aria-current", "page");
+        }
+      } catch (err) {
+        console.warn("Skipping invalid nav link:", rawHref, err);
       }
     });
 
@@ -39,13 +50,10 @@ async function loadNavbar() {
       });
     }
 
-    // Notify page navbar is ready
     window.dispatchEvent(new Event("navbar:loaded"));
-
   } catch (err) {
     console.error("Navbar load failed:", err);
   }
 }
 
-// Run automatically when DOM is ready
 document.addEventListener("DOMContentLoaded", loadNavbar);
