@@ -12,10 +12,9 @@
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
 
   <style>
-      body {
+    body {
       background: linear-gradient(180deg, #ecedef 100%, #f1f2f5 100%);
     }
-
 
     body.loading {
       cursor: wait;
@@ -515,9 +514,11 @@
       }
 
       async function fetchMaintenanceSummary(reg) {
-        const res = await authFetch(`${MAINT_API_BASE}/admin/aircraft-maintenance/${encodeURIComponent(reg)}`, {
-          method: "GET"
-        });
+        const res = await authFetch(
+          `${MAINT_API_BASE}/admin/aircraft-maintenance?aircraft=${encodeURIComponent(reg)}`,
+          { method: "GET" }
+        );
+
         if (!res.ok) throw new Error("Failed to load maintenance");
 
         const data = await res.json();
@@ -838,8 +839,6 @@
       })
       .catch(console.error);
   </script>
-
-  <script src="js/admin-guard.js"></script>
 </body>
 
 </html>
