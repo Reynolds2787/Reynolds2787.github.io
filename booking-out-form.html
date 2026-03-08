@@ -20,7 +20,6 @@
       cursor: wait;
     }
 
-    /* Slightly tighter, nicer on mobile */
     .page-title {
       letter-spacing: 0.02em;
     }
@@ -45,7 +44,6 @@
       transform: translateY(0);
     }
 
-
     .form-control,
     .form-select {
       background-color: #e7e7eb;
@@ -66,15 +64,11 @@
     }
   </style>
 
-  <!-- Auth + Logout + shared UI helpers -->
-
-
   <script src="js/auth.js" defer></script>
   <script src="js/logout.js" defer></script>
   <script src="js/ui.js"></script>
   <script src="js/admin-guard.js" defer></script>
   <script src="js/due-soon-badge.js" defer></script>
-
 </head>
 
 <body>
@@ -84,10 +78,9 @@
 
   <div id="navbar-placeholder"></div>
 
-  <div class="alert alert-warning">
+  <div class="alert alert-warning mb-0">
     <strong>Warning</strong> Test Mode Only - feel free to experiment!
   </div>
-
 
   <main class="container py-3">
     <div class="section-card bg-white p-3 p-md-4 fade-in" id="pageCard">
@@ -99,13 +92,11 @@
       </div>
 
       <form id="bookingForm" class="needs-validation" novalidate>
-
-        <div class="col-12 col-md-4 mb-2">
+        <div class="col-12 col-md-4 mb-3">
           <label class="form-label" for="pic_name">PIC Name</label>
           <input id="pic_name" class="form-control" required />
           <div class="invalid-feedback">PIC required</div>
         </div>
-
 
         <div class="row g-3">
           <div class="col-12 col-md-4">
@@ -120,7 +111,6 @@
             </select>
             <div class="invalid-feedback">Aircraft required</div>
           </div>
-
 
           <div class="col-12 col-md-4">
             <label class="form-label" for="reason">Reason</label>
@@ -202,7 +192,6 @@
             <div class="invalid-feedback">Required</div>
           </div>
 
-          <!-- Passengers -->
           <div class="col-12">
             <div class="border-top pt-3 mt-1">
               <div class="fw-semibold mb-2">Passengers</div>
@@ -276,18 +265,11 @@
             </div>
           </div>
 
-          <!-- Actions -->
           <div class="col-12 pt-2">
             <div class="d-flex flex-column flex-sm-row gap-2">
-              <button type="submit" id="submitBtn" class="btn btn-primary">
-                Submit
-              </button>
-              <button type="button" id="clearAll" class="btn btn-outline-danger">
-                Clear form
-              </button>
-              <button type="button" id="clearAllExit" class="btn btn-outline-warning">
-                Exit
-              </button>
+              <button type="submit" id="submitBtn" class="btn btn-primary">Submit</button>
+              <button type="button" id="clearAll" class="btn btn-outline-danger">Clear form</button>
+              <button type="button" id="clearAllExit" class="btn btn-outline-warning">Exit</button>
             </div>
           </div>
         </div>
@@ -295,15 +277,11 @@
     </div>
   </main>
 
-
-
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const pageCard = document.getElementById("pageCard");
-      // fade in
       requestAnimationFrame(() => pageCard?.classList.add("ready"));
 
-      // Safety checks
       if (typeof authFetch !== "function") {
         console.error("authFetch not available — auth.js may not be loaded");
         return;
@@ -318,69 +296,32 @@
       const bookingForm = document.getElementById("bookingForm");
       const submitBtn = document.getElementById("submitBtn");
       const rows = document.querySelectorAll(".passenger");
+      const occupants = document.getElementById("occupants");
+      const fromInput = document.getElementById("from");
+      const toInput = document.getElementById("to");
+      const fromKemble = document.getElementById("from_kemble");
+      const toKemble = document.getElementById("to_kemble");
+      const authSelf = document.getElementById("auth_self");
+      const authInput = document.getElementById("auth");
+      const picInput = document.getElementById("pic_name");
 
-      // Helpers
       function resetETATimeOnly() {
-        const ETA = document.getElementById("ETA");
-        if (!ETA?.value) return;
-        const datePart = ETA.value.split("T")[0];
-        ETA.value = datePart ? `${datePart}T` : "";
+        const eta = document.getElementById("ETA");
+        if (!eta?.value) return;
+        const datePart = eta.value.split("T")[0];
+        eta.value = datePart ? `${datePart}T` : "";
       }
 
-      // Autofill PIC from logged-in user
-      const loggedInUser = localStorage.getItem("username");
-      const pic = document.getElementById("pic_name");
-      if (loggedInUser && pic) pic.value = loggedInUser;
+      function buildPreflightUrl(aircraft) {
+        return `pre-flight-checks.html?aircraft=${encodeURIComponent(aircraft)}`;
+      }
 
-      // Clear form button (NO auth clearing)
-      document.getElementById("clearAll")?.addEventListener("click", () => {
-        if (!confirm("Clear all current form data?")) return;
-        bookingForm.reset();
-        bookingForm.classList.remove("was-validated");
-        document.getElementById("occupants").value = "0";
-        updatePassengers();
-      });
+      function buildDefectsUrl(aircraft) {
+        return `defects.html?aircraft=${encodeURIComponent(aircraft)}&next=${encodeURIComponent(buildPreflightUrl(aircraft))}`;
+      }
 
-
-      // Clear form and exit? 
-      document.getElementById("clearAllExit")?.addEventListener("click", () => {
-        if (!confirm("Exit?")) return;
-        bookingForm.reset();
-        bookingForm.classList.remove("was-validated");
-        document.getElementById("occupants").value = "0";
-        updatePassengers();
-        window.location.href = "index.html";
-
-      });
-
-      // Authorisation self checkbox
-      const authSelf = document.getElementById("auth_self");
-      const auth = document.getElementById("auth");
-      authSelf?.addEventListener("change", () => {
-        if (!auth) return;
-        if (authSelf.checked) {
-          auth.value = "Self";
-          auth.readOnly = true;
-        } else {
-          auth.readOnly = false;
-          if (auth.value === "Self") auth.value = "";
-        }
-      });
-
-      // Kemble shortcuts
-      document.getElementById("from_kemble")?.addEventListener("change", (e) => {
-        const from = document.getElementById("from");
-        if (e.target.checked && from) from.value = "Kemble";
-      });
-
-      document.getElementById("to_kemble")?.addEventListener("change", (e) => {
-        const to = document.getElementById("to");
-        if (e.target.checked && to) to.value = "Kemble";
-      });
-
-      // Passenger logic
       function updatePassengers() {
-        const count = Number(document.getElementById("occupants").value);
+        const count = Number(occupants.value || 0);
 
         rows.forEach(row => {
           const idx = Number(row.dataset.index);
@@ -405,17 +346,80 @@
         });
       }
 
-      document.getElementById("occupants")?.addEventListener("change", updatePassengers);
+      function syncKembleCheckbox(input, checkbox) {
+        const value = (input.value || "").trim().toLowerCase();
+        checkbox.checked = value === "kemble";
+      }
+
+      function prepareForNextLeg() {
+        fromInput.value = toInput.value;
+        toInput.value = "";
+        toKemble.checked = false;
+        showToast("Enter next leg", { variant: "warning", title: "Next Leg" });
+        resetETATimeOnly();
+      }
+
+      const loggedInUser = localStorage.getItem("username");
+      if (loggedInUser && picInput) picInput.value = loggedInUser;
+
+      document.getElementById("clearAll")?.addEventListener("click", () => {
+        if (!confirm("Clear all current form data?")) return;
+        bookingForm.reset();
+        bookingForm.classList.remove("was-validated");
+        occupants.value = "0";
+        if (loggedInUser && picInput) picInput.value = loggedInUser;
+        updatePassengers();
+      });
+
+      document.getElementById("clearAllExit")?.addEventListener("click", () => {
+        if (!confirm("Exit?")) return;
+        bookingForm.reset();
+        bookingForm.classList.remove("was-validated");
+        occupants.value = "0";
+        updatePassengers();
+        window.location.href = "index.html";
+      });
+
+      authSelf?.addEventListener("change", () => {
+        if (authSelf.checked) {
+          authInput.value = "Self";
+          authInput.readOnly = true;
+        } else {
+          authInput.readOnly = false;
+          if (authInput.value === "Self") authInput.value = "";
+        }
+      });
+
+      fromKemble?.addEventListener("change", (e) => {
+        if (e.target.checked) {
+          fromInput.value = "Kemble";
+        } else if ((fromInput.value || "").trim().toLowerCase() === "kemble") {
+          fromInput.value = "";
+        }
+      });
+
+      toKemble?.addEventListener("change", (e) => {
+        if (e.target.checked) {
+          toInput.value = "Kemble";
+        } else if ((toInput.value || "").trim().toLowerCase() === "kemble") {
+          toInput.value = "";
+        }
+      });
+
+      fromInput?.addEventListener("input", () => syncKembleCheckbox(fromInput, fromKemble));
+      toInput?.addEventListener("input", () => syncKembleCheckbox(toInput, toKemble));
+
+      occupants?.addEventListener("change", updatePassengers);
       updatePassengers();
 
       document.querySelectorAll("input[id$='_club_member']").forEach(cb => {
         cb.addEventListener("change", () => {
           const row = cb.closest(".passenger");
-          row.querySelector("input[id$='_number']").required = !cb.checked;
+          const numberInput = row.querySelector("input[id$='_number']");
+          numberInput.required = !cb.checked;
         });
       });
 
-      // Submit booking (auth-safe + button spinner + toast)
       bookingForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -427,13 +431,13 @@
 
         const payload = {
           aircraft: document.getElementById("aircraft").value,
-          picName: document.getElementById("pic_name").value,
+          picName: picInput.value,
           reason: document.getElementById("reason").value,
-          from: document.getElementById("from").value,
-          to: document.getElementById("to").value,
+          from: fromInput.value,
+          to: toInput.value,
           eta: document.getElementById("ETA").value,
           costSharing: document.getElementById("cost_sharing").value,
-          authorised: document.getElementById("auth").value,
+          authorised: authInput.value,
           passengers: []
         };
 
@@ -462,20 +466,25 @@
 
           showToast("Flight booked successfully.", { variant: "success", title: "Booked" });
 
-          // Redirect if returning to Kemble
-          const toVal = (document.getElementById("to").value || "").trim().toLowerCase();
+          const aircraftVal = (document.getElementById("aircraft").value || "").trim();
+          const toVal = (toInput.value || "").trim().toLowerCase();
+
           if (toVal === "kemble") {
-            setTimeout(() => { window.location.href = "pre-flight-checks.html"; }, 900);
+            setTimeout(() => {
+              const viewDefects = confirm(
+                `Your destination is Kemble.\n\nWould you like to view defects for ${aircraftVal} before continuing to pre-flight checks?`
+              );
+
+              if (viewDefects) {
+                window.location.href = buildDefectsUrl(aircraftVal);
+              } else {
+                window.location.href = buildPreflightUrl(aircraftVal);
+              }
+            }, 500);
             return;
           }
 
-          // Prepare for next booking
-
-          document.getElementById("from").value = document.getElementById("to").value;
-          document.getElementById("to").value = "";
-          document.getElementById("to_kemble").checked = false;
-          showToast("Enter next leg", { variant: "warning", title: "Next Leg" });
-          resetETATimeOnly();
+          prepareForNextLeg();
 
         } catch (err) {
           console.error(err);
@@ -488,7 +497,6 @@
   </script>
 
   <script>
-
     fetch("/partials/navbar.html")
       .then(r => {
         if (!r.ok) throw new Error("Failed to load navbar.html");
@@ -500,11 +508,9 @@
 
         mount.innerHTML = html;
 
-        // username
         const userEl = document.getElementById("loggedInUser");
         if (userEl) userEl.textContent = localStorage.getItem("username") || "User";
 
-        // highlight current link (NOW the links exist)
         const currentPath = window.location.pathname.replace(/\/$/, "");
         document.querySelectorAll(".nav-link").forEach(link => {
           const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
@@ -514,10 +520,8 @@
           }
         });
 
-        // admin menu visibility
         if (window.setupAdminMenu) await window.setupAdminMenu();
 
-        // enable tooltips in injected navbar
         document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
           new bootstrap.Tooltip(el);
         });
@@ -526,7 +530,6 @@
       })
       .catch(console.error);
   </script>
-
 
   <script src="js/admin-guard.js"></script>
 </body>
