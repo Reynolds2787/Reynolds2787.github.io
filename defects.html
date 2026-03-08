@@ -11,26 +11,39 @@
 
   <style>
     body {
-      background: linear-gradient(180deg, #ecedef 100%,#f1f2f5 100%);
+      background: linear-gradient(180deg, #ecedef 100%, #f1f2f5 100%);
     }
 
     body.loading { cursor: wait; }
 
-    .fade-in { opacity: 0; transform: translateY(2px); transition: opacity .18s ease, transform .18s ease; }
-    .fade-in.ready { opacity: 1; transform: none; }
+    .fade-in {
+      opacity: 0;
+      transform: translateY(2px);
+      transition: opacity .18s ease, transform .18s ease;
+    }
+
+    .fade-in.ready {
+      opacity: 1;
+      transform: none;
+    }
 
     .skeleton {
       border-radius: .75rem;
-      background: linear-gradient(90deg,#e9ecef 25%,#f8f9fa 37%,#e9ecef 63%);
+      background: linear-gradient(90deg, #e9ecef 25%, #f8f9fa 37%, #e9ecef 63%);
       background-size: 400% 100%;
       animation: shimmer 1.4s ease infinite;
     }
-    @keyframes shimmer { 0% { background-position: 100% 0 } 100% { background-position: 0 0 } }
 
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    @keyframes shimmer {
+      0% { background-position: 100% 0; }
+      100% { background-position: 0 0; }
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
   </style>
 
-  <!-- Shared helpers (same pattern as my-bookings.html) -->
   <script src="js/auth.js"></script>
   <script src="js/logout.js"></script>
   <script src="js/ui.js"></script>
@@ -80,13 +93,12 @@
             <button class="btn btn-primary" id="addBtn" data-bs-toggle="modal" data-bs-target="#addModal" disabled>
               Add defect
             </button>
-            <a class="btn btn-outline-secondary" href="index.html">Done</a>
+            <button class="btn btn-outline-secondary" id="doneBtn" type="button">Done</button>
           </div>
         </div>
 
         <div class="alert alert-danger d-none mb-3" id="errorBox"></div>
 
-        <!-- Skeleton list while loading -->
         <div id="listSkeleton" class="d-none">
           <div class="skeleton mb-2" style="height: 92px;"></div>
           <div class="skeleton mb-2" style="height: 92px;"></div>
@@ -100,7 +112,6 @@
     </div>
   </div>
 
-  <!-- Add defect modal -->
   <div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
       <div class="modal-content">
@@ -157,7 +168,6 @@
     </div>
   </div>
 
-  <!-- Admin action modal (Defer / Rectify) -->
   <div class="modal fade" id="actionModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
       <div class="modal-content">
@@ -196,33 +206,47 @@
   </div>
 
   <script>
-    // Your defects API base (same as your current file)
     const API_BASE = "https://fm5h9wwozc.execute-api.eu-west-2.amazonaws.com";
 
     const el = (id) => document.getElementById(id);
 
-    function normalizeReg(v) { return (v || "").trim().toUpperCase(); }
+    function normalizeReg(v) {
+      return (v || "").trim().toUpperCase();
+    }
+
+    function getQueryParam(name) {
+      return new URLSearchParams(window.location.search).get(name);
+    }
+
+    function getNextUrl() {
+      return getQueryParam("next");
+    }
 
     function showError(msg) {
       el("errorBox").textContent = msg;
       el("errorBox").classList.remove("d-none");
     }
+
     function clearError() {
       el("errorBox").classList.add("d-none");
       el("errorBox").textContent = "";
     }
+
     function showAddErr(msg) {
       el("addErr").textContent = msg;
       el("addErr").classList.remove("d-none");
     }
+
     function hideAddErr() {
       el("addErr").classList.add("d-none");
       el("addErr").textContent = "";
     }
+
     function showActErr(msg) {
       el("actErr").textContent = msg;
       el("actErr").classList.remove("d-none");
     }
+
     function hideActErr() {
       el("actErr").classList.add("d-none");
       el("actErr").textContent = "";
@@ -235,7 +259,7 @@
 
     function toLocalInputValue(d) {
       const pad = (n) => String(n).padStart(2, "0");
-      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
     }
 
     function fmt(iso) {
@@ -266,124 +290,182 @@
       return false;
     }
 
-    let isAdmin = false;
-    let pendingAction = null; // { aircraft, reportedAt, status }
+    async function currentUserRole() {
+      try {
+        const ok = await waitForAuthFetch();
+        if (!ok) return "";
+        const res = await window.authFetch("https://hwjx5fihi5.execute-api.eu-west-2.amazonaws.com/profile", {
+          method: "GET"
+        });
+        if (!res.ok) return "";
+        const data = await res.json();
+        return (data?.role || "").toLowerCase();
+      } catch {
+        return "";
+      }
+    }
 
-    function render(defects) {
-      el("defectCount").textContent = String(defects.length);
+    function syncAddModal(reg) {
+      el("newAircraft").value = reg || "";
+      el("newDate").value = toLocalInputValue(new Date());
+      el("newName").value = localStorage.getItem("username") || "";
+      el("newSeverity").value = "MINOR";
+      el("newDefect").value = "";
+      el("newEffect").value = "";
+      hideAddErr();
+    }
 
-      const host = el("defectsList");
-      host.innerHTML = "";
+    async function loadDefects(reg) {
+      const statusFilter = el("statusFilter").value;
+      clearError();
+      setLoadingList(true);
 
-      if (!defects.length) {
-        host.innerHTML = `<div class="text-muted">No defects found for this aircraft/filter.</div>`;
+      try {
+        const ok = await waitForAuthFetch();
+        if (!ok) throw new Error("Authentication helper not ready");
+
+        const qs = new URLSearchParams({
+          aircraft: reg,
+          includeClosed: statusFilter === "all" ? "true" : "false"
+        });
+
+        const res = await window.authFetch(`${API_BASE}/defects?${qs.toString()}`, { method: "GET" });
+        if (!res.ok) throw new Error("Failed to load defects");
+
+        const data = await res.json();
+        const items = Array.isArray(data?.items) ? data.items : [];
+
+        el("defectCount").textContent = items.length;
+        renderDefects(items, reg);
+      } catch (err) {
+        console.error(err);
+        showError("Could not load defects.");
+        el("defectsList").innerHTML = `<div class="text-muted">Unable to load defects.</div>`;
+        el("defectCount").textContent = "0";
+      } finally {
+        setLoadingList(false);
+      }
+    }
+
+    async function renderDefects(items, reg) {
+      const container = el("defectsList");
+      container.innerHTML = "";
+
+      if (!items.length) {
+        container.innerHTML = `<div class="alert alert-success mb-0">No defects found for ${reg}.</div>`;
         return;
       }
 
-      for (const d of defects) {
-        const status = (d.status || "OPEN").toUpperCase();
-        const sev = (d.severity || "MINOR").toUpperCase();
+      const role = await currentUserRole();
+      const isAdmin = role === "admin";
+
+      for (const item of items) {
+        const status = (item.status || "OPEN").toUpperCase();
+        const severity = (item.severity || "MINOR").toUpperCase();
 
         const card = document.createElement("div");
         card.className = "card shadow-sm";
 
-        const topBadges = `
-          <span class="badge ${badgeClassForSeverity(sev)} me-1">${sev}</span>
-          <span class="badge ${badgeClassForStatus(status)}">${status}</span>
-          ${d.grounded ? `<span class="badge bg-danger ms-1">GROUNDED</span>` : ``}
-        `;
-
-        const extra = status === "RECTIFIED"
+        const adminActions = isAdmin && status === "OPEN"
           ? `
-            <div class="mt-2 small text-muted">
-              <div><span class="fw-semibold">Rectified:</span> ${fmt(d.rectifiedAt || "")} ${d.rectifiedBy ? `— ${d.rectifiedBy}` : ""}</div>
-              ${d.rectificationNotes ? `<div class="mt-1"><span class="fw-semibold">Notes:</span> ${escapeHtml(d.rectificationNotes)}</div>` : ""}
+            <div class="d-flex gap-2 mt-3">
+              <button class="btn btn-sm btn-outline-warning defer-btn">Defer</button>
+              <button class="btn btn-sm btn-outline-success rectify-btn">Rectify</button>
             </div>
           `
-          : status === "DEFERRED"
-          ? `
-            <div class="mt-2 small text-muted">
-              ${d.deferredNotes ? `<div><span class="fw-semibold">Deferred notes:</span> ${escapeHtml(d.deferredNotes)}</div>` : ""}
-            </div>
-          `
-          : ``;
+          : "";
 
         card.innerHTML = `
           <div class="card-body">
-            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
-              <div>
-                <div class="mb-2">${topBadges}</div>
-                <div class="fw-semibold">${escapeHtml((d.defect || "").trim() || "—")}</div>
-                <div class="text-muted small">${escapeHtml((d.effectOnFlight || "").trim() || "—")}</div>
-                ${extra}
+            <div class="d-flex flex-wrap justify-content-between gap-2 mb-2">
+              <div class="d-flex flex-wrap gap-2">
+                <span class="badge ${badgeClassForStatus(status)}">${status}</span>
+                <span class="badge ${badgeClassForSeverity(severity)}">${severity}</span>
               </div>
-
-              <div class="text-end">
-                <div class="small text-muted">Reported</div>
-                <div class="fw-semibold">${fmt(d.reportedAt)}</div>
-                <div class="small text-muted">${escapeHtml((d.reportedBy || "").trim())}</div>
-              </div>
+              <div class="text-muted small">${fmt(item.reportedAt)}</div>
             </div>
 
-            <div class="d-flex justify-content-end gap-2 mt-3" ${(!isAdmin || status !== "OPEN") ? 'style="display:none"' : ""}>
-              <button class="btn btn-sm btn-outline-warning" data-action="DEFERRED">Defer</button>
-              <button class="btn btn-sm btn-outline-success" data-action="RECTIFIED">Rectify</button>
+            <div class="fw-semibold mb-1">${item.defect || "No defect description"}</div>
+            <div class="text-muted mb-2">${item.effectOnFlight || "No effect on flight recorded."}</div>
+
+            <div class="small text-muted">
+              Reported by: ${item.reportedBy || "Unknown"}
             </div>
+
+            ${adminActions}
           </div>
         `;
 
-        // Wire up admin buttons
         if (isAdmin && status === "OPEN") {
-          card.querySelectorAll("button[data-action]").forEach(btn => {
-            btn.addEventListener("click", () => {
-              const actionStatus = btn.getAttribute("data-action");
-              openActionModal({
-                aircraft: d.aircraft,
-                reportedAt: d.reportedAt,
-                status: actionStatus
-              });
-            });
+          card.querySelector(".defer-btn")?.addEventListener("click", () => {
+            openActionModal("DEFERRED", reg, item.reportedAt);
+          });
+
+          card.querySelector(".rectify-btn")?.addEventListener("click", () => {
+            openActionModal("RECTIFIED", reg, item.reportedAt);
           });
         }
 
-        host.appendChild(card);
+        container.appendChild(card);
       }
     }
 
-    function escapeHtml(str) {
-      return String(str || "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+    let pendingAction = null;
+
+    function openActionModal(actionType, aircraft, reportedAt) {
+      pendingAction = { actionType, aircraft, reportedAt };
+
+      el("actAircraft").value = aircraft;
+      el("actReportedAt").value = reportedAt;
+      el("actNotes").value = "";
+      hideActErr();
+
+      if (actionType === "DEFERRED") {
+        el("actionTitle").textContent = "Defer defect";
+        el("notesLabel").textContent = "Deferred notes";
+        el("notesHelp").textContent = "Enter details of the deferment / limitations.";
+      } else {
+        el("actionTitle").textContent = "Rectify defect";
+        el("notesLabel").textContent = "Rectification notes";
+        el("notesHelp").textContent = "Enter details of the fix carried out.";
+      }
+
+      bootstrap.Modal.getOrCreateInstance(el("actionModal")).show();
     }
 
-    async function loadDefects(aircraft) {
-      clearError();
-      const reg = normalizeReg(aircraft);
-      if (!reg) return;
+    async function saveAction() {
+      hideActErr();
 
-      setLoadingList(true);
+      if (!pendingAction) return;
+
+      const notes = el("actNotes").value.trim();
+      if (!notes) {
+        showActErr("Please enter notes.");
+        return;
+      }
 
       try {
-        const status = el("statusFilter").value || "open";
-        const url = new URL(`${API_BASE}/defects`);
-        url.searchParams.set("aircraft", reg);
-        url.searchParams.set("status", status);
+        const ok = await waitForAuthFetch();
+        if (!ok) throw new Error("Authentication helper not ready");
 
-        const res = await authFetch(url.toString(), { method: "GET" });
-        if (!res || !res.ok) throw new Error(`Load failed (${res?.status || "no response"})`);
+        const res = await window.authFetch(`${API_BASE}/defects/action`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            aircraft: pendingAction.aircraft,
+            reportedAt: pendingAction.reportedAt,
+            action: pendingAction.actionType,
+            notes
+          })
+        });
 
-        const data = await res.json();
-        const items = (data?.items || []);
-        items.sort((a,b) => (b.reportedAt || "").localeCompare(a.reportedAt || ""));
-        render(items);
-      } catch (e) {
-        console.error(e);
-        showError(e.message || "Failed to load defects.");
-      } finally {
-        setLoadingList(false);
+        if (!res.ok) throw new Error("Action failed");
+
+        bootstrap.Modal.getInstance(el("actionModal"))?.hide();
+        await loadDefects(normalizeReg(el("aircraftSelect").value));
+      } catch (err) {
+        console.error(err);
+        showActErr("Unable to update defect.");
       }
     }
 
@@ -391,167 +473,58 @@
       hideAddErr();
 
       const aircraft = normalizeReg(el("newAircraft").value);
-      const defect = (el("newDefect").value || "").trim();
-      const effectOnFlight = (el("newEffect").value || "").trim();
-      const reportedBy = (el("newName").value || "").trim();
-      const severity = (el("newSeverity").value || "MINOR").trim().toUpperCase();
+      const reportedAt = el("newDate").value;
+      const reportedBy = el("newName").value.trim();
+      const severity = el("newSeverity").value;
+      const defect = el("newDefect").value.trim();
+      const effectOnFlight = el("newEffect").value.trim();
 
-      const dtLocal = el("newDate").value;
-      const reportedAt = dtLocal ? new Date(dtLocal).toISOString() : new Date().toISOString();
-
-      if (!aircraft) return showAddErr("No aircraft selected.");
-      if (!defect) return showAddErr("Please enter a defect.");
-      if (!effectOnFlight) return showAddErr("Please enter the effect on flight.");
-
-      const btn = el("saveBtn");
-      btn.disabled = true;
-      btn.textContent = "Saving…";
+      if (!aircraft || !reportedAt || !reportedBy || !defect) {
+        showAddErr("Please complete Aircraft, Date, Full Name and Defect.");
+        return;
+      }
 
       try {
-        const res = await authFetch(`${API_BASE}/defects`, {
+        const ok = await waitForAuthFetch();
+        if (!ok) throw new Error("Authentication helper not ready");
+
+        const res = await window.authFetch(`${API_BASE}/defects`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ aircraft, reportedBy, defect, effectOnFlight, reportedAt, severity })
+          body: JSON.stringify({
+            aircraft,
+            reportedAt,
+            reportedBy,
+            severity,
+            defect,
+            effectOnFlight
+          })
         });
 
-        if (!res || !res.ok) {
-          const txt = await res.text().catch(() => "");
-          throw new Error(txt || `Save failed (${res?.status || "no response"})`);
-        }
+        if (!res.ok) throw new Error("Failed to save defect");
 
-        showToast?.("Defect saved", { variant: "success" });
-
-        el("newDefect").value = "";
-        el("newEffect").value = "";
-        el("newSeverity").value = "MINOR";
-
+        bootstrap.Modal.getInstance(el("addModal"))?.hide();
         await loadDefects(aircraft);
-
-        const modal = bootstrap.Modal.getInstance(el("addModal"));
-        modal?.hide();
-      } catch (e) {
-        console.error(e);
-        showAddErr(e.message || "Failed to save defect.");
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "Save";
-      }
-    }
-
-    function syncAddModal(reg) {
-      el("newAircraft").value = reg;
-      el("newName").value = localStorage.getItem("username") || "";
-      el("newDate").value = toLocalInputValue(new Date());
-      el("newSeverity").value = "MINOR";
-      hideAddErr();
-    }
-
-    function openActionModal({ aircraft, reportedAt, status }) {
-      pendingAction = { aircraft, reportedAt, status };
-
-      el("actAircraft").value = aircraft || "";
-      el("actReportedAt").value = reportedAt || "";
-      el("actNotes").value = "";
-      hideActErr();
-
-      if (status === "RECTIFIED") {
-        el("actionTitle").textContent = "Rectify defect";
-        el("notesLabel").textContent = "Rectification notes";
-        el("notesHelp").textContent = "Required. This will mark the defect as RECTIFIED.";
-        el("actConfirmBtn").className = "btn btn-success";
-        el("actConfirmBtn").textContent = "Mark rectified";
-      } else {
-        el("actionTitle").textContent = "Defer defect";
-        el("notesLabel").textContent = "Deferred notes";
-        el("notesHelp").textContent = "Optional. This will mark the defect as DEFERRED.";
-        el("actConfirmBtn").className = "btn btn-warning";
-        el("actConfirmBtn").textContent = "Mark deferred";
-      }
-
-      const modal = new bootstrap.Modal(el("actionModal"));
-      modal.show();
-    }
-
-    async function confirmAction() {
-      hideActErr();
-      if (!pendingAction) return;
-
-      const { aircraft, reportedAt, status } = pendingAction;
-      const notes = (el("actNotes").value || "").trim();
-      const username = (localStorage.getItem("username") || "").trim();
-
-      if (status === "RECTIFIED" && !notes) {
-        return showActErr("Rectification notes are required.");
-      }
-
-      const payload = {
-        aircraft,
-        reportedAt,
-        status,
-        rectifiedBy: username,
-        rectifiedAt: new Date().toISOString(),
-        rectificationNotes: status === "RECTIFIED" ? notes : undefined,
-        deferredNotes: status === "DEFERRED" ? notes : undefined
-      };
-      Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
-
-      const btn = el("actConfirmBtn");
-      btn.disabled = true;
-      const oldText = btn.textContent;
-      btn.textContent = "Saving…";
-
-      try {
-        const res = await authFetch(`${API_BASE}/defects`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        if (!res || !res.ok) {
-          const txt = await res.text().catch(() => "");
-          throw new Error(txt || `Update failed (${res?.status || "no response"})`);
-        }
-
-        showToast?.("Defect updated", { variant: "success" });
-
-        const modal = bootstrap.Modal.getInstance(el("actionModal"));
-        modal?.hide();
-
-        const currentReg = normalizeReg(el("aircraftSelect").value);
-        if (currentReg) await loadDefects(currentReg);
-      } catch (e) {
-        console.error(e);
-        showActErr(e.message || "Failed to update defect.");
-      } finally {
-        btn.disabled = false;
-        btn.textContent = oldText;
+      } catch (err) {
+        console.error(err);
+        showAddErr("Unable to save defect.");
       }
     }
 
     document.addEventListener("DOMContentLoaded", async () => {
       requestAnimationFrame(() => el("pageCard")?.classList.add("ready"));
 
-      // Ensure authFetch exists (auth.js may still be loading)
-      await waitForAuthFetch();
-
-      // Determine admin (admin-guard.js exposes isAdminUser)
-      try {
-        isAdmin = (typeof window.isAdminUser === "function") ? await window.isAdminUser() : false;
-      } catch {
-        isAdmin = false;
-      }
-
       el("aircraftSelect").addEventListener("change", async () => {
         const reg = normalizeReg(el("aircraftSelect").value);
         el("addBtn").disabled = !reg;
+        syncAddModal(reg);
 
         if (!reg) {
-          el("defectCount").textContent = "0";
           el("defectsList").innerHTML = `<div class="text-muted">Select an aircraft to view defects.</div>`;
+          el("defectCount").textContent = "0";
           return;
         }
 
-        syncAddModal(reg);
         await loadDefects(reg);
       });
 
@@ -560,17 +533,35 @@
         if (reg) await loadDefects(reg);
       });
 
-      el("addModal").addEventListener("show.bs.modal", () => {
-        const reg = normalizeReg(el("aircraftSelect").value);
-        syncAddModal(reg);
-      });
-
       el("saveBtn").addEventListener("click", saveDefect);
-      el("actConfirmBtn").addEventListener("click", confirmAction);
+      el("actConfirmBtn").addEventListener("click", saveAction);
+
+      const aircraftFromUrl = normalizeReg(getQueryParam("aircraft") || "");
+      if (aircraftFromUrl) {
+        el("aircraftSelect").value = aircraftFromUrl;
+        el("addBtn").disabled = !aircraftFromUrl;
+        syncAddModal(aircraftFromUrl);
+        await loadDefects(aircraftFromUrl);
+      }
+
+      el("doneBtn").addEventListener("click", () => {
+        const next = getNextUrl();
+
+        if (next) {
+          const goNext = confirm("Would you like to complete the pre-flight checks now?");
+          if (goNext) {
+            window.location.href = next;
+          } else {
+            window.location.href = "index.html";
+          }
+          return;
+        }
+
+        window.location.href = "index.html";
+      });
     });
   </script>
 
-  <!-- Navbar include (same pattern as your other pages) -->
   <script>
     fetch("/partials/navbar.html")
       .then(r => {
@@ -583,11 +574,9 @@
 
         mount.innerHTML = html;
 
-        // username
         const userEl = document.getElementById("loggedInUser");
         if (userEl) userEl.textContent = localStorage.getItem("username") || "User";
 
-        // highlight current link
         const currentPath = window.location.pathname.replace(/\/$/, "");
         document.querySelectorAll(".nav-link").forEach(link => {
           const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
@@ -597,10 +586,8 @@
           }
         });
 
-        // admin menu visibility
         if (window.setupAdminMenu) await window.setupAdminMenu();
 
-        // tooltips in navbar
         document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
           new bootstrap.Tooltip(el);
         });
