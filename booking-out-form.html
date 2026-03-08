@@ -12,9 +12,10 @@
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
 
   <style>
-    body {
-      background: linear-gradient(180deg, #d8d9db 100%, #d8d9db 100%);
+      body {
+      background: linear-gradient(180deg, #ecedef 100%, #f1f2f5 100%);
     }
+
 
     body.loading {
       cursor: wait;
@@ -61,6 +62,61 @@
 
     .passenger-block[hidden] {
       display: none !important;
+    }
+
+    .status-card {
+      border-radius: 1.2rem;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      background: rgba(255, 255, 255, 0.55);
+      box-shadow:
+        0 1px 2px rgba(0, 0, 0, .04),
+        0 10px 28px rgba(0, 0, 0, .05);
+    }
+
+    .status-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 0 4px rgba(25, 135, 84, 0.10);
+      flex: 0 0 auto;
+    }
+
+    .status-metric-card {
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 1rem;
+      padding: 1rem;
+      background: #f3f4f6;
+    }
+
+    .status-label {
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: .82rem;
+      color: #6c757d;
+      margin-bottom: .35rem;
+    }
+
+    .status-value {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+      color: #212529;
+    }
+
+    .status-subtext {
+      margin-top: .35rem;
+      color: #6c757d;
+    }
+
+    .status-overdue {
+      border: 1px solid rgba(220, 53, 69, .18);
+      background: rgba(220, 53, 69, .06);
+      color: #b02a37;
+      border-radius: .8rem;
+      padding: .6rem .75rem;
+      font-size: .92rem;
+      font-weight: 600;
     }
   </style>
 
@@ -128,6 +184,60 @@
               <option>Other</option>
             </select>
             <div class="invalid-feedback">Reason required</div>
+          </div>
+
+          <div class="col-12">
+            <div id="statusCardWrap" class="mt-1">
+              <div class="card status-card d-none" id="aircraftStatusCard">
+                <div class="card-body p-3">
+                  <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                    <div>
+                      <div class="d-flex align-items-center gap-2 mb-2">
+                        <span id="statusDot" class="status-dot bg-secondary"></span>
+                        <div class="fw-semibold fs-5" id="statusAircraft">Aircraft</div>
+                      </div>
+                      <span class="badge bg-secondary" id="statusBadge">Loading</span>
+                    </div>
+
+                    <div class="text-end">
+                      <div class="text-uppercase small text-muted">Tech Log</div>
+                      <a id="techLogLink" class="text-decoration-none" href="aircraft-tech-log.html">Open</a>
+                    </div>
+                  </div>
+
+                  <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                      <div class="status-metric-card h-100">
+                        <div class="status-label">Open defects</div>
+                        <div class="status-value" id="statusOpenDefects">—</div>
+                        <div class="status-subtext">Current open items</div>
+                      </div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                      <div class="status-metric-card h-100">
+                        <div class="status-label" id="statusHoursLabel">Hours remaining</div>
+                        <div class="status-value" id="statusHoursValue">—</div>
+                        <div class="status-subtext">To next service</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div id="statusOverdueWrap" class="mt-3 d-none">
+                    <div class="status-overdue" id="statusOverdueText"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card status-card d-none" id="statusCardSkeleton">
+                <div class="card-body p-3">
+                  <div class="placeholder-glow">
+                    <span class="placeholder col-4 mb-3 d-block"></span>
+                    <span class="placeholder col-12 d-block" style="height: 90px;"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="col-12 col-md-6">
@@ -292,6 +402,10 @@
       }
 
       const API_URL = "https://rj7w2wkpgj.execute-api.eu-west-2.amazonaws.com/bookout";
+      const DEFECTS_API_BASE = "https://fm5h9wwozc.execute-api.eu-west-2.amazonaws.com";
+      const MAINT_API_BASE = "https://dssjr33iy8.execute-api.eu-west-2.amazonaws.com";
+      const DUE_SOON_URL = "https://dssjr33iy8.execute-api.eu-west-2.amazonaws.com/admin/aircraft-maintenance/due-soon?limit=50";
+      const USES_FLIGHT_HOURS = new Set(["G-AZWS", "G-BULL"]);
 
       const bookingForm = document.getElementById("bookingForm");
       const submitBtn = document.getElementById("submitBtn");
@@ -304,6 +418,28 @@
       const authSelf = document.getElementById("auth_self");
       const authInput = document.getElementById("auth");
       const picInput = document.getElementById("pic_name");
+      const aircraftSelect = document.getElementById("aircraft");
+
+      function normalizeReg(v) {
+        return (v || "").trim().toUpperCase();
+      }
+
+      function formatHours(v) {
+        if (v === null || v === undefined || v === "" || Number.isNaN(Number(v))) return "—";
+        return Number(v).toFixed(1);
+      }
+
+      function daysUntil(dateStr) {
+        if (!dateStr) return null;
+        const today = new Date();
+        const due = new Date(dateStr);
+        if (Number.isNaN(due.getTime())) return null;
+
+        today.setHours(0, 0, 0, 0);
+        due.setHours(0, 0, 0, 0);
+
+        return Math.round((due - today) / 86400000);
+      }
 
       function resetETATimeOnly() {
         const eta = document.getElementById("ETA");
@@ -359,6 +495,168 @@
         resetETATimeOnly();
       }
 
+      async function fetchOpenDefectsSummary(reg) {
+        const url = new URL(`${DEFECTS_API_BASE}/defects`);
+        url.searchParams.set("aircraft", reg);
+        url.searchParams.set("includeClosed", "false");
+
+        const res = await authFetch(url.toString(), { method: "GET" });
+        if (!res.ok) throw new Error("Failed to load defects");
+
+        const data = await res.json();
+        const items = Array.isArray(data?.items) ? data.items : [];
+
+        const openCount = items.length;
+        const grounded = items.some(d =>
+          String(d?.severity || "").toUpperCase() === "GROUNDED" || d?.grounded === true
+        );
+
+        return { openCount, grounded };
+      }
+
+      async function fetchMaintenanceSummary(reg) {
+        const res = await authFetch(`${MAINT_API_BASE}/admin/aircraft-maintenance/${encodeURIComponent(reg)}`, {
+          method: "GET"
+        });
+        if (!res.ok) throw new Error("Failed to load maintenance");
+
+        const data = await res.json();
+        const usesFlight = USES_FLIGHT_HOURS.has(reg);
+
+        return {
+          hoursLabel: usesFlight ? "Flight hrs remaining" : "Tacho hrs remaining",
+          hoursValue: usesFlight ? data?.flightHoursToNextService : data?.tachoHoursToNextService
+        };
+      }
+
+      async function fetchDueSoonGrouped() {
+        const res = await authFetch(DUE_SOON_URL, { method: "GET" });
+        if (!res.ok) return new Map();
+
+        const data = await res.json();
+        const byAircraft = new Map();
+
+        for (const it of (data.items || [])) {
+          const reg = normalizeReg(it.aircraft);
+          if (!reg) continue;
+
+          const days = daysUntil(it.nextDueDate);
+          if (days === null || days >= 0) continue;
+
+          if (!byAircraft.has(reg)) byAircraft.set(reg, []);
+          byAircraft.get(reg).push(it);
+        }
+
+        return byAircraft;
+      }
+
+      function getStatusState({ grounded, openCount, overdueCount }) {
+        if (grounded) {
+          return {
+            text: "Grounded",
+            badgeClass: "bg-danger",
+            dotClass: "bg-danger"
+          };
+        }
+
+        if (openCount > 0 || overdueCount > 0) {
+          return {
+            text: "Open",
+            badgeClass: "bg-warning text-dark",
+            dotClass: "bg-warning"
+          };
+        }
+
+        return {
+          text: "Serviceable",
+          badgeClass: "bg-success",
+          dotClass: "bg-success"
+        };
+      }
+
+      function renderStatusCard({ aircraft, openCount, grounded, hoursLabel, hoursValue, overdueItems }) {
+        const overdueCount = (overdueItems || []).length;
+        const status = getStatusState({ grounded, openCount, overdueCount });
+
+        document.getElementById("statusAircraft").textContent = aircraft;
+        document.getElementById("statusBadge").textContent = status.text.toUpperCase();
+        document.getElementById("statusBadge").className = `badge ${status.badgeClass}`;
+
+        const dot = document.getElementById("statusDot");
+        dot.className = `status-dot ${status.dotClass}`;
+
+        document.getElementById("statusOpenDefects").textContent = String(openCount);
+        document.getElementById("statusHoursLabel").textContent = hoursLabel;
+        document.getElementById("statusHoursValue").textContent = formatHours(hoursValue);
+        document.getElementById("techLogLink").href =
+          `aircraft-tech-log.html?aircraft=${encodeURIComponent(aircraft)}`;
+
+        const overdueWrap = document.getElementById("statusOverdueWrap");
+        const overdueText = document.getElementById("statusOverdueText");
+
+        if (overdueCount > 0) {
+          overdueText.textContent =
+            overdueCount === 1
+              ? "1 overdue maintenance item requires attention"
+              : `${overdueCount} overdue maintenance items require attention`;
+          overdueWrap.classList.remove("d-none");
+        } else {
+          overdueWrap.classList.add("d-none");
+          overdueText.textContent = "";
+        }
+
+        document.getElementById("statusCardSkeleton").classList.add("d-none");
+        document.getElementById("aircraftStatusCard").classList.remove("d-none");
+      }
+
+      async function loadAircraftStatusCard(reg) {
+        const skeleton = document.getElementById("statusCardSkeleton");
+        const card = document.getElementById("aircraftStatusCard");
+
+        if (!reg) {
+          skeleton.classList.add("d-none");
+          card.classList.add("d-none");
+          return;
+        }
+
+        skeleton.classList.remove("d-none");
+        card.classList.add("d-none");
+
+        try {
+          const dueMap = await fetchDueSoonGrouped();
+
+          const [defects, maint] = await Promise.all([
+            fetchOpenDefectsSummary(reg),
+            fetchMaintenanceSummary(reg)
+          ]);
+
+          renderStatusCard({
+            aircraft: reg,
+            openCount: defects.openCount,
+            grounded: defects.grounded,
+            hoursLabel: maint.hoursLabel,
+            hoursValue: maint.hoursValue,
+            overdueItems: dueMap.get(reg) || []
+          });
+        } catch (err) {
+          console.error(err);
+          skeleton.classList.add("d-none");
+          card.classList.remove("d-none");
+
+          document.getElementById("statusAircraft").textContent = reg;
+          document.getElementById("statusBadge").textContent = "Unavailable";
+          document.getElementById("statusBadge").className = "badge bg-secondary";
+          document.getElementById("statusDot").className = "status-dot bg-secondary";
+          document.getElementById("statusOpenDefects").textContent = "—";
+          document.getElementById("statusHoursLabel").textContent = "Hours remaining";
+          document.getElementById("statusHoursValue").textContent = "—";
+          document.getElementById("techLogLink").href =
+            `aircraft-tech-log.html?aircraft=${encodeURIComponent(reg)}`;
+          document.getElementById("statusOverdueWrap").classList.add("d-none");
+          document.getElementById("statusOverdueText").textContent = "";
+        }
+      }
+
       const loggedInUser = localStorage.getItem("username");
       if (loggedInUser && picInput) picInput.value = loggedInUser;
 
@@ -369,6 +667,7 @@
         occupants.value = "0";
         if (loggedInUser && picInput) picInput.value = loggedInUser;
         updatePassengers();
+        loadAircraftStatusCard("");
       });
 
       document.getElementById("clearAllExit")?.addEventListener("click", () => {
@@ -419,6 +718,15 @@
           numberInput.required = !cb.checked;
         });
       });
+
+      aircraftSelect?.addEventListener("change", async () => {
+        const reg = normalizeReg(aircraftSelect.value);
+        await loadAircraftStatusCard(reg);
+      });
+
+      if (aircraftSelect?.value) {
+        loadAircraftStatusCard(normalizeReg(aircraftSelect.value));
+      }
 
       bookingForm.addEventListener("submit", async (e) => {
         e.preventDefault();
