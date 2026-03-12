@@ -2,146 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Admin Pricing</title>
+  <title>Admin - Pricing</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 
   <style>
     body {
-      background: linear-gradient(180deg, #ecedef 0%, #f4f6f8 100%);
+      background: linear-gradient(180deg, #ecedef 100%, #f1f2f5 100%);
     }
 
     body.loading {
       cursor: wait;
     }
 
-    .page-shell {
-      max-width: 1250px;
-    }
-
-    .hero-card {
-      border: 0;
-      border-radius: 1.25rem;
-      overflow: hidden;
-      background:
-        linear-gradient(135deg, rgba(8, 32, 59, 0.96), rgba(18, 61, 109, 0.93)),
-        linear-gradient(180deg, #0d223c, #153d6d);
-      color: #fff;
-      box-shadow: 0 18px 40px rgba(18, 38, 63, 0.16);
-    }
-
-    .hero-strip {
-      height: 6px;
-      background: linear-gradient(90deg, #32a852, #65c27b, #9fd8ac);
-    }
-
-    .hero-subtitle {
-      color: rgba(255,255,255,.78);
-    }
-
-    .glass-badge {
-      border: 1px solid rgba(255,255,255,.18);
-      background: rgba(255,255,255,.10);
-      backdrop-filter: blur(4px);
-      color: #fff;
-      border-radius: 999px;
-      padding: .45rem .8rem;
-      font-size: .85rem;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: .4rem;
-    }
-
-    .section-card {
-      border: 0;
-      border-radius: 1.1rem;
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
-      overflow: hidden;
-    }
-
-    .section-card .card-header {
-      background: linear-gradient(180deg, #f9fafb, #f3f4f6);
-      border-bottom: 1px solid rgba(0,0,0,.06);
-      font-weight: 700;
-      letter-spacing: .02em;
-    }
-
-    .metric-label {
-      font-size: .75rem;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: #6c757d;
-      font-weight: 700;
-      margin-bottom: .35rem;
-    }
-
-    .metric-note {
-      font-size: .88rem;
-      color: #6c757d;
-    }
-
-    .pricing-input {
-      border-radius: .9rem;
-      min-height: 52px;
-      font-weight: 600;
-    }
-
-    .summary-tile {
-      border-radius: 1rem;
-      padding: 1rem;
-      background: linear-gradient(180deg, #fbfcfd, #f3f6f8);
-      border: 1px solid rgba(0,0,0,.06);
-      height: 100%;
-    }
-
-    .summary-value {
-      font-size: 1.45rem;
-      font-weight: 800;
-      color: #0d223c;
-      line-height: 1.1;
-    }
-
-    .summary-caption {
-      font-size: .8rem;
-      color: #6c757d;
-      text-transform: uppercase;
-      letter-spacing: .07em;
-      font-weight: 700;
-    }
-
-    .aircraft-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: .45rem;
-      border-radius: 999px;
-      padding: .45rem .85rem;
-      background: #eef4f8;
-      color: #23415f;
-      font-weight: 700;
-      font-size: .9rem;
-    }
-
-    .soft-panel {
-      border-radius: 1rem;
-      background: linear-gradient(180deg, #f8fafc, #f1f5f9);
-      border: 1px solid rgba(0,0,0,.06);
-      padding: 1rem;
-    }
-
-    .status-line {
-      min-height: 1.25rem;
-      font-size: .92rem;
-      font-weight: 600;
-    }
-
     .fade-in {
       opacity: 0;
-      transform: translateY(4px);
-      transition: opacity .22s ease, transform .22s ease;
+      transform: translateY(2px);
+      transition: opacity .18s ease, transform .18s ease;
     }
 
     .fade-in.ready {
@@ -149,175 +28,140 @@
       transform: none;
     }
 
-    .btn-aviation {
-      border-radius: .9rem;
-      padding: .7rem 1rem;
+    .status-text {
+      min-height: 1.25rem;
+    }
+
+    .section-title {
+      letter-spacing: .04em;
+      font-size: .78rem;
+      text-transform: uppercase;
+      color: #6c757d;
       font-weight: 700;
     }
 
-    .btn-save {
-      box-shadow: 0 8px 18px rgba(13, 110, 253, 0.18);
-    }
-
-    @media (max-width: 767.98px) {
-      .hero-title {
-        font-size: 1.5rem;
-      }
-
-      .summary-value {
-        font-size: 1.2rem;
-      }
+    .hint-card {
+      border: 0;
+      border-radius: 1rem;
     }
   </style>
 </head>
+
 <body>
+  <div class="container-fluid p-2 bg-primary text-white text-center">
+    <h2 class="mb-0">PRICING</h2>
+  </div>
+
   <div id="navbar-placeholder"></div>
 
-  <div class="container py-4 page-shell">
-    <div class="card hero-card fade-in mb-4" id="heroCard">
-      <div class="hero-strip"></div>
-      <div class="card-body p-4 p-lg-5">
-        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
+  <div class="container py-4">
+    <div class="card shadow-sm fade-in" id="pageCard">
+      <div class="card-body">
+
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
           <div>
-            <div class="glass-badge mb-3">Admin Console</div>
-            <h1 class="hero-title h2 fw-bold mb-2">Aircraft Pricing Control Panel</h1>
-            <div class="hero-subtitle">
-              Manage aircraft hourly rates and shared operational charges from one place.
-            </div>
+            <h1 class="h4 mb-1">Pricing Editor</h1>
           </div>
 
-          <div class="text-lg-end">
-            <div class="glass-badge mb-2" id="selectedAircraftBadge">No aircraft selected</div>
-            <div class="small hero-subtitle">Pricing changes are written directly to your existing aircraft-data table.</div>
-          </div>
+          <div class="status-text small text-muted" id="saveStatus"></div>
         </div>
-      </div>
-    </div>
 
-    <div class="alert alert-danger d-none fade-in" id="errorBox"></div>
+        <div class="alert alert-danger d-none mb-4" id="errorBox"></div>
 
-    <div class="row g-4">
-      <div class="col-12 col-xl-5">
-        <div class="card section-card fade-in" id="globalCard">
-          <div class="card-header py-3 px-4">Global Charges</div>
-          <div class="card-body p-4">
-            <div class="row g-3 mb-4">
-              <div class="col-12 col-md-4 col-xl-12">
-                <div class="summary-tile">
-                  <div class="summary-caption mb-2">Landing Fee</div>
-                  <div class="summary-value" id="landingFeeSummary">£--</div>
-                </div>
-              </div>
-              <div class="col-12 col-md-4 col-xl-12">
-                <div class="summary-tile">
-                  <div class="summary-caption mb-2">Instructor Hourly</div>
-                  <div class="summary-value" id="instructorHourlySummary">£--</div>
-                </div>
-              </div>
-              <div class="col-12 col-md-4 col-xl-12">
-                <div class="summary-tile">
-                  <div class="summary-caption mb-2">Surcharge</div>
-                  <div class="summary-value" id="defaultSurchargeSummary">£--</div>
+        <div class="row g-3 mb-4">
+          <div class="col-12 col-lg-6">
+            <div class="card shadow-sm hint-card h-100">
+              <div class="card-body">
+                <div class="section-title">Aircraft Rate</div>
+                <div class="small text-muted mt-2">
+                  Select an aircraft to update its <strong>hourly rate</strong>.
                 </div>
               </div>
             </div>
+          </div>
 
-            <div class="soft-panel">
-              <div class="metric-label">Shared Charges (GLOBAL row)</div>
-
-              <div class="mb-3">
-                <label class="form-label fw-semibold" for="landingFee">Landing Fee (£)</label>
-                <input id="landingFee" type="number" step="0.01" min="0" class="form-control pricing-input" placeholder="e.g. 6.00">
+          <div class="col-12 col-lg-6">
+            <div class="card shadow-sm hint-card h-100">
+              <div class="card-body">
+                <div class="section-title">Other</div>
+                <div class="small text-muted mt-2">
+                  <strong>Landing fee</strong>, <strong>instructor hourly</strong> and <strong>surcharge</strong>
+                  are stored against the <strong>GLOBAL</strong> item.
+                </div>
               </div>
-
-              <div class="mb-3">
-                <label class="form-label fw-semibold" for="instructorHourly">Instructor Hourly Rate (£)</label>
-                <input id="instructorHourly" type="number" step="0.01" min="0" class="form-control pricing-input" placeholder="e.g. 40.00">
-              </div>
-
-              <div class="mb-0">
-                <label class="form-label fw-semibold" for="defaultSurcharge">Surcharge Fee (£)</label>
-                <input id="defaultSurcharge" type="number" step="0.01" min="0" class="form-control pricing-input" placeholder="e.g. 10.00">
-              </div>
-            </div>
-
-            <div class="metric-note mt-3">
-              These values are stored on the <strong>GLOBAL</strong> row in your DynamoDB table.
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="col-12 col-xl-7">
-        <div class="card section-card fade-in" id="aircraftCard">
-          <div class="card-header py-3 px-4">Aircraft Rate Editor</div>
-          <div class="card-body p-4">
-            <div class="row g-3 align-items-end mb-4">
-              <div class="col-12 col-lg-7">
-                <label class="form-label fw-semibold" for="aircraft">Aircraft Registration</label>
-                <select id="aircraft" class="form-select pricing-input">
+        <div class="card shadow-sm mb-4">
+          <div class="card-body">
+            <div class="row g-3 align-items-end">
+              <div class="col-12 col-md-4">
+                <label class="form-label fw-semibold" for="aircraft">Aircraft</label>
+                <select id="aircraft" class="form-select">
                   <option value="">Select aircraft...</option>
-                  <option value="G-AZWS">G-AZWS</option>
-                  <option value="G-BPAF">G-BPAF</option>
-                  <option value="G-BULL">G-BULL</option>
-                  <option value="G-AVYL">G-AVYL</option>
-                  <option value="G-EDGI">G-EDGI</option>
+                  <option>G-AZWS</option>
+                  <option>G-BPAF</option>
+                  <option>G-EDGI</option>
+                  <option>G-AVYL</option>
+                  <option>G-BULL</option>
                 </select>
               </div>
 
-              <div class="col-12 col-lg-5">
-                <div class="aircraft-pill" id="ratePreview">Hourly Rate £--</div>
+              <div class="col-12 col-md-8 text-md-end">
+                <button id="loadBtn" class="btn btn-outline-primary">Load Pricing</button>
+                <button id="saveBtn" class="btn btn-primary">Save Pricing</button>
               </div>
-            </div>
-
-            <div class="soft-panel mb-4">
-              <div class="metric-label">Selected Aircraft Pricing</div>
-
-              <div class="mb-0">
-                <label class="form-label fw-semibold" for="hourlyRate">Aircraft Hourly Rate (£)</label>
-                <input id="hourlyRate" type="number" step="0.01" min="0" class="form-control pricing-input" placeholder="e.g. 180.00">
-              </div>
-            </div>
-
-            <div class="row g-3 align-items-center">
-              <div class="col-12 col-lg">
-                <div class="status-line text-muted" id="saveStatus"></div>
-              </div>
-
-              <div class="col-12 col-lg-auto d-flex flex-wrap gap-2">
-                <button id="loadBtn" class="btn btn-outline-primary btn-aviation">Load Pricing</button>
-                <button id="saveBtn" class="btn btn-primary btn-save btn-aviation">Save Pricing</button>
-              </div>
-            </div>
-
-            <hr class="my-4">
-
-            <div class="row g-3">
-              <div class="col-12 col-md-4">
-                <div class="summary-tile">
-                  <div class="summary-caption mb-2">Selected Aircraft</div>
-                  <div class="summary-value fs-4" id="selectedAircraftSummary">--</div>
-                </div>
-              </div>
-              <div class="col-12 col-md-4">
-                <div class="summary-tile">
-                  <div class="summary-caption mb-2">Current Hourly Rate</div>
-                  <div class="summary-value fs-4" id="currentHourlyRateSummary">£--</div>
-                </div>
-              </div>
-              <div class="col-12 col-md-4">
-                <div class="summary-tile">
-                  <div class="summary-caption mb-2">Charge Profile</div>
-                  <div class="summary-value fs-5">Aircraft + Global</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="metric-note mt-3">
-              Aircraft hourly rate is stored on the selected aircraft row. Shared fees are stored on the GLOBAL row.
             </div>
           </div>
         </div>
+
+        <div class="row g-4">
+          <div class="col-12 col-lg-6">
+            <div class="card shadow-sm h-100">
+              <div class="card-body">
+                <div class="section-title mb-3">Aircraft Pricing</div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-semibold" for="hourlyRate">Aircraft Hourly Rate (£)</label>
+                  <input id="hourlyRate" type="number" step="0.01" min="0" class="form-control" placeholder="e.g. 180">
+                </div>
+
+                <div class="small text-muted">
+                  This value is saved against the selected aircraft row.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-6">
+            <div class="card shadow-sm h-100">
+              <div class="card-body">
+                <div class="section-title mb-3">Global Charges</div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-semibold" for="landingFee">Landing Fee (£)</label>
+                  <input id="landingFee" type="number" step="0.01" min="0" class="form-control" placeholder="e.g. 6">
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-semibold" for="instructorHourly">Instructor Hourly Rate (£)</label>
+                  <input id="instructorHourly" type="number" step="0.01" min="0" class="form-control" placeholder="e.g. 40">
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-semibold" for="defaultSurcharge">Surcharge Fee (£)</label>
+                  <input id="defaultSurcharge" type="number" step="0.01" min="0" class="form-control" placeholder="e.g. 10">
+                </div>
+
+                <div class="small text-muted">
+                  These values are saved against the <strong>GLOBAL</strong> row.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -330,111 +174,79 @@
 
   <script>
     const API_BASE = "https://g7e595crml.execute-api.eu-west-2.amazonaws.com";
-    const $ = (id) => document.getElementById(id);
-
-    function formatMoney(value) {
-      if (value === null || value === undefined || value === "" || Number.isNaN(Number(value))) {
-        return "£--";
-      }
-      return `£${Number(value).toFixed(2)}`;
-    }
-
-    function normalizeReg(value) {
-      return String(value || "").trim().toUpperCase();
-    }
+    const el = (id) => document.getElementById(id);
 
     function setBusy(isBusy) {
       document.body.classList.toggle("loading", isBusy);
-      $("loadBtn").disabled = isBusy;
-      $("saveBtn").disabled = isBusy;
-      $("aircraft").disabled = isBusy;
-      $("hourlyRate").disabled = isBusy;
-      $("landingFee").disabled = isBusy;
-      $("instructorHourly").disabled = isBusy;
-      $("defaultSurcharge").disabled = isBusy;
+      el("loadBtn").disabled = isBusy;
+      el("saveBtn").disabled = isBusy;
+      el("aircraft").disabled = isBusy;
     }
 
-    function showError(message) {
-      const box = $("errorBox");
-      box.textContent = message || "Something went wrong.";
+    function showError(msg) {
+      const box = el("errorBox");
+      box.textContent = msg || "Something went wrong.";
       box.classList.remove("d-none");
     }
 
     function clearError() {
-      const box = $("errorBox");
+      const box = el("errorBox");
       box.textContent = "";
       box.classList.add("d-none");
     }
 
-    function setStatus(message, isError = false) {
-      const el = $("saveStatus");
-      el.textContent = message || "";
-      el.classList.toggle("text-danger", !!isError);
-      el.classList.toggle("text-muted", !isError);
+    function setStatus(msg) {
+      el("saveStatus").textContent = msg || "";
     }
 
     async function waitForAuthFetch(maxMs = 2500) {
       const start = Date.now();
       while (Date.now() - start < maxMs) {
         if (typeof window.authFetch === "function") return true;
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise(r => setTimeout(r, 50));
       }
       return false;
     }
 
-    function updateAircraftBadge() {
-      const aircraft = normalizeReg($("aircraft").value);
-      $("selectedAircraftBadge").textContent = aircraft ? `Selected ${aircraft}` : "No aircraft selected";
-      $("selectedAircraftSummary").textContent = aircraft || "--";
-    }
-
-    function updateSummaries() {
-      $("landingFeeSummary").textContent = formatMoney($("landingFee").value);
-      $("instructorHourlySummary").textContent = formatMoney($("instructorHourly").value);
-      $("defaultSurchargeSummary").textContent = formatMoney($("defaultSurcharge").value);
-
-      $("currentHourlyRateSummary").textContent = formatMoney($("hourlyRate").value);
-      $("ratePreview").textContent = `Hourly Rate ${formatMoney($("hourlyRate").value)}`;
+    function normalizeReg(value) {
+      return (value || "").trim().toUpperCase();
     }
 
     function fillAircraftForm(data) {
-      $("hourlyRate").value = data?.hourlyRate ?? "";
-      updateSummaries();
+      el("hourlyRate").value = data?.hourlyRate ?? "";
     }
 
     function fillGlobalForm(data) {
-      $("landingFee").value = data?.defaultLandingFee ?? data?.landingFee ?? "";
-      $("instructorHourly").value = data?.instructorHourly ?? "";
-      $("defaultSurcharge").value = data?.defaultSurcharge ?? data?.defaultsurcharge ?? "";
-      updateSummaries();
+      el("landingFee").value = data?.defaultLandingFee ?? data?.landingFee ?? "";
+      el("instructorHourly").value = data?.instructorHourly ?? "";
+      el("defaultSurcharge").value = data?.defaultSurcharge ?? data?.defaultsurcharge ?? "";
     }
 
     function readAircraftForm() {
       return {
-        hourlyRate: $("hourlyRate").value === "" ? null : Number($("hourlyRate").value)
+        hourlyRate: el("hourlyRate").value === "" ? null : Number(el("hourlyRate").value)
       };
     }
 
     function readGlobalForm() {
       return {
-        defaultLandingFee: $("landingFee").value === "" ? null : Number($("landingFee").value),
-        instructorHourly: $("instructorHourly").value === "" ? null : Number($("instructorHourly").value),
-        defaultSurcharge: $("defaultSurcharge").value === "" ? null : Number($("defaultSurcharge").value)
+        defaultLandingFee: el("landingFee").value === "" ? null : Number(el("landingFee").value),
+        instructorHourly: el("instructorHourly").value === "" ? null : Number(el("instructorHourly").value),
+        defaultSurcharge: el("defaultSurcharge").value === "" ? null : Number(el("defaultSurcharge").value)
       };
     }
 
     async function loadPricing() {
       clearError();
-      updateAircraftBadge();
 
-      const aircraft = normalizeReg($("aircraft").value);
+      const aircraft = normalizeReg(el("aircraft").value);
       if (!aircraft) {
         showError("Please select an aircraft first.");
         return;
       }
 
       setBusy(true);
-      setStatus("Loading pricing...");
+      setStatus("Loading...");
 
       try {
         const [aircraftRes, globalRes] = await Promise.all([
@@ -447,13 +259,11 @@
         ]);
 
         if (!aircraftRes?.ok) {
-          const txt = await aircraftRes.text().catch(() => "");
-          throw new Error(txt || `Aircraft pricing load failed (${aircraftRes?.status || "no response"})`);
+          throw new Error(`Aircraft pricing load failed (${aircraftRes?.status || "no response"})`);
         }
 
         if (!globalRes?.ok) {
-          const txt = await globalRes.text().catch(() => "");
-          throw new Error(txt || `Global pricing load failed (${globalRes?.status || "no response"})`);
+          throw new Error(`Global pricing load failed (${globalRes?.status || "no response"})`);
         }
 
         const aircraftData = await aircraftRes.json();
@@ -462,11 +272,11 @@
         fillAircraftForm(aircraftData);
         fillGlobalForm(globalData);
 
-        setStatus("Pricing loaded.");
-        setTimeout(() => setStatus(""), 1600);
+        setStatus("Loaded.");
+        setTimeout(() => setStatus(""), 1500);
       } catch (err) {
         console.error(err);
-        setStatus("Load failed.", true);
+        setStatus("");
         showError(err.message || "Failed to load pricing.");
       } finally {
         setBusy(false);
@@ -475,34 +285,28 @@
 
     async function savePricing() {
       clearError();
-      updateAircraftBadge();
 
-      const aircraft = normalizeReg($("aircraft").value);
+      const aircraft = normalizeReg(el("aircraft").value);
       if (!aircraft) {
         showError("Please select an aircraft first.");
         return;
       }
 
-      const aircraftPayload = {
-        scope: "aircraft",
-        aircraft,
-        ...readAircraftForm()
-      };
-
-      const globalPayload = {
-        scope: "global",
-        ...readGlobalForm()
-      };
-
-      if (aircraftPayload.hourlyRate === null) {
-        showError("Please enter an aircraft hourly rate.");
-        return;
-      }
-
       setBusy(true);
-      setStatus("Saving pricing...");
+      setStatus("Saving...");
 
       try {
+        const aircraftPayload = {
+          scope: "aircraft",
+          aircraft,
+          ...readAircraftForm()
+        };
+
+        const globalPayload = {
+          scope: "global",
+          ...readGlobalForm()
+        };
+
         const [aircraftRes, globalRes] = await Promise.all([
           window.authFetch(`${API_BASE}/admin/aircraft-pricing`, {
             method: "PUT",
@@ -526,12 +330,11 @@
           throw new Error(txt || `Global save failed (${globalRes?.status || "no response"})`);
         }
 
-        updateSummaries();
-        setStatus("Pricing saved successfully.");
-        setTimeout(() => setStatus(""), 1800);
+        setStatus("Saved.");
+        setTimeout(() => setStatus(""), 1500);
       } catch (err) {
         console.error(err);
-        setStatus("Save failed.", true);
+        setStatus("");
         showError(err.message || "Failed to save pricing.");
       } finally {
         setBusy(false);
@@ -539,11 +342,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", async () => {
-      requestAnimationFrame(() => {
-        $("heroCard")?.classList.add("ready");
-        $("globalCard")?.classList.add("ready");
-        $("aircraftCard")?.classList.add("ready");
-      });
+      requestAnimationFrame(() => el("pageCard")?.classList.add("ready"));
 
       const ok = await waitForAuthFetch();
       if (!ok) {
@@ -556,22 +355,15 @@
         window.location.href = "index.html";
         return;
       }
-
-      updateAircraftBadge();
-      updateSummaries();
     });
 
-    $("loadBtn").addEventListener("click", loadPricing);
-    $("saveBtn").addEventListener("click", savePricing);
-    $("aircraft").addEventListener("change", () => {
+    el("loadBtn").addEventListener("click", loadPricing);
+    el("saveBtn").addEventListener("click", savePricing);
+
+    el("aircraft").addEventListener("change", () => {
       clearError();
       setStatus("");
-      updateAircraftBadge();
       fillAircraftForm({});
-    });
-
-    ["hourlyRate", "landingFee", "instructorHourly", "defaultSurcharge"].forEach(id => {
-      $(id).addEventListener("input", updateSummaries);
     });
   </script>
 </body>
