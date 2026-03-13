@@ -105,30 +105,6 @@
 
         <div class="alert alert-danger d-none mb-4" id="errorBox"></div>
 
-        <div class="row g-3 mb-4">
-          <div class="col-12 col-lg-4">
-            <div class="card shadow-sm hint-card h-100">
-              <div class="card-body">
-                <div class="section-title">How it works</div>
-                <div class="small text-muted mt-2">
-                  Search for a user, select their record, update permissions, then save.
-                  This page updates your DynamoDB <strong>UserProfiles</strong> table only.
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-12 col-lg-8">
-            <div class="card shadow-sm hint-card h-100">
-              <div class="card-body">
-                <div class="section-title">Recommended</div>
-                <div class="small text-muted mt-2">
-                  Keep <strong>userId</strong> and Cognito identity fields read-only.
-                  Only edit club/admin fields here such as role, phone, self-auth and aircraft permissions.
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         <div class="row g-4">
@@ -272,9 +248,7 @@
                     </div>
                   </div>
 
-                  <div class="alert alert-info mt-4 mb-0">
-                    This editor updates your DynamoDB profile record. It does not change Cognito email or username attributes.
-                  </div>
+            
                 </form>
               </div>
             </div>
