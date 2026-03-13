@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin - User Profiles</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+  <style>
+    body {
+      background: linear-gradient(180deg, #ecedef 100%, #f1f2f5 100%);
+    }
+
+    body.loading {
+      cursor: wait;
+    }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(2px);
+      transition: opacity .18s ease, transform .18s ease;
+    }
+
+    .fade-in.ready {
+      opacity: 1;
+      transform: none;
+    }
+
+    .status-text {
+      min-height: 1.25rem;
+    }
+
+    .section-title {
+      letter-spacing: .04em;
+      font-size: .78rem;
+      text-transform: uppercase;
+      color: #6c757d;
+      font-weight: 700;
+    }
+
+    .hint-card,
+    .editor-card,
+    .list-card {
+      border: 0;
+      border-radius: 1rem;
+    }
+
+    .user-row {
+      cursor: pointer;
+    }
+
+    .user-row.table-active td {
+      box-shadow: inset 3px 0 0 #0d6efd;
+    }
+
+    .table-wrap {
+      max-height: 520px;
+      overflow: auto;
+    }
+
+    .pill-yes {
+      background: #d1e7dd;
+      color: #0f5132;
+      border-radius: 999px;
+      padding: .2rem .55rem;
+      font-size: .75rem;
+      font-weight: 600;
+    }
+
+    .pill-no {
+      background: #f8d7da;
+      color: #842029;
+      border-radius: 999px;
+      padding: .2rem .55rem;
+      font-size: .75rem;
+      font-weight: 600;
+    }
+
+    .read-only {
+      background-color: #f8f9fa;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container-fluid p-2 bg-primary text-white text-center">
+    <h2 class="mb-0">USER PROFILES</h2>
+  </div>
+
+  <div id="navbar-placeholder"></div>
+
+  <div class="container py-4">
+    <div class="card shadow-sm fade-in" id="pageCard">
+      <div class="card-body">
+
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+          <div>
+            <h1 class="h4 mb-1">User Profile Editor</h1>
+            <div class="small text-muted">Admin-only editor for EFM user permissions and details.</div>
+          </div>
+          <div class="status-text small text-muted" id="saveStatus"></div>
+        </div>
+
+        <div class="alert alert-danger d-none mb-4" id="errorBox"></div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-12 col-lg-4">
+            <div class="card shadow-sm hint-card h-100">
+              <div class="card-body">
+                <div class="section-title">How it works</div>
+                <div class="small text-muted mt-2">
+                  Search for a user, select their record, update permissions, then save.
+                  This page updates your DynamoDB <strong>UserProfiles</strong> table only.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-8">
+            <div class="card shadow-sm hint-card h-100">
+              <div class="card-body">
+                <div class="section-title">Recommended</div>
+                <div class="small text-muted mt-2">
+                  Keep <strong>userId</strong> and Cognito identity fields read-only.
+                  Only edit club/admin fields here such as role, phone, self-auth and aircraft permissions.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <!-- LEFT: USER LIST -->
+          <div class="col-12 col-xl-5">
+            <div class="card shadow-sm list-card h-100">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+                  <div class="section-title mb-0">Users</div>
+                  <button id="refreshBtn" class="btn btn-sm btn-outline-primary">Refresh</button>
+                </div>
+
+                <div class="row g-2 mb-3">
+                  <div class="col-12 col-md-8">
+                    <input id="searchInput" class="form-control" placeholder="Search name, phone, role...">
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <select id="roleFilter" class="form-select">
+                      <option value="">All roles</option>
+                      <option value="Admin">Admin</option>
+                      <option value="EFM User">EFM User</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="table-wrap border rounded">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+                      <tr>
+                        <th>Name</th>
+                        <th>Role</th>
+                        <th>Phone</th>
+                      </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                      <tr>
+                        <td colspan="3" class="text-muted">Loading users...</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="small text-muted mt-2">
+                  <span id="userCount">0</span> users shown
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: EDITOR -->
+          <div class="col-12 col-xl-7">
+            <div class="card shadow-sm editor-card h-100">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+                  <div class="section-title mb-0">Selected user</div>
+                  <div class="d-flex gap-2">
+                    <button id="loadBtn" class="btn btn-outline-primary" disabled>Reload</button>
+                    <button id="saveBtn" class="btn btn-primary" disabled>Save Changes</button>
+                  </div>
+                </div>
+
+                <form id="editorForm" novalidate>
+                  <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                      <label class="form-label fw-semibold" for="userId">User ID</label>
+                      <input id="userId" class="form-control read-only" disabled>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                      <label class="form-label fw-semibold" for="createdAt">Created</label>
+                      <input id="createdAt" class="form-control read-only" disabled>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                      <label class="form-label fw-semibold" for="name">Name</label>
+                      <input id="name" class="form-control" placeholder="Full name">
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                      <label class="form-label fw-semibold" for="phone">Phone</label>
+                      <input id="phone" class="form-control" placeholder="07...">
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                      <label class="form-label fw-semibold" for="role">Role</label>
+                      <select id="role" class="form-select">
+                        <option value="EFM User">EFM User</option>
+                        <option value="Admin">Admin</option>
+                      </select>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                      <label class="form-label fw-semibold" for="updatedAt">Last updated</label>
+                      <input id="updatedAt" class="form-control read-only" disabled>
+                    </div>
+                  </div>
+
+                  <hr class="my-4">
+
+                  <div class="section-title mb-3">Permissions</div>
+
+                  <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                      <label class="form-label fw-semibold" for="self_auth">Self Authorisation</label>
+                      <select id="self_auth" class="form-select">
+                        <option value="No">No</option>
+                        <option value="Yes">Yes</option>
+                      </select>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                      <label class="form-label fw-semibold" for="efis">EFIS</label>
+                      <select id="efis" class="form-select">
+                        <option value="No">No</option>
+                        <option value="Yes">Yes</option>
+                      </select>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                      <label class="form-label fw-semibold" for="bulldog">Bulldog</label>
+                      <select id="bulldog" class="form-select">
+                        <option value="No">No</option>
+                        <option value="Yes">Yes</option>
+                      </select>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                      <label class="form-label fw-semibold" for="complex">Complex</label>
+                      <select id="complex" class="form-select">
+                        <option value="No">No</option>
+                        <option value="Yes">Yes</option>
+                      </select>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                      <label class="form-label fw-semibold" for="aeros">Aeros</label>
+                      <select id="aeros" class="form-select">
+                        <option value="No">No</option>
+                        <option value="Yes">Yes</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="alert alert-info mt-4 mb-0">
+                    This editor updates your DynamoDB profile record. It does not change Cognito email or username attributes.
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/logout.js"></script>
+  <script src="js/admin-guard.js" defer></script>
+  <script src="js/due-soon-badge.js" defer></script>
+  <script src="js/loadNavbar.js"></script>
+
+  <script>
+    const API_BASE = "https://YOUR-API-ID.execute-api.eu-west-2.amazonaws.com";
+    const el = (id) => document.getElementById(id);
+
+    let allUsers = [];
+    let selectedUserId = "";
+
+    function setBusy(isBusy) {
+      document.body.classList.toggle("loading", isBusy);
+      el("refreshBtn").disabled = isBusy;
+      el("searchInput").disabled = isBusy;
+      el("roleFilter").disabled = isBusy;
+      el("loadBtn").disabled = isBusy || !selectedUserId;
+      el("saveBtn").disabled = isBusy || !selectedUserId;
+    }
+
+    function showError(msg) {
+      const box = el("errorBox");
+      box.textContent = msg || "Something went wrong.";
+      box.classList.remove("d-none");
+    }
+
+    function clearError() {
+      const box = el("errorBox");
+      box.textContent = "";
+      box.classList.add("d-none");
+    }
+
+    function setStatus(msg) {
+      el("saveStatus").textContent = msg || "";
+    }
+
+    async function waitForAuthFetch(maxMs = 2500) {
+      const start = Date.now();
+      while (Date.now() - start < maxMs) {
+        if (typeof window.authFetch === "function") return true;
+        await new Promise(r => setTimeout(r, 50));
+      }
+      return false;
+    }
+
+    function fmtDate(value) {
+      if (!value) return "";
+      const d = new Date(value);
+      return Number.isNaN(d.getTime()) ? value : d.toLocaleString();
+    }
+
+    function yesNoPill(value) {
+      return value === "Yes"
+        ? `<span class="pill-yes">Yes</span>`
+        : `<span class="pill-no">No</span>`;
+    }
+
+    function clearForm() {
+      [
+        "userId", "createdAt", "updatedAt",
+        "name", "phone", "role",
+        "self_auth", "efis", "bulldog", "complex", "aeros"
+      ].forEach(id => el(id).value = "");
+
+      el("role").value = "EFM User";
+      el("self_auth").value = "No";
+      el("efis").value = "No";
+      el("bulldog").value = "No";
+      el("complex").value = "No";
+      el("aeros").value = "No";
+    }
+
+    function fillForm(data) {
+      el("userId").value = data.userId || "";
+      el("createdAt").value = fmtDate(data.createdAt);
+      el("updatedAt").value = fmtDate(data.updatedAt);
+      el("name").value = data.name || "";
+      el("phone").value = data.phone || "";
+      el("role").value = data.role || "EFM User";
+      el("self_auth").value = data.self_auth || "No";
+      el("efis").value = data.efis || "No";
+      el("bulldog").value = data.bulldog || "No";
+      el("complex").value = data.complex || "No";
+      el("aeros").value = data.aeros || "No";
+    }
+
+    function readForm() {
+      return {
+        name: (el("name").value || "").trim(),
+        phone: (el("phone").value || "").trim(),
+        role: el("role").value || "EFM User",
+        self_auth: el("self_auth").value || "No",
+        efis: el("efis").value || "No",
+        bulldog: el("bulldog").value || "No",
+        complex: el("complex").value || "No",
+        aeros: el("aeros").value || "No"
+      };
+    }
+
+    function filteredUsers() {
+      const q = (el("searchInput").value || "").trim().toLowerCase();
+      const role = el("roleFilter").value;
+
+      return allUsers.filter(u => {
+        const matchesSearch =
+          !q ||
+          (u.name || "").toLowerCase().includes(q) ||
+          (u.phone || "").toLowerCase().includes(q) ||
+          (u.role || "").toLowerCase().includes(q) ||
+          (u.userId || "").toLowerCase().includes(q);
+
+        const matchesRole = !role || (u.role || "") === role;
+        return matchesSearch && matchesRole;
+      });
+    }
+
+    function renderUsers() {
+      const items = filteredUsers();
+      const tbody = el("usersTableBody");
+
+      if (!items.length) {
+        tbody.innerHTML = `<tr><td colspan="3" class="text-muted">No users found.</td></tr>`;
+        el("userCount").textContent = "0";
+        return;
+      }
+
+      tbody.innerHTML = items.map(u => `
+        <tr class="user-row ${u.userId === selectedUserId ? "table-active" : ""}" data-userid="${u.userId}">
+          <td>
+            <div class="fw-semibold">${escapeHtml(u.name || "Unnamed user")}</div>
+            <div class="small text-muted">${escapeHtml(u.userId || "")}</div>
+          </td>
+          <td>
+            <div>${escapeHtml(u.role || "EFM User")}</div>
+            <div class="small mt-1">${yesNoPill(u.self_auth || "No")}</div>
+          </td>
+          <td>${escapeHtml(u.phone || "-")}</td>
+        </tr>
+      `).join("");
+
+      el("userCount").textContent = String(items.length);
+
+      tbody.querySelectorAll(".user-row").forEach(row => {
+        row.addEventListener("click", async () => {
+          selectedUserId = row.dataset.userid || "";
+          renderUsers();
+          await loadUser(selectedUserId);
+        });
+      });
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    async function loadUsers() {
+      clearError();
+      setBusy(true);
+      setStatus("Loading users...");
+
+      try {
+        const res = await window.authFetch(`${API_BASE}/admin/user-profiles`, {
+          method: "GET"
+        });
+
+        if (!res?.ok) {
+          const txt = await res.text().catch(() => "");
+          throw new Error(txt || `Load failed (${res?.status || "no response"})`);
+        }
+
+        const data = await res.json();
+        allUsers = Array.isArray(data?.items) ? data.items : [];
+        renderUsers();
+        setStatus("Loaded.");
+        setTimeout(() => setStatus(""), 1200);
+      } catch (err) {
+        console.error(err);
+        allUsers = [];
+        renderUsers();
+        showError(err.message || "Failed to load users.");
+        setStatus("");
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function loadUser(userId) {
+      if (!userId) return;
+
+      clearError();
+      setBusy(true);
+      setStatus("Loading user...");
+
+      try {
+        const res = await window.authFetch(`${API_BASE}/admin/user-profiles/${encodeURIComponent(userId)}`, {
+          method: "GET"
+        });
+
+        if (!res?.ok) {
+          const txt = await res.text().catch(() => "");
+          throw new Error(txt || `User load failed (${res?.status || "no response"})`);
+        }
+
+        const data = await res.json();
+        fillForm(data);
+        el("loadBtn").disabled = false;
+        el("saveBtn").disabled = false;
+        setStatus("Loaded.");
+        setTimeout(() => setStatus(""), 1200);
+      } catch (err) {
+        console.error(err);
+        showError(err.message || "Failed to load user.");
+        setStatus("");
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function saveUser() {
+      if (!selectedUserId) {
+        showError("Please select a user first.");
+        return;
+      }
+
+      clearError();
+      setBusy(true);
+      setStatus("Saving...");
+
+      try {
+        const res = await window.authFetch(`${API_BASE}/admin/user-profiles/${encodeURIComponent(selectedUserId)}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(readForm())
+        });
+
+        if (!res?.ok) {
+          const txt = await res.text().catch(() => "");
+          throw new Error(txt || `Save failed (${res?.status || "no response"})`);
+        }
+
+        const data = await res.json();
+        fillForm(data.item || { userId: selectedUserId, ...readForm() });
+        await loadUsers();
+        setStatus("Saved.");
+        setTimeout(() => setStatus(""), 1500);
+      } catch (err) {
+        console.error(err);
+        showError(err.message || "Failed to save user.");
+        setStatus("");
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      requestAnimationFrame(() => el("pageCard")?.classList.add("ready"));
+      clearForm();
+
+      const ok = await waitForAuthFetch();
+      if (!ok) {
+        showError("Authentication helper failed to load.");
+        return;
+      }
+
+      const isAdmin = await window.isAdminUser?.();
+      if (!isAdmin) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      await loadUsers();
+
+      el("refreshBtn").addEventListener("click", loadUsers);
+      el("loadBtn").addEventListener("click", () => loadUser(selectedUserId));
+      el("saveBtn").addEventListener("click", saveUser);
+      el("searchInput").addEventListener("input", renderUsers);
+      el("roleFilter").addEventListener("change", renderUsers);
+    });
+  </script>
+</body>
+</html>
