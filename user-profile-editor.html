@@ -391,11 +391,9 @@
         <tr class="user-row ${u.userId === selectedUserId ? "table-active" : ""}" data-userid="${u.userId}">
           <td>
             <div class="fw-semibold">${escapeHtml(u.name || "Unnamed user")}</div>
-            <div class="small text-muted">${escapeHtml(u.userId || "")}</div>
           </td>
           <td>
-            <div>${escapeHtml(u.role || "EFM User")}</div>
-            <div class="small mt-1">${yesNoPill(u.self_auth || "No")}</div>
+            ${escapeHtml(u.role || "EFM User")}
           </td>
           <td>${escapeHtml(u.phone || "-")}</td>
         </tr>
