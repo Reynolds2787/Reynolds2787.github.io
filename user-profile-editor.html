@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>Admin - User Profiles</title>
@@ -47,12 +48,24 @@
       border-radius: 1rem;
     }
 
-    .user-row {
-      cursor: pointer;
+    .user-row td {
+      transition: background-color 0.18s ease, transform 0.15s ease;
     }
 
     .user-row.table-active td {
-      box-shadow: inset 3px 0 0 #0d6efd;
+      background: linear-gradient(90deg, #e7f1ff, #f7faff);
+      font-weight: 600;
+      box-shadow: inset 0 0 0 1px rgba(13, 110, 253, 0.15);
+    }
+
+    .user-row.table-active {
+      transform: translateX(3px);
+    }
+
+
+
+    .user-row:hover td {
+      background-color: rgba(13, 110, 253, 0.05);
     }
 
     .table-wrap {
@@ -105,158 +118,158 @@
 
         <div class="alert alert-danger d-none mb-4" id="errorBox"></div>
 
+      </div>
+
+      <div class="row g-4">
+        <!-- LEFT: USER LIST -->
+        <div class="col-12 col-xl-5">
+          <div class="card shadow-sm list-card h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+                <div class="section-title mb-0">Users</div>
+                <button id="refreshBtn" class="btn btn-sm btn-outline-primary">Refresh</button>
+              </div>
+
+              <div class="row g-2 mb-3">
+                <div class="col-12 col-md-8">
+                  <input id="searchInput" class="form-control" placeholder="Search name, phone, role...">
+                </div>
+                <div class="col-12 col-md-4">
+                  <select id="roleFilter" class="form-select">
+                    <option value="">All roles</option>
+                    <option value="Admin">Admin</option>
+                    <option value="EFM User">EFM User</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="table-wrap border rounded">
+                <table class="table table-hover align-middle mb-0">
+                  <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+                    <tr>
+                      <th>Name</th>
+                      <th>Role</th>
+                      <th>Phone</th>
+                    </tr>
+                  </thead>
+                  <tbody id="usersTableBody">
+                    <tr>
+                      <td colspan="3" class="text-muted">Loading users...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="small text-muted mt-2">
+                <span id="userCount">0</span> users shown
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="row g-4">
-          <!-- LEFT: USER LIST -->
-          <div class="col-12 col-xl-5">
-            <div class="card shadow-sm list-card h-100">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
-                  <div class="section-title mb-0">Users</div>
-                  <button id="refreshBtn" class="btn btn-sm btn-outline-primary">Refresh</button>
+        <!-- RIGHT: EDITOR -->
+        <div class="col-12 col-xl-7">
+          <div class="card shadow-sm editor-card h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+                <div class="section-title mb-0">Selected user</div>
+                <div class="d-flex gap-2">
+                  <button id="loadBtn" class="btn btn-outline-primary" disabled>Reload</button>
+                  <button id="saveBtn" class="btn btn-primary" disabled>Save Changes</button>
+                </div>
+              </div>
+
+              <form id="editorForm" novalidate>
+                <div class="row g-3">
+                  <div class="col-12 col-md-6">
+                    <label class="form-label fw-semibold" for="userId">User ID</label>
+                    <input id="userId" class="form-control read-only" disabled>
+                  </div>
+
+                  <div class="col-12 col-md-6">
+                    <label class="form-label fw-semibold" for="createdAt">Created</label>
+                    <input id="createdAt" class="form-control read-only" disabled>
+                  </div>
+
+                  <div class="col-12 col-md-6">
+                    <label class="form-label fw-semibold" for="name">Name</label>
+                    <input id="name" class="form-control" placeholder="Full name">
+                  </div>
+
+                  <div class="col-12 col-md-6">
+                    <label class="form-label fw-semibold" for="phone">Phone</label>
+                    <input id="phone" class="form-control" placeholder="07...">
+                  </div>
+
+                  <div class="col-12 col-md-6">
+                    <label class="form-label fw-semibold" for="role">Role</label>
+                    <select id="role" class="form-select">
+                      <option value="EFM User">EFM User</option>
+                      <option value="Admin">Admin</option>
+                    </select>
+                  </div>
+
+                  <div class="col-12 col-md-6">
+                    <label class="form-label fw-semibold" for="updatedAt">Last updated</label>
+                    <input id="updatedAt" class="form-control read-only" disabled>
+                  </div>
                 </div>
 
-                <div class="row g-2 mb-3">
-                  <div class="col-12 col-md-8">
-                    <input id="searchInput" class="form-control" placeholder="Search name, phone, role...">
+                <hr class="my-4">
+
+                <div class="section-title mb-3">Permissions</div>
+
+                <div class="row g-3">
+                  <div class="col-12 col-md-6">
+                    <label class="form-label fw-semibold" for="self_auth">Self Authorisation</label>
+                    <select id="self_auth" class="form-select">
+                      <option value="No">No</option>
+                      <option value="Yes">Yes</option>
+                    </select>
                   </div>
-                  <div class="col-12 col-md-4">
-                    <select id="roleFilter" class="form-select">
-                      <option value="">All roles</option>
-                      <option value="Admin">Admin</option>
-                      <option value="EFM User">EFM User</option>
+
+                  <div class="col-12 col-md-6">
+                    <label class="form-label fw-semibold" for="efis">EFIS</label>
+                    <select id="efis" class="form-select">
+                      <option value="No">No</option>
+                      <option value="Yes">Yes</option>
+                    </select>
+                  </div>
+
+                  <div class="col-12 col-md-6">
+                    <label class="form-label fw-semibold" for="bulldog">Bulldog</label>
+                    <select id="bulldog" class="form-select">
+                      <option value="No">No</option>
+                      <option value="Yes">Yes</option>
+                    </select>
+                  </div>
+
+                  <div class="col-12 col-md-6">
+                    <label class="form-label fw-semibold" for="complex">Complex</label>
+                    <select id="complex" class="form-select">
+                      <option value="No">No</option>
+                      <option value="Yes">Yes</option>
+                    </select>
+                  </div>
+
+                  <div class="col-12 col-md-6">
+                    <label class="form-label fw-semibold" for="aeros">Aeros</label>
+                    <select id="aeros" class="form-select">
+                      <option value="No">No</option>
+                      <option value="Yes">Yes</option>
                     </select>
                   </div>
                 </div>
 
-                <div class="table-wrap border rounded">
-                  <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
-                      <tr>
-                        <th>Name</th>
-                        <th>Role</th>
-                        <th>Phone</th>
-                      </tr>
-                    </thead>
-                    <tbody id="usersTableBody">
-                      <tr>
-                        <td colspan="3" class="text-muted">Loading users...</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
 
-                <div class="small text-muted mt-2">
-                  <span id="userCount">0</span> users shown
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- RIGHT: EDITOR -->
-          <div class="col-12 col-xl-7">
-            <div class="card shadow-sm editor-card h-100">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
-                  <div class="section-title mb-0">Selected user</div>
-                  <div class="d-flex gap-2">
-                    <button id="loadBtn" class="btn btn-outline-primary" disabled>Reload</button>
-                    <button id="saveBtn" class="btn btn-primary" disabled>Save Changes</button>
-                  </div>
-                </div>
-
-                <form id="editorForm" novalidate>
-                  <div class="row g-3">
-                    <div class="col-12 col-md-6">
-                      <label class="form-label fw-semibold" for="userId">User ID</label>
-                      <input id="userId" class="form-control read-only" disabled>
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                      <label class="form-label fw-semibold" for="createdAt">Created</label>
-                      <input id="createdAt" class="form-control read-only" disabled>
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                      <label class="form-label fw-semibold" for="name">Name</label>
-                      <input id="name" class="form-control" placeholder="Full name">
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                      <label class="form-label fw-semibold" for="phone">Phone</label>
-                      <input id="phone" class="form-control" placeholder="07...">
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                      <label class="form-label fw-semibold" for="role">Role</label>
-                      <select id="role" class="form-select">
-                        <option value="EFM User">EFM User</option>
-                        <option value="Admin">Admin</option>
-                      </select>
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                      <label class="form-label fw-semibold" for="updatedAt">Last updated</label>
-                      <input id="updatedAt" class="form-control read-only" disabled>
-                    </div>
-                  </div>
-
-                  <hr class="my-4">
-
-                  <div class="section-title mb-3">Permissions</div>
-
-                  <div class="row g-3">
-                    <div class="col-12 col-md-6">
-                      <label class="form-label fw-semibold" for="self_auth">Self Authorisation</label>
-                      <select id="self_auth" class="form-select">
-                        <option value="No">No</option>
-                        <option value="Yes">Yes</option>
-                      </select>
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                      <label class="form-label fw-semibold" for="efis">EFIS</label>
-                      <select id="efis" class="form-select">
-                        <option value="No">No</option>
-                        <option value="Yes">Yes</option>
-                      </select>
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                      <label class="form-label fw-semibold" for="bulldog">Bulldog</label>
-                      <select id="bulldog" class="form-select">
-                        <option value="No">No</option>
-                        <option value="Yes">Yes</option>
-                      </select>
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                      <label class="form-label fw-semibold" for="complex">Complex</label>
-                      <select id="complex" class="form-select">
-                        <option value="No">No</option>
-                        <option value="Yes">Yes</option>
-                      </select>
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                      <label class="form-label fw-semibold" for="aeros">Aeros</label>
-                      <select id="aeros" class="form-select">
-                        <option value="No">No</option>
-                        <option value="Yes">Yes</option>
-                      </select>
-                    </div>
-                  </div>
-
-            
-                </form>
-              </div>
+              </form>
             </div>
           </div>
         </div>
-
       </div>
+
     </div>
+  </div>
   </div>
 
   <script src="js/auth.js"></script>
@@ -544,4 +557,5 @@
     });
   </script>
 </body>
+
 </html>
