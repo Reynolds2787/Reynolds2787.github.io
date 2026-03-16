@@ -20,10 +20,9 @@
       margin: 0;
     }
 
-      body {
+    body {
       background: linear-gradient(180deg, #ecedef 100%, #f1f2f5 100%);
     }
-
 
     body.loading {
       cursor: wait;
@@ -179,7 +178,6 @@
       </div>
     </div>
 
-    <!-- Skeleton while booking prefill loads -->
     <div id="prefillSkeleton" class="card section-card mb-3">
       <div class="card-body">
         <div class="row g-3">
@@ -283,11 +281,11 @@
           <div class="row g-3 mt-1">
             <div class="col-12 col-md-6">
               <label class="form-label" for="blockTime">Block time (auto)</label>
-              <input class="form-control" id="blockTime" type="text" readonly placeholder="--:--">
+              <input class="form-control" id="blockTime" name="blockTime" type="text" readonly placeholder="--:--">
             </div>
             <div class="col-12 col-md-6">
               <label class="form-label" for="airTime">Air time (auto)</label>
-              <input class="form-control" id="airTime" type="text" readonly placeholder="--:--">
+              <input class="form-control" id="airTime" name="airTime" type="text" readonly placeholder="--:--">
             </div>
             <div class="col-12">
               <div class="form-text" id="timeHelp">
@@ -327,9 +325,41 @@
             </div>
 
             <div class="col-12 col-md-6">
-              <label class="form-label" for="tachoDiff">Tacho difference (auto)</label>
-              <input class="form-control" id="tachoDiff" type="text" readonly placeholder="--.-">
+              <label class="form-label" for="tachoDiff">Tachometer used (auto)</label>
+              <input class="form-control" id="tachoDiff" name="tachometerUsed" type="text" readonly placeholder="--.-">
               <div class="form-text">Shown as hours.tenths (e.g. 1.7).</div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label" for="remainingTachoTime">Remaining tacho time (auto)</label>
+              <input class="form-control" id="remainingTachoTime" name="remainingTachoTime" type="text" readonly placeholder="--.-">
+              <div class="form-text">Pulled from maintenance data when available.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Operational Summary -->
+      <div class="card section-card alt mb-3">
+        <div class="card-header">Operational Summary 📊</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-12 col-lg-4">
+              <label class="form-label" for="numberOfMovements">Kemble movements (auto)</label>
+              <input class="form-control" id="numberOfMovements" name="numberOfMovements" type="number" readonly placeholder="0">
+              <div class="form-text">
+                Calculated as: 1 departure from Kemble + Kemble landings.
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-4">
+              <label class="form-label" for="departureFromKemble">Departure from Kemble?</label>
+              <input class="form-control" id="departureFromKemble" type="text" readonly placeholder="No">
+            </div>
+
+            <div class="col-12 col-lg-4">
+              <label class="form-label" for="kembleMovementNote">Movement note</label>
+              <input class="form-control" id="kembleMovementNote" type="text" readonly placeholder="Awaiting route">
             </div>
           </div>
         </div>
@@ -514,15 +544,22 @@
     </form>
   </main>
 
-  <!-- Auth + shared helpers -->
   <script src="js/auth.js"></script>
   <script src="js/logout.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/calculatePayment.js"></script>
 
   <script>
-    // FlightBookings API base
     const API_BASE = "https://rj7w2wkpgj.execute-api.eu-west-2.amazonaws.com";
+
+    /*
+      Update this route if your maintenance endpoint uses a different path.
+      Expected response can contain one of:
+      - remainingTachoTime
+      - tachoHoursRemaining
+      - tachoHoursToNextService
+    */
+    const MAINT_LOOKUP_URL = `https://dssjr33iy8.execute-api.eu-west-2.amazonaws.com/admin/aircraft-maintenance`;
 
     const params = new URLSearchParams(window.location.search);
     const bookingId = params.get("id");
@@ -545,9 +582,6 @@
       return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : null;
     }
 
-    // -------------------------
-    // Small helper: make programmatic value changes trigger listeners
-    // -------------------------
     function fireChange(el) {
       if (!el) return;
       el.dispatchEvent(new Event("input", { bubbles: true }));
@@ -560,7 +594,6 @@
       }
     }
 
-    // ---------- Times logic (single source of truth) ----------
     const TIME_IDS = ["offChocks", "takeoff", "land", "onChocks"];
 
     function parseHHMM(v) {
@@ -635,7 +668,6 @@
         on: snapMinutesTo5(on)
       };
 
-      // snap UI values to nearest 5 minutes
       offEl.value = minutesToHHMM(snapped.off);
       toEl.value = minutesToHHMM(snapped.to);
       landEl.value = minutesToHHMM(snapped.land);
@@ -646,12 +678,10 @@
 
       let invalid = false;
 
-      // sanity checks
       if (air > block) invalid = true;
       if (block <= 0) invalid = true;
       if (block > 16 * 60) invalid = true;
 
-      // taxi sanity checks
       const taxiOut = duration(snapped.off, snapped.to);
       const taxiIn = duration(snapped.land, snapped.on);
       if (taxiOut > 6 * 60 || taxiIn > 6 * 60) invalid = true;
@@ -685,7 +715,6 @@
       return true;
     }
 
-    // Fire time calc when user changes any time
     TIME_IDS.forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
@@ -694,7 +723,6 @@
       });
     });
 
-    // ---------- Tacho helper functions ----------
     function clampDigitChar(ch) {
       return /[0-9]/.test(ch) ? ch : "";
     }
@@ -773,6 +801,8 @@
         diffOut.value = tenthsToHoursTenths(diffTenths);
         fireChange(diffOut);
       }
+
+      recalcOperationalSummary();
       recalcPayment();
       return true;
     }
@@ -860,7 +890,66 @@
       }
     }
 
-    // Landings auto-fill (runs after prefill too)
+    async function prefillRemainingTachoTime(aircraft) {
+      const out = document.getElementById("remainingTachoTime");
+      if (!out || !aircraft) return;
+
+      out.value = "";
+
+      try {
+        const res = await authFetch(`${MAINT_LOOKUP_URL}/${encodeURIComponent(aircraft)}`);
+        if (!res || !res.ok) return;
+
+        const data = await res.json();
+        const remaining =
+          data?.remainingTachoTime ??
+          data?.tachoHoursRemaining ??
+          data?.tachoHoursToNextService ??
+          "";
+
+        if (remaining !== "") {
+          out.value = String(remaining);
+          fireChange(out);
+        }
+      } catch (e) {
+        console.warn("Could not prefill remaining tacho time", e);
+      }
+    }
+
+    function isKemble(value) {
+      const v = String(value || "").trim().toUpperCase();
+      return v === "KEMBLE" || v === "EGBP";
+    }
+
+    function recalcOperationalSummary() {
+      const fromVal = document.getElementById("from")?.value || "";
+      const landingsKembleVal = Number(document.getElementById("landingsKemble")?.value || 0);
+
+      const departedKemble = isKemble(fromVal);
+      const movements = (departedKemble ? 1 : 0) + landingsKembleVal;
+
+      const movementsEl = document.getElementById("numberOfMovements");
+      const departedEl = document.getElementById("departureFromKemble");
+      const noteEl = document.getElementById("kembleMovementNote");
+
+      if (movementsEl) {
+        movementsEl.value = Number.isFinite(movements) ? movements : 0;
+        fireChange(movementsEl);
+      }
+
+      if (departedEl) {
+        departedEl.value = departedKemble ? "Yes" : "No";
+      }
+
+      if (noteEl) {
+        if (departedKemble) {
+          noteEl.value = `1 departure + ${landingsKembleVal} Kemble landing(s)`;
+        } else {
+          noteEl.value = `${landingsKembleVal} Kemble landing(s) only`;
+        }
+      }
+    }
+
     function setLandingsFromTo() {
       const toVal = (document.getElementById("to")?.value || "").trim();
       const kemble = document.getElementById("landingsKemble");
@@ -877,10 +966,10 @@
 
       fireChange(kemble);
       fireChange(other);
+      recalcOperationalSummary();
       recalcPayment();
     }
 
-    // ---------- Prefill + submit ----------
     async function prefillFromBooking() {
       if (!bookingId) {
         showToast("Missing booking id", { variant: "danger" });
@@ -915,10 +1004,11 @@
 
       if (b.aircraft) {
         await prefillStartTachoFromLast(b.aircraft);
+        await prefillRemainingTachoTime(b.aircraft);
       }
 
-      // IMPORTANT: to field is now known, so set landings defaults now
       setLandingsFromTo();
+      recalcOperationalSummary();
 
       setPrefillVisible(true);
     }
@@ -945,7 +1035,15 @@
       const tachoOk = validateAndCalcTacho();
       if (!tachoOk) return;
 
+      recalcOperationalSummary();
+
       const payload = Object.fromEntries(new FormData(form).entries());
+
+      payload.blockTime = document.getElementById("blockTime")?.value || "";
+      payload.airTime = document.getElementById("airTime")?.value || "";
+      payload.tachometerUsed = document.getElementById("tachoDiff")?.value || "";
+      payload.remainingTachoTime = document.getElementById("remainingTachoTime")?.value || "";
+      payload.numberOfMovements = document.getElementById("numberOfMovements")?.value || "0";
 
       setButtonLoading(submitBtn, true, { loadingText: "Submitting…" });
       setButtonLoading(submitBtnTop, true, { loadingText: "Submitting…" });
@@ -970,7 +1068,6 @@
       }
     });
 
-    // Navbar
     fetch("/partials/navbar.html")
       .then(res => res.text())
       .then(html => {
@@ -987,12 +1084,23 @@
 
       document.querySelectorAll(".tacho").forEach(wireTacho);
 
-      // If user manually changes "to", update landings too
-      document.getElementById("to")?.addEventListener("change", setLandingsFromTo);
+      document.getElementById("to")?.addEventListener("change", () => {
+        setLandingsFromTo();
+        recalcOperationalSummary();
+      });
+
+      document.getElementById("from")?.addEventListener("change", recalcOperationalSummary);
+      document.getElementById("landingsKemble")?.addEventListener("input", recalcOperationalSummary);
+
+      document.getElementById("aircraft")?.addEventListener("change", async (e) => {
+        const aircraft = e.target.value?.trim();
+        if (aircraft) await prefillRemainingTachoTime(aircraft);
+      });
 
       withLoading(async () => {
         setPrefillVisible(false);
         await prefillFromBooking();
+        recalcOperationalSummary();
         recalcPayment();
       });
     });
