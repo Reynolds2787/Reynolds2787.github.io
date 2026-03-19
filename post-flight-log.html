@@ -280,16 +280,16 @@
 
           <div class="row g-3 mt-1">
             <div class="col-12 col-md-6">
-              <label class="form-label" for="blockTime">Block time (auto)</label>
+              <label class="form-label" for="blockTime">Block time</label>
               <input class="form-control" id="blockTime" name="blockTime" type="text" readonly placeholder="--:--">
             </div>
             <div class="col-12 col-md-6">
-              <label class="form-label" for="airTime">Air time (auto)</label>
+              <label class="form-label" for="airTime">Air time</label>
               <input class="form-control" id="airTime" name="airTime" type="text" readonly placeholder="--:--">
             </div>
             <div class="col-12">
               <div class="form-text" id="timeHelp">
-                Times auto-calculate once all four fields are complete (snaps to nearest 5 minutes).
+                Times auto-calculate once all four fields are complete.
               </div>
             </div>
           </div>
@@ -325,45 +325,15 @@
             </div>
 
             <div class="col-12 col-md-6">
-              <label class="form-label" for="tachoDiff">Tachometer used (auto)</label>
+              <label class="form-label" for="tachoDiff">Tachometer used</label>
               <input class="form-control" id="tachoDiff" name="tachometerUsed" type="text" readonly placeholder="--.-">
-              <div class="form-text">Shown as hours.tenths (e.g. 1.7).</div>
             </div>
-
-            <div class="col-12 col-md-6">
-              <label class="form-label" for="remainingTachoTime">Remaining tacho time (auto)</label>
-              <input class="form-control" id="remainingTachoTime" name="remainingTachoTime" type="text" readonly placeholder="--.-">
-              <div class="form-text">Pulled from maintenance data when available.</div>
-            </div>
+            
           </div>
         </div>
       </div>
 
-      <!-- Operational Summary -->
-      <div class="card section-card alt mb-3">
-        <div class="card-header">Operational Summary 📊</div>
-        <div class="card-body">
-          <div class="row g-3">
-            <div class="col-12 col-lg-4">
-              <label class="form-label" for="numberOfMovements">Kemble movements (auto)</label>
-              <input class="form-control" id="numberOfMovements" name="numberOfMovements" type="number" readonly placeholder="0">
-              <div class="form-text">
-                Calculated as: 1 departure from Kemble + Kemble landings.
-              </div>
-            </div>
-
-            <div class="col-12 col-lg-4">
-              <label class="form-label" for="departureFromKemble">Departure from Kemble?</label>
-              <input class="form-control" id="departureFromKemble" type="text" readonly placeholder="No">
-            </div>
-
-            <div class="col-12 col-lg-4">
-              <label class="form-label" for="kembleMovementNote">Movement note</label>
-              <input class="form-control" id="kembleMovementNote" type="text" readonly placeholder="Awaiting route">
-            </div>
-          </div>
-        </div>
-      </div>
+      
 
       <!-- Fuel & oil Home-->
       <div class="card section-card alt mb-3">
@@ -1039,11 +1009,11 @@
 
       const payload = Object.fromEntries(new FormData(form).entries());
 
-      payload.blockTime = document.getElementById("blockTime")?.value || "";
-      payload.airTime = document.getElementById("airTime")?.value || "";
-      payload.tachometerUsed = document.getElementById("tachoDiff")?.value || "";
-      payload.remainingTachoTime = document.getElementById("remainingTachoTime")?.value || "";
-      payload.numberOfMovements = document.getElementById("numberOfMovements")?.value || "0";
+      //payload.blockTime = document.getElementById("blockTime")?.value || "";
+      //payload.airTime = document.getElementById("airTime")?.value || "";
+      //payload.tachometerUsed = document.getElementById("tachoDiff")?.value || "";
+      //payload.remainingTachoTime = document.getElementById("remainingTachoTime")?.value || "";
+      //payload.numberOfMovements = document.getElementById("numberOfMovements")?.value || "0";
 
       setButtonLoading(submitBtn, true, { loadingText: "Submitting…" });
       setButtonLoading(submitBtnTop, true, { loadingText: "Submitting…" });
