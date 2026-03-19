@@ -958,11 +958,13 @@
 
       const b = await res.json();
 
+  
       document.getElementById("picName").value = b.picName || b.pic || b.PIC || localStorage.getItem("username") || "";
       document.getElementById("from").value = b.from ?? "";
       document.getElementById("to").value = b.to ?? "";
       document.getElementById("authorised").value = b.authorised ?? b.authorized ?? "";
       document.getElementById("aircraft").value = b.aircraft ?? "";
+      console.log = b.costSharing;
 
       const etaDate = toISODateFromEta(b.eta);
       document.getElementById("flightDate").value = etaDate || new Date().toISOString().slice(0, 10);
@@ -974,7 +976,6 @@
 
       if (b.aircraft) {
         await prefillStartTachoFromLast(b.aircraft);
-        await prefillRemainingTachoTime(b.aircraft);
       }
 
       setLandingsFromTo();
@@ -1008,6 +1009,8 @@
       recalcOperationalSummary();
 
       const payload = Object.fromEntries(new FormData(form).entries());
+
+      payload.costSharing = b.costSharing;
 
       //payload.blockTime = document.getElementById("blockTime")?.value || "";
       //payload.airTime = document.getElementById("airTime")?.value || "";
