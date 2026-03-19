@@ -940,6 +940,10 @@
       recalcPayment();
     }
 
+    
+    // declaring as global scope
+    let costSharing = "";
+    
     async function prefillFromBooking() {
       if (!bookingId) {
         showToast("Missing booking id", { variant: "danger" });
@@ -964,7 +968,8 @@
       document.getElementById("to").value = b.to ?? "";
       document.getElementById("authorised").value = b.authorised ?? b.authorized ?? "";
       document.getElementById("aircraft").value = b.aircraft ?? "";
-      console.log = b.costSharing;
+      costSharing = b.costSharing;
+      console.log = (b.costSharing);
 
       const etaDate = toISODateFromEta(b.eta);
       document.getElementById("flightDate").value = etaDate || new Date().toISOString().slice(0, 10);
@@ -1010,7 +1015,7 @@
 
       const payload = Object.fromEntries(new FormData(form).entries());
 
-      payload.costSharing = b.costSharing;
+      payload.costSharing = costSharing;
 
       //payload.blockTime = document.getElementById("blockTime")?.value || "";
       //payload.airTime = document.getElementById("airTime")?.value || "";
