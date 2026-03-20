@@ -943,6 +943,9 @@
     
     // declaring as global scope
     let costSharing = "";
+    let reason = "";
+    
+    
     
     async function prefillFromBooking() {
       if (!bookingId) {
@@ -969,7 +972,8 @@
       document.getElementById("authorised").value = b.authorised ?? b.authorized ?? "";
       document.getElementById("aircraft").value = b.aircraft ?? "";
       costSharing = b.costSharing;
-      console.log = (b.costSharing);
+      reason = b.reason;
+      
 
       const etaDate = toISODateFromEta(b.eta);
       document.getElementById("flightDate").value = etaDate || new Date().toISOString().slice(0, 10);
@@ -1016,6 +1020,7 @@
       const payload = Object.fromEntries(new FormData(form).entries());
 
       payload.costSharing = costSharing;
+      payload.reason = reason;
 
       //payload.blockTime = document.getElementById("blockTime")?.value || "";
       //payload.airTime = document.getElementById("airTime")?.value || "";
