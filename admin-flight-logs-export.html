@@ -268,7 +268,7 @@
     }
 
     async function generateExport(payload) {
-      const exportUrl = "https://dssjr33iy8.execute-api.eu-west-2.amazonaws.com/admin/flightlogs/export";
+      const exportUrl = "https://nc7chp4h26.execute-api.eu-west-2.amazonaws.com/admin/flightlogs/export";
       if (!exportUrl) throw new Error("Please enter the export endpoint URL.");
 
       const ok = await waitForAuthFetch();
