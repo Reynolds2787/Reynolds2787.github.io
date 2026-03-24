@@ -112,31 +112,11 @@
         <div class="alert alert-danger d-none" id="errorBox"></div>
         <div class="alert alert-success d-none" id="successBox"></div>
 
-        <div class="row g-3 mb-4">
-          <div class="col-12 col-xl-6">
-            <div class="card shadow-sm hint-card h-100">
-              <div class="card-body">
-                <div class="section-title mb-2">How it works</div>
-                <div class="small text-muted">
-                  Choose a flight date range, select the aircraft to include, and the backend will generate one Excel workbook with a tab per aircraft.
-                </div>
-              </div>
-            </div>
-          </div>
+       
 
-          <div class="col-12 col-xl-6">
-            <div class="card shadow-sm hint-card h-100">
-              <div class="card-body">
-                <div class="section-title mb-2">API endpoint</div>
-                <div class="small text-muted mb-2">
-                  Set your export endpoint below or replace it directly in the script.
-                </div>
-                <input id="endpointUrl" type="text" class="form-control form-control-sm" value="https://nc7chp4h26.execute-api.eu-west-2.amazonaws.com/admin/flightlogs/export">
-              </div>
-            </div>
-          </div>
-        </div>
-
+        
+                        
+            
         <form id="exportForm" class="row g-4">
           <div class="col-12 col-md-4">
             <label for="fromDate" class="form-label fw-semibold">From date</label>
@@ -192,32 +172,7 @@
             </div>
           </div>
 
-          <div class="col-12">
-            <div class="card border-0 bg-light">
-              <div class="card-body py-3">
-                <div class="section-title mb-2">Expected output</div>
-                <div class="table-responsive">
-                  <table class="table table-sm mb-0 table-compact">
-                    <tbody>
-                      <tr>
-                        <td class="text-muted" style="width: 180px;">Workbook format</td>
-                        <td>Single Excel file</td>
-                      </tr>
-                      <tr>
-                        <td class="text-muted">Sheet layout</td>
-                        <td>One tab per aircraft</td>
-                      </tr>
-                      <tr>
-                        <td class="text-muted">Date filter</td>
-                        <td>Uses <code>flightDate</code> between selected start and end dates</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-
+        
           <div class="col-12 d-flex flex-wrap gap-2">
             <button id="downloadBtn" type="submit" class="btn btn-primary">Generate Export</button>
             <button id="last30Btn" type="button" class="btn btn-outline-secondary">Last 30 days</button>
@@ -313,7 +268,7 @@
     }
 
     async function generateExport(payload) {
-      const exportUrl = el("endpointUrl").value.trim();
+      const exportUrl = "https://nc7chp4h26.execute-api.eu-west-2.amazonaws.com/admin/flightlogs/export";
       if (!exportUrl) throw new Error("Please enter the export endpoint URL.");
 
       const ok = await waitForAuthFetch();

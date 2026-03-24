@@ -44,6 +44,12 @@
       border: 0;
       border-radius: 1rem;
     }
+
+
+    .card{
+     margin-bottom: 10px;
+    }
+    
   </style>
 </head>
 
@@ -88,43 +94,39 @@
 
         <div class="alert alert-danger d-none mb-4" id="errorBox"></div>
 
-        <div class="row g-3 mb-4">
-          <div class="col-12 col-lg-6">
-            <div class="card shadow-sm hint-card h-100">
-              <div class="card-body">
-                <div class="section-title">Service Hours</div>
-                <div class="small text-muted mt-2">
-                  G-AZWS and G-BULL use <strong>Flight Hours</strong> to determine next service.
-                  The remaining aircraft use <strong>Tacho Hours</strong>.
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-12 col-lg-6">
-            <div class="card shadow-sm hint-card h-100">
-              <div class="card-body">
-                <div class="section-title">Quick Tip</div>
-                <div class="small text-muted mt-2">
-                  Opening this page from the tech log now preselects the aircraft automatically and loads its record.
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+  
 
         <div class="card shadow-sm">
-          <div class="card-body">
+          <div class="card-body pb-3">
             <div class="row g-3">
               <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold" for="tachoNext">Tacho Hours to Next Service</label>
+                <label class="form-label fw-semibold" for="tachoNext">Remaining Tacho Hours</label>
                 <input id="tachoNext" type="number" step="0.1" class="form-control" placeholder="e.g. 12.5">
               </div>
 
               <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold" for="flightHoursNext">Flight Hours to Next Service</label>
+                <label class="form-label fw-semibold" for="flightHoursNext">Remaining Flight Hours</label>
                 <input id="flightHoursNext" type="number" step="0.1" class="form-control" placeholder="e.g. 8.0">
               </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-semibold" for="serviceAt">Service At Flight Hours</label>
+                <input id="serviceAt" type="data" class="form-control" placeholder="e.g. 1234.5 tacho hours">
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-semibold" for="currentTacho">Current Flight Hours</label>
+                <input id="currentTacho" type="number" step="0.1" class="form-control" placeholder="e.g. 1234.5 tacho hours">
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <div class="row g-3">
 
               <div class="col-12 col-md-6">
                 <label class="form-label fw-semibold" for="arcDue">ARC Due Date</label>
@@ -148,6 +150,7 @@
             </div>
           </div>
         </div>
+
 
       </div>
     </div>
@@ -210,6 +213,7 @@
       el("insuranceDue").value = data?.insuranceDueDate ?? "";
       el("modWaiverDue").value = data?.modWaiverDueDate ?? "";
       el("annualDue").value = data?.annualDueDate ?? "";
+      el("serviceAt").value = data?.serviceAt ?? "";
     }
 
     function clearForm() {
@@ -223,7 +227,9 @@
         arcDueDate: el("arcDue").value || null,
         insuranceDueDate: el("insuranceDue").value || null,
         modWaiverDueDate: el("modWaiverDue").value || null,
-        annualDueDate: el("annualDue").value || null
+        annualDueDate: el("annualDue").value || null,
+        serviceAt: el("serviceAt").value || null,
+
       };
     }
 
