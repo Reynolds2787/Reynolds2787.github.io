@@ -101,7 +101,7 @@
     .passenger {
       border: 1px solid rgba(0, 0, 0, 0.06);
       background: #f8f9fc !important;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
     }
 
     .status-card {
@@ -262,9 +262,11 @@
     }
 
     .efm-modal-value {
-      font-size: 1.15rem;
+      font-size: 1.05rem;
       font-weight: 700;
       color: #212529;
+      line-height: 1.2;
+      word-break: break-word;
     }
 
     .efm-modal-note {
@@ -628,13 +630,21 @@
 
           <div class="efm-modal-summary mb-3">
             <div class="row g-3">
-              <div class="col-6">
-                <div class="efm-modal-label">Destination</div>
-                <div class="efm-modal-value">Kemble</div>
+              <div class="col-6 col-md-3">
+                <div class="efm-modal-label">From</div>
+                <div class="efm-modal-value" id="defectPromptFrom">—</div>
               </div>
-              <div class="col-6">
+              <div class="col-6 col-md-3">
+                <div class="efm-modal-label">To</div>
+                <div class="efm-modal-value" id="defectPromptTo">—</div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="efm-modal-label">ETA</div>
+                <div class="efm-modal-value" id="defectPromptEta">—</div>
+              </div>
+              <div class="col-6 col-md-3">
                 <div class="efm-modal-label">Next step</div>
-                <div class="efm-modal-value">Pre-flight checks</div>
+                <div class="efm-modal-value" id="defectPromptNextStep">Pre-flight checks</div>
               </div>
             </div>
           </div>
@@ -832,9 +842,18 @@
         const reg = normalizeReg(aircraft);
         const modal = getDefectPromptModal();
 
+        const fromVal = (document.getElementById("from")?.value || "").trim() || "—";
+        const toVal = (document.getElementById("to")?.value || "").trim() || "—";
+        const etaVal = document.getElementById("ETA")?.value || "";
+
         document.getElementById("defectPromptAircraft").textContent = reg;
         document.getElementById("defectPromptAircraftText").textContent = reg;
         document.getElementById("defectPromptOpenCount").textContent = String(openCount);
+
+        document.getElementById("defectPromptFrom").textContent = fromVal;
+        document.getElementById("defectPromptTo").textContent = toVal;
+        document.getElementById("defectPromptEta").textContent = formatDisplayEta(etaVal);
+        document.getElementById("defectPromptNextStep").textContent = "Pre-flight checks";
 
         const openText = document.getElementById("defectPromptOpenText");
         if (openCount === 0) {
@@ -891,6 +910,20 @@
             number.value = "";
             club.checked = false;
           }
+        });
+      }
+
+      function formatDisplayEta(value) {
+        if (!value) return "—";
+
+        const d = new Date(value);
+        if (Number.isNaN(d.getTime())) return value;
+
+        return d.toLocaleString([], {
+          day: "2-digit",
+          month: "short",
+          hour: "2-digit",
+          minute: "2-digit"
         });
       }
 
