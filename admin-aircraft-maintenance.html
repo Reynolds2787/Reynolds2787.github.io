@@ -56,6 +56,10 @@
     .metric-card .card-body {
       padding-bottom: 1rem;
     }
+
+    input[readonly] {
+      background-color: #f8f9fa;
+    }
   </style>
 </head>
 
@@ -118,12 +122,12 @@
 
               <div class="col-12 col-md-6" id="tachoNextWrap">
                 <label class="form-label fw-semibold" for="tachoNext">Remaining Tacho Hours</label>
-                <input id="tachoNext" type="number" step="0.1" class="form-control" placeholder="e.g. 12.5">
+                <input id="tachoNext" type="number" step="0.1" class="form-control" placeholder="Calculated automatically" readonly>
               </div>
 
               <div class="col-12 col-md-6" id="flightHoursNextWrap">
                 <label class="form-label fw-semibold" for="flightHoursNext">Remaining Flight Hours</label>
-                <input id="flightHoursNext" type="number" step="0.1" class="form-control" placeholder="e.g. 8.0">
+                <input id="flightHoursNext" type="number" step="0.1" class="form-control" placeholder="Calculated automatically" readonly>
               </div>
 
               <div class="col-12 col-md-6">
@@ -223,6 +227,35 @@
       return normalizeReg(params.get("aircraft") || "");
     }
 
+    function calculateRemainingHours() {
+      const useFlight = !!el("useFlightHours").checked;
+
+      const serviceAtRaw = el("serviceAt").value;
+      const currentRaw = el("currentTacho").value;
+
+      const serviceAt = serviceAtRaw === "" ? null : Number(serviceAtRaw);
+      const current = currentRaw === "" ? null : Number(currentRaw);
+
+      let remaining = null;
+
+      if (
+        serviceAt !== null &&
+        current !== null &&
+        Number.isFinite(serviceAt) &&
+        Number.isFinite(current)
+      ) {
+        remaining = Number((serviceAt - current).toFixed(1));
+      }
+
+      if (useFlight) {
+        el("flightHoursNext").value = remaining ?? "";
+        el("tachoNext").value = "";
+      } else {
+        el("tachoNext").value = remaining ?? "";
+        el("flightHoursNext").value = "";
+      }
+    }
+
     function updateMetricVisibility() {
       const useFlight = !!el("useFlightHours").checked;
 
@@ -237,8 +270,15 @@
         ? "Current Flight Hours"
         : "Current Tacho Hours";
 
-      el("serviceAt").placeholder = useFlight ? "e.g. 4321.0 flight hours" : "e.g. 1234.5 tacho hours";
-      el("currentTacho").placeholder = useFlight ? "e.g. 4312.4 flight hours" : "e.g. 1222.0 tacho hours";
+      el("serviceAt").placeholder = useFlight
+        ? "e.g. 6000.0 flight hours"
+        : "e.g. 1234.5 tacho hours";
+
+      el("currentTacho").placeholder = useFlight
+        ? "e.g. 5020.0 flight hours"
+        : "e.g. 1222.0 tacho hours";
+
+      calculateRemainingHours();
     }
 
     function fillForm(data) {
@@ -248,16 +288,15 @@
 
       el("useFlightHours").checked = !!useFlight;
 
-      el("tachoNext").value = data?.tachoHoursToNextService ?? "";
-      el("flightHoursNext").value = data?.flightHoursToNextService ?? "";
+      el("serviceAt").value = data?.serviceAt ?? "";
+      el("currentTacho").value = data?.currentHours ?? data?.currentTacho ?? "";
       el("arcDue").value = data?.arcDueDate ?? "";
       el("insuranceDue").value = data?.insuranceDueDate ?? "";
       el("modWaiverDue").value = data?.modWaiverDueDate ?? "";
       el("annualDue").value = data?.annualDueDate ?? "";
-      el("serviceAt").value = data?.serviceAt ?? "";
-      el("currentTacho").value = data?.currentHours ?? data?.currentTacho ?? "";
 
       updateMetricVisibility();
+      calculateRemainingHours();
     }
 
     function clearForm() {
@@ -270,8 +309,12 @@
       return {
         useFlightHours: useFlight,
         serviceMetric: useFlight ? "FLIGHT_HOURS" : "TACHO_HOURS",
-        tachoHoursToNextService: el("tachoNext").value === "" ? null : Number(el("tachoNext").value),
-        flightHoursToNextService: el("flightHoursNext").value === "" ? null : Number(el("flightHoursNext").value),
+        tachoHoursToNextService: useFlight
+          ? null
+          : (el("tachoNext").value === "" ? null : Number(el("tachoNext").value)),
+        flightHoursToNextService: useFlight
+          ? (el("flightHoursNext").value === "" ? null : Number(el("flightHoursNext").value))
+          : null,
         currentHours: el("currentTacho").value === "" ? null : Number(el("currentTacho").value),
         arcDueDate: el("arcDue").value || null,
         insuranceDueDate: el("insuranceDue").value || null,
@@ -323,6 +366,8 @@
         showError("Please select an aircraft first.");
         return;
       }
+
+      calculateRemainingHours();
 
       setBusy(true);
       setStatus("Saving...");
@@ -384,6 +429,8 @@
     el("loadBtn").addEventListener("click", loadAircraft);
     el("saveBtn").addEventListener("click", saveAircraft);
     el("useFlightHours").addEventListener("change", updateMetricVisibility);
+    el("serviceAt").addEventListener("input", calculateRemainingHours);
+    el("currentTacho").addEventListener("input", calculateRemainingHours);
 
     el("aircraft").addEventListener("change", () => {
       clearError();
