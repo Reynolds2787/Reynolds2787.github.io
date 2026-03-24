@@ -25,12 +25,13 @@
     }
 
     .section-card {
-      border-radius: 1rem;
-      background-color: #fffffff5;
+      border-radius: 1.25rem;
+      background: rgba(255, 255, 255, 0.92);
       box-shadow:
         0 1px 2px rgba(0, 0, 0, .04),
-        0 8px 24px rgba(0, 0, 0, .06);
+        0 12px 32px rgba(0, 0, 0, .06);
       border: 1px solid rgba(0, 0, 0, .06);
+      backdrop-filter: blur(4px);
     }
 
     .fade-in {
@@ -44,15 +45,49 @@
       transform: translateY(0);
     }
 
+    .form-label {
+      font-weight: 600;
+      color: #1f2a37;
+      margin-bottom: 0.45rem;
+    }
+
     .form-control,
     .form-select {
-      background-color: #e7e7eb;
+      background-color: #f8f9fc;
+      border: 1px solid rgba(0, 0, 0, 0.10);
+      color: #212529;
+      border-radius: 0.85rem;
+      min-height: 48px;
+      transition:
+        background-color .15s ease,
+        border-color .15s ease,
+        box-shadow .15s ease,
+        transform .15s ease;
+    }
+
+    .form-control::placeholder {
+      color: #6c757d;
+      opacity: 0.9;
+    }
+
+    .form-control:hover,
+    .form-select:hover {
+      background-color: #ffffff;
+      border-color: rgba(0, 0, 0, 0.16);
     }
 
     .form-control:focus,
     .form-select:focus {
-      background-color: #e0e0e4;
-      box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, .15);
+      background-color: #ffffff;
+      border-color: rgba(13, 110, 253, 0.35);
+      box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, .12);
+    }
+
+    .form-control:disabled,
+    .form-select:disabled,
+    .form-control[readonly] {
+      background-color: #eef1f4;
+      color: #6c757d;
     }
 
     .border-top {
@@ -63,10 +98,16 @@
       display: none !important;
     }
 
+    .passenger {
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      background: #f8f9fc !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+    }
+
     .status-card {
       border-radius: 1.2rem;
       border: 1px solid rgba(0, 0, 0, 0.06);
-      background: rgba(255, 255, 255, 0.55);
+      background: rgba(255, 255, 255, 0.82);
       box-shadow:
         0 1px 2px rgba(0, 0, 0, .04),
         0 10px 28px rgba(0, 0, 0, .05);
@@ -85,13 +126,13 @@
       border: 1px solid rgba(0, 0, 0, 0.08);
       border-radius: 1rem;
       padding: 1rem;
-      background: #f3f4f6;
+      background: #f8f9fc;
     }
 
     .status-label {
       text-transform: uppercase;
       letter-spacing: .08em;
-      font-size: .82rem;
+      font-size: .78rem;
       color: #6c757d;
       margin-bottom: .35rem;
     }
@@ -116,6 +157,44 @@
       padding: .6rem .75rem;
       font-size: .92rem;
       font-weight: 600;
+    }
+
+    .form-check-input {
+      width: 2.2rem;
+      height: 1.2rem;
+      margin-top: 0.2rem;
+      cursor: pointer;
+    }
+
+    .form-check-label {
+      font-weight: 500;
+      color: #1f2a37;
+    }
+
+    .btn {
+      border-radius: 0.85rem;
+      min-height: 46px;
+      font-weight: 600;
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+
+    .btn-primary {
+      box-shadow: 0 8px 18px rgba(13, 110, 253, 0.16);
+    }
+
+    .btn-outline-danger,
+    .btn-outline-warning,
+    .btn-outline-secondary {
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .alert {
+      border-radius: 0;
+    }
+
+    .text-muted.small {
+      color: #6b7280 !important;
     }
 
     .efm-modal .modal-content {
@@ -237,6 +316,20 @@
       margin-top: 0.25rem;
       font-size: 0.92rem;
     }
+
+    @media (max-width: 767.98px) {
+      .section-card {
+        padding: 1rem !important;
+      }
+
+      .status-value {
+        font-size: 1.7rem;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
   </style>
 
   <script src="js/auth.js" defer></script>
@@ -261,8 +354,8 @@
     <div class="section-card bg-white p-3 p-md-4 fade-in" id="pageCard">
       <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
         <div>
-          <h1 class="h4 mb-1">Booking Out Form</h1>
-          <div class="text-muted small">Any flight you book will only be visible to you under My Bookings</div>
+          <h1 class="h4 mb-1 fw-semibold">Booking Out Form</h1>
+          <div class="text-muted small">Any flight you book will only be visible to you under My Bookings.</div>
         </div>
       </div>
 
@@ -275,8 +368,8 @@
 
         <div class="row g-3">
           <div class="col-12 col-md-4">
-            <label class="form-label" for="aircraft">Aircraft</label>
-            <select id="aircraft" class="form-select" required>
+            <label class="form-label" for="aircraft">Aircraft Registration</label>
+            <select id="aircraft" class="form-select shadow-sm" required>
               <option value="">Choose...</option>
               <option>G-AZWS</option>
               <option>G-BPAF</option>
@@ -509,7 +602,6 @@
   <div class="modal fade efm-modal" id="defectPromptModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
-
         <div class="modal-header">
           <h5 class="modal-title">
             <span>✈️</span>
@@ -570,7 +662,74 @@
             View defects
           </button>
         </div>
+      </div>
+    </div>
+  </div>
 
+  <div class="modal fade efm-modal" id="clearFormModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <span>🧹</span>
+            <span>Clear form</span>
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="efm-modal-note">
+            This will remove all current booking details from the form.
+          </div>
+
+          <div class="efm-modal-summary mt-3">
+            <div class="efm-modal-label">Action</div>
+            <div class="efm-modal-value">Reset all entered fields</div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+            Cancel
+          </button>
+          <button type="button" class="btn btn-outline-danger" id="confirmClearBtn">
+            Clear form
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade efm-modal" id="exitFormModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <span>↩️</span>
+            <span>Exit booking page</span>
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="efm-modal-note">
+            You are about to leave this page. Any unsaved form entries will be lost.
+          </div>
+
+          <div class="efm-modal-summary mt-3">
+            <div class="efm-modal-label">Destination</div>
+            <div class="efm-modal-value">Home page</div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+            Stay here
+          </button>
+          <button type="button" class="btn btn-outline-warning" id="confirmExitBtn">
+            Exit page
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -609,6 +768,8 @@
       const aircraftSelect = document.getElementById("aircraft");
 
       let defectPromptModal = null;
+      let clearFormModal = null;
+      let exitFormModal = null;
 
       function normalizeReg(v) {
         return (v || "").trim().toUpperCase();
@@ -653,6 +814,20 @@
         return defectPromptModal;
       }
 
+      function getClearFormModal() {
+        if (!clearFormModal) {
+          clearFormModal = new bootstrap.Modal(document.getElementById("clearFormModal"));
+        }
+        return clearFormModal;
+      }
+
+      function getExitFormModal() {
+        if (!exitFormModal) {
+          exitFormModal = new bootstrap.Modal(document.getElementById("exitFormModal"));
+        }
+        return exitFormModal;
+      }
+
       function showDefectPrompt(aircraft, openCount = 0) {
         const reg = normalizeReg(aircraft);
         const modal = getDefectPromptModal();
@@ -681,6 +856,16 @@
         };
 
         modal.show();
+      }
+
+      function clearBookingForm() {
+        const loggedInUser = localStorage.getItem("username");
+        bookingForm.reset();
+        bookingForm.classList.remove("was-validated");
+        occupants.value = "0";
+        if (loggedInUser && picInput) picInput.value = loggedInUser;
+        updatePassengers();
+        loadAircraftStatusCard("");
       }
 
       function updatePassengers() {
@@ -890,21 +1075,22 @@
       if (loggedInUser && picInput) picInput.value = loggedInUser;
 
       document.getElementById("clearAll")?.addEventListener("click", () => {
-        if (!confirm("Clear all current form data?")) return;
-        bookingForm.reset();
-        bookingForm.classList.remove("was-validated");
-        occupants.value = "0";
-        if (loggedInUser && picInput) picInput.value = loggedInUser;
-        updatePassengers();
-        loadAircraftStatusCard("");
+        getClearFormModal().show();
       });
 
       document.getElementById("clearAllExit")?.addEventListener("click", () => {
-        if (!confirm("Exit?")) return;
-        bookingForm.reset();
-        bookingForm.classList.remove("was-validated");
-        occupants.value = "0";
-        updatePassengers();
+        getExitFormModal().show();
+      });
+
+      document.getElementById("confirmClearBtn")?.addEventListener("click", () => {
+        getClearFormModal().hide();
+        clearBookingForm();
+        showToast("Form cleared.", { variant: "success", title: "Cleared" });
+      });
+
+      document.getElementById("confirmExitBtn")?.addEventListener("click", () => {
+        getExitFormModal().hide();
+        clearBookingForm();
         window.location.href = "index.html";
       });
 
