@@ -117,6 +117,126 @@
       font-size: .92rem;
       font-weight: 600;
     }
+
+    .efm-modal .modal-content {
+      border: 0;
+      border-radius: 1.25rem;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top right, rgba(13, 110, 253, 0.08), transparent 35%),
+        linear-gradient(180deg, #ffffff, #f7f9fc);
+      box-shadow:
+        0 1rem 2.5rem rgba(0, 0, 0, 0.18),
+        0 0.25rem 1rem rgba(13, 110, 253, 0.08);
+    }
+
+    .efm-modal .modal-header {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      padding: 1rem 1.1rem;
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .efm-modal .modal-title {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .efm-modal .modal-body {
+      padding: 1.1rem;
+    }
+
+    .efm-modal .modal-footer {
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+      padding: 1rem 1.1rem;
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .efm-modal-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.38rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      background: rgba(220, 53, 69, 0.1);
+      color: #b02a37;
+      border: 1px solid rgba(220, 53, 69, 0.16);
+    }
+
+    .efm-modal-summary {
+      border: 1px solid rgba(0, 0, 0, 0.07);
+      border-radius: 1rem;
+      padding: 1rem;
+      background: rgba(248, 249, 250, 0.9);
+    }
+
+    .efm-modal-label {
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6c757d;
+      margin-bottom: 0.25rem;
+    }
+
+    .efm-modal-value {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #212529;
+    }
+
+    .efm-modal-note {
+      border-radius: 0.9rem;
+      padding: 0.85rem 0.95rem;
+      background: rgba(13, 110, 253, 0.06);
+      border: 1px solid rgba(13, 110, 253, 0.08);
+      color: #274c77;
+      font-size: 0.95rem;
+    }
+
+    .efm-aircraft-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.45rem 0.8rem;
+      border-radius: 999px;
+      background: #f3f4f6;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      font-weight: 700;
+    }
+
+    .efm-aircraft-dot {
+      width: 0.75rem;
+      height: 0.75rem;
+      border-radius: 50%;
+      background: #dc3545;
+      box-shadow: 0 0 0 0.18rem rgba(220, 53, 69, 0.12);
+      flex: 0 0 auto;
+    }
+
+    .efm-open-defects-box {
+      margin-top: 1rem;
+      border-radius: 1rem;
+      padding: 0.9rem 1rem;
+      border: 1px solid rgba(220, 53, 69, 0.12);
+      background: rgba(220, 53, 69, 0.05);
+    }
+
+    .efm-open-defects-count {
+      font-size: 1.75rem;
+      line-height: 1;
+      font-weight: 700;
+      color: #b02a37;
+    }
+
+    .efm-open-defects-text {
+      color: #6c757d;
+      margin-top: 0.25rem;
+      font-size: 0.92rem;
+    }
   </style>
 
   <script src="js/auth.js" defer></script>
@@ -166,7 +286,6 @@
             </select>
             <div class="invalid-feedback">Aircraft required</div>
           </div>
-
 
           <div class="col-12">
             <div id="statusCardWrap" class="mt-1">
@@ -239,8 +358,6 @@
             </select>
             <div class="invalid-feedback">Reason required</div>
           </div>
-
-          
 
           <div class="col-12 col-md-6">
             <label class="form-label" for="auth">Authorised</label>
@@ -389,6 +506,75 @@
     </div>
   </main>
 
+  <div class="modal fade efm-modal" id="defectPromptModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <span>✈️</span>
+            <span>Pre-flight review</span>
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+            <div>
+              <div class="text-muted small mb-2">Aircraft selected</div>
+              <div class="efm-aircraft-chip">
+                <span class="efm-aircraft-dot"></span>
+                <span id="defectPromptAircraft">G-AZWS</span>
+              </div>
+            </div>
+
+            <div class="efm-modal-badge">
+              <span>⚠</span>
+              <span>Review before departure</span>
+            </div>
+          </div>
+
+          <div class="efm-modal-summary mb-3">
+            <div class="row g-3">
+              <div class="col-6">
+                <div class="efm-modal-label">Destination</div>
+                <div class="efm-modal-value">Kemble</div>
+              </div>
+              <div class="col-6">
+                <div class="efm-modal-label">Next step</div>
+                <div class="efm-modal-value">Pre-flight checks</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="efm-modal-note">
+            Would you like to review defects for
+            <strong id="defectPromptAircraftText">this aircraft</strong>
+            before continuing?
+          </div>
+
+          <div class="efm-open-defects-box">
+            <div class="efm-modal-label">Open defects found</div>
+            <div class="efm-open-defects-count" id="defectPromptOpenCount">0</div>
+            <div class="efm-open-defects-text" id="defectPromptOpenText">
+              No open defects currently recorded.
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" id="skipDefectsBtn">
+            Continue to pre-flight checks
+          </button>
+          <button type="button" class="btn btn-primary" id="viewDefectsBtn">
+            View defects
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const pageCard = document.getElementById("pageCard");
@@ -421,6 +607,8 @@
       const authInput = document.getElementById("auth");
       const picInput = document.getElementById("pic_name");
       const aircraftSelect = document.getElementById("aircraft");
+
+      let defectPromptModal = null;
 
       function normalizeReg(v) {
         return (v || "").trim().toUpperCase();
@@ -456,6 +644,43 @@
 
       function buildDefectsUrl(aircraft) {
         return `defects.html?aircraft=${encodeURIComponent(aircraft)}&next=${encodeURIComponent(buildPreflightUrl(aircraft))}`;
+      }
+
+      function getDefectPromptModal() {
+        if (!defectPromptModal) {
+          defectPromptModal = new bootstrap.Modal(document.getElementById("defectPromptModal"));
+        }
+        return defectPromptModal;
+      }
+
+      function showDefectPrompt(aircraft, openCount = 0) {
+        const reg = normalizeReg(aircraft);
+        const modal = getDefectPromptModal();
+
+        document.getElementById("defectPromptAircraft").textContent = reg;
+        document.getElementById("defectPromptAircraftText").textContent = reg;
+        document.getElementById("defectPromptOpenCount").textContent = String(openCount);
+
+        const openText = document.getElementById("defectPromptOpenText");
+        if (openCount === 0) {
+          openText.textContent = "No open defects currently recorded.";
+        } else if (openCount === 1) {
+          openText.textContent = "1 open defect is currently recorded for this aircraft.";
+        } else {
+          openText.textContent = `${openCount} open defects are currently recorded for this aircraft.`;
+        }
+
+        document.getElementById("viewDefectsBtn").onclick = () => {
+          modal.hide();
+          window.location.href = buildDefectsUrl(reg);
+        };
+
+        document.getElementById("skipDefectsBtn").onclick = () => {
+          modal.hide();
+          window.location.href = buildPreflightUrl(reg);
+        };
+
+        modal.show();
       }
 
       function updatePassengers() {
@@ -782,16 +1007,17 @@
           const toVal = (toInput.value || "").trim().toLowerCase();
 
           if (toVal === "kemble") {
-            setTimeout(() => {
-              const viewDefects = confirm(
-                `Your destination is Kemble.\n\nWould you like to view defects for ${aircraftVal} before continuing to pre-flight checks?`
-              );
+            setTimeout(async () => {
+              let openCount = 0;
 
-              if (viewDefects) {
-                window.location.href = buildDefectsUrl(aircraftVal);
-              } else {
-                window.location.href = buildPreflightUrl(aircraftVal);
+              try {
+                const defectSummary = await fetchOpenDefectsSummary(aircraftVal);
+                openCount = defectSummary.openCount || 0;
+              } catch (err) {
+                console.warn("Could not load defect count for prompt:", err);
               }
+
+              showDefectPrompt(aircraftVal, openCount);
             }, 500);
             return;
           }
