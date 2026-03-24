@@ -642,7 +642,7 @@
                 <div class="efm-modal-label">ETA</div>
                 <div class="efm-modal-value" id="defectPromptEta">—</div>
               </div>
-             
+
             </div>
           </div>
 
@@ -657,14 +657,14 @@
         </div>
 
         <div class="modal-footer">
-          
+
           <button type="button" class="btn btn-primary" id="viewDefectsBtn">
             View defects
           </button>
           <button type="button" class="btn btn-outline-secondary" id="skipDefectsBtn">
             Continue to pre-flight checks
           </button>
-          
+
         </div>
       </div>
     </div>
@@ -841,13 +841,10 @@
         const etaVal = document.getElementById("ETA")?.value || "";
 
         document.getElementById("defectPromptAircraft").textContent = reg;
-        document.getElementById("defectPromptAircraftText").textContent = reg;
         document.getElementById("defectPromptOpenCount").textContent = String(openCount);
-
         document.getElementById("defectPromptFrom").textContent = fromVal;
         document.getElementById("defectPromptTo").textContent = toVal;
         document.getElementById("defectPromptEta").textContent = formatDisplayEta(etaVal);
-        document.getElementById("defectPromptNextStep").textContent = "Pre-flight checks";
 
         const openText = document.getElementById("defectPromptOpenText");
         if (openCount === 0) {
