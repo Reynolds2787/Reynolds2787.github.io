@@ -45,11 +45,17 @@
       border-radius: 1rem;
     }
 
-
-    .card{
-     margin-bottom: 10px;
+    .card {
+      margin-bottom: 10px;
     }
-    
+
+    .metric-card {
+      border-radius: 1rem;
+    }
+
+    .metric-card .card-body {
+      padding-bottom: 1rem;
+    }
   </style>
 </head>
 
@@ -94,35 +100,45 @@
 
         <div class="alert alert-danger d-none mb-4" id="errorBox"></div>
 
-  
+        <div class="card shadow-sm hint-card">
+          <div class="card-body">
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="useFlightHours">
+              <label class="form-check-label fw-semibold" for="useFlightHours">Use Flight Hours</label>
+            </div>
+            <div class="small text-muted mt-2">
+              When enabled, the editor will use flight hours for service tracking and hide the tacho-hours field.
+            </div>
+          </div>
+        </div>
 
-        <div class="card shadow-sm">
+        <div class="card shadow-sm metric-card">
           <div class="card-body pb-3">
             <div class="row g-3">
-              <div class="col-12 col-md-6">
+
+              <div class="col-12 col-md-6" id="tachoNextWrap">
                 <label class="form-label fw-semibold" for="tachoNext">Remaining Tacho Hours</label>
                 <input id="tachoNext" type="number" step="0.1" class="form-control" placeholder="e.g. 12.5">
               </div>
 
-              <div class="col-12 col-md-6">
+              <div class="col-12 col-md-6" id="flightHoursNextWrap">
                 <label class="form-label fw-semibold" for="flightHoursNext">Remaining Flight Hours</label>
                 <input id="flightHoursNext" type="number" step="0.1" class="form-control" placeholder="e.g. 8.0">
               </div>
 
               <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold" for="serviceAt">Next Check Due</label>
-                <input id="serviceAt" type="data" class="form-control" placeholder="e.g. 1234.5 tacho hours">
+                <label class="form-label fw-semibold" for="serviceAt" id="serviceAtLabel">Service At Tacho Hours</label>
+                <input id="serviceAt" type="number" step="0.1" class="form-control" placeholder="e.g. 1234.5">
               </div>
 
               <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold" for="currentTacho">Current Hours</label>
-                <input id="currentTacho" type="number" step="0.1" class="form-control" placeholder="e.g. 1234.5 tacho hours">
+                <label class="form-label fw-semibold" for="currentTacho" id="currentHoursLabel">Current Tacho Hours</label>
+                <input id="currentTacho" type="number" step="0.1" class="form-control" placeholder="e.g. 1234.5">
               </div>
 
             </div>
           </div>
         </div>
-
 
         <div class="card shadow-sm">
           <div class="card-body">
@@ -151,7 +167,6 @@
           </div>
         </div>
 
-
       </div>
     </div>
   </div>
@@ -169,6 +184,8 @@
       document.body.classList.toggle("loading", isBusy);
       el("loadBtn").disabled = isBusy;
       el("saveBtn").disabled = isBusy;
+      el("aircraft").disabled = isBusy;
+      el("useFlightHours").disabled = isBusy;
     }
 
     function showError(msg) {
@@ -206,7 +223,31 @@
       return normalizeReg(params.get("aircraft") || "");
     }
 
+    function updateMetricVisibility() {
+      const useFlight = !!el("useFlightHours").checked;
+
+      el("flightHoursNextWrap").classList.toggle("d-none", !useFlight);
+      el("tachoNextWrap").classList.toggle("d-none", useFlight);
+
+      el("serviceAtLabel").textContent = useFlight
+        ? "Service At Flight Hours"
+        : "Service At Tacho Hours";
+
+      el("currentHoursLabel").textContent = useFlight
+        ? "Current Flight Hours"
+        : "Current Tacho Hours";
+
+      el("serviceAt").placeholder = useFlight ? "e.g. 4321.0 flight hours" : "e.g. 1234.5 tacho hours";
+      el("currentTacho").placeholder = useFlight ? "e.g. 4312.4 flight hours" : "e.g. 1222.0 tacho hours";
+    }
+
     function fillForm(data) {
+      const useFlight =
+        data?.useFlightHours === true ||
+        data?.serviceMetric === "FLIGHT_HOURS";
+
+      el("useFlightHours").checked = !!useFlight;
+
       el("tachoNext").value = data?.tachoHoursToNextService ?? "";
       el("flightHoursNext").value = data?.flightHoursToNextService ?? "";
       el("arcDue").value = data?.arcDueDate ?? "";
@@ -214,6 +255,9 @@
       el("modWaiverDue").value = data?.modWaiverDueDate ?? "";
       el("annualDue").value = data?.annualDueDate ?? "";
       el("serviceAt").value = data?.serviceAt ?? "";
+      el("currentTacho").value = data?.currentHours ?? data?.currentTacho ?? "";
+
+      updateMetricVisibility();
     }
 
     function clearForm() {
@@ -221,15 +265,19 @@
     }
 
     function readForm() {
+      const useFlight = !!el("useFlightHours").checked;
+
       return {
+        useFlightHours: useFlight,
+        serviceMetric: useFlight ? "FLIGHT_HOURS" : "TACHO_HOURS",
         tachoHoursToNextService: el("tachoNext").value === "" ? null : Number(el("tachoNext").value),
         flightHoursToNextService: el("flightHoursNext").value === "" ? null : Number(el("flightHoursNext").value),
+        currentHours: el("currentTacho").value === "" ? null : Number(el("currentTacho").value),
         arcDueDate: el("arcDue").value || null,
         insuranceDueDate: el("insuranceDue").value || null,
         modWaiverDueDate: el("modWaiverDue").value || null,
         annualDueDate: el("annualDue").value || null,
-        serviceAt: el("serviceAt").value || null,
-
+        serviceAt: el("serviceAt").value === "" ? null : Number(el("serviceAt").value)
       };
     }
 
@@ -312,6 +360,7 @@
 
     document.addEventListener("DOMContentLoaded", async () => {
       requestAnimationFrame(() => el("pageCard")?.classList.add("ready"));
+      updateMetricVisibility();
 
       const ok = await waitForAuthFetch();
       if (!ok) {
@@ -334,11 +383,13 @@
 
     el("loadBtn").addEventListener("click", loadAircraft);
     el("saveBtn").addEventListener("click", saveAircraft);
+    el("useFlightHours").addEventListener("change", updateMetricVisibility);
 
     el("aircraft").addEventListener("change", () => {
       clearError();
       setStatus("");
       clearForm();
+      updateMetricVisibility();
     });
   </script>
 
