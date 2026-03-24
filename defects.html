@@ -42,6 +42,164 @@
     .mono {
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     }
+
+    .efm-modal .modal-content {
+      border: 0;
+      border-radius: 1.25rem;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top right, rgba(13, 110, 253, 0.08), transparent 35%),
+        linear-gradient(180deg, #ffffff, #f7f9fc);
+      box-shadow:
+        0 1rem 2.5rem rgba(0, 0, 0, 0.18),
+        0 0.25rem 1rem rgba(13, 110, 253, 0.08);
+    }
+
+    .efm-modal .modal-header {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      padding: 1rem 1.1rem;
+      background: rgba(255, 255, 255, 0.86);
+    }
+
+    .efm-modal .modal-title {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .efm-modal .modal-body {
+      padding: 1.1rem;
+    }
+
+    .efm-modal .modal-footer {
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+      padding: 1rem 1.1rem;
+      background: rgba(255, 255, 255, 0.78);
+    }
+
+    .efm-modal-note {
+      border-radius: 0.9rem;
+      padding: 0.9rem 1rem;
+      background: rgba(13, 110, 253, 0.06);
+      border: 1px solid rgba(13, 110, 253, 0.08);
+      color: #274c77;
+      font-size: 0.95rem;
+    }
+
+    .efm-modal-summary {
+      border: 1px solid rgba(0, 0, 0, 0.07);
+      border-radius: 1rem;
+      padding: 1rem;
+      background: rgba(248, 249, 250, 0.92);
+    }
+
+    .efm-modal-label {
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6c757d;
+      margin-bottom: 0.25rem;
+    }
+
+    .efm-modal-value {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #212529;
+      line-height: 1.2;
+      word-break: break-word;
+    }
+
+    .efm-aircraft-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.45rem 0.8rem;
+      border-radius: 999px;
+      background: #f3f4f6;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      font-weight: 700;
+    }
+
+    .efm-aircraft-dot {
+      width: 0.75rem;
+      height: 0.75rem;
+      border-radius: 50%;
+      background: #dc3545;
+      box-shadow: 0 0 0 0.18rem rgba(220, 53, 69, 0.12);
+      flex: 0 0 auto;
+    }
+
+    .efm-form-card {
+      border: 1px solid rgba(0, 0, 0, 0.07);
+      border-radius: 1rem;
+      padding: 1rem;
+      background: rgba(248, 249, 250, 0.88);
+    }
+
+    .efm-modal .form-label {
+      font-weight: 600;
+      color: #1f2a37;
+      margin-bottom: 0.45rem;
+    }
+
+    .efm-modal .form-control,
+    .efm-modal .form-select,
+    .efm-modal textarea.form-control {
+      background-color: #f8f9fc;
+      border: 1px solid rgba(0, 0, 0, 0.10);
+      color: #212529;
+      border-radius: 0.85rem;
+      min-height: 46px;
+      transition:
+        background-color .15s ease,
+        border-color .15s ease,
+        box-shadow .15s ease;
+    }
+
+    .efm-modal textarea.form-control {
+      min-height: auto;
+    }
+
+    .efm-modal .form-control::placeholder,
+    .efm-modal textarea.form-control::placeholder {
+      color: #6c757d;
+      opacity: 0.9;
+    }
+
+    .efm-modal .form-control:hover,
+    .efm-modal .form-select:hover,
+    .efm-modal textarea.form-control:hover {
+      background-color: #ffffff;
+      border-color: rgba(0, 0, 0, 0.16);
+    }
+
+    .efm-modal .form-control:focus,
+    .efm-modal .form-select:focus,
+    .efm-modal textarea.form-control:focus {
+      background-color: #ffffff;
+      border-color: rgba(13, 110, 253, 0.35);
+      box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, .12);
+    }
+
+    .efm-modal .form-control[readonly] {
+      background-color: #eef1f4;
+      color: #495057;
+    }
+
+    .efm-modal .form-text {
+      color: #6b7280;
+    }
+
+    .efm-danger-note {
+      border-radius: 0.9rem;
+      padding: 0.9rem 1rem;
+      background: rgba(220, 53, 69, 0.06);
+      border: 1px solid rgba(220, 53, 69, 0.10);
+      color: #a52834;
+      font-size: 0.95rem;
+    }
   </style>
 
   <script src="js/auth.js"></script>
@@ -112,48 +270,57 @@
     </div>
   </div>
 
-  <div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+  <div class="modal fade efm-modal" id="addModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Add defect</h5>
+          <h5 class="modal-title">
+            <span>📝</span>
+            <span>Add defect</span>
+          </h5>
           <button class="btn-close" data-bs-dismiss="modal"></button>
         </div>
 
         <div class="modal-body">
-          <div class="row g-3">
-            <div class="col-12 col-md-3">
-              <label class="form-label">Aircraft</label>
-              <input class="form-control mono" id="newAircraft" readonly>
-            </div>
+          <div class="efm-modal-note mb-3">
+            Record a new aircraft defect with enough detail for pilots and admins to understand the operational impact.
+          </div>
 
-            <div class="col-12 col-md-3">
-              <label class="form-label">Date</label>
-              <input class="form-control" id="newDate" type="datetime-local">
-            </div>
+          <div class="efm-form-card">
+            <div class="row g-3">
+              <div class="col-12 col-md-3">
+                <label class="form-label">Aircraft</label>
+                <input class="form-control mono" id="newAircraft" readonly>
+              </div>
 
-            <div class="col-12 col-md-3">
-              <label class="form-label">Full Name</label>
-              <input class="form-control" id="newName" placeholder="e.g. Sam">
-            </div>
+              <div class="col-12 col-md-3">
+                <label class="form-label">Date</label>
+                <input class="form-control" id="newDate" type="datetime-local">
+              </div>
 
-            <div class="col-12 col-md-3">
-              <label class="form-label">Severity</label>
-              <select class="form-select" id="newSeverity">
-                <option value="MINOR" selected>Minor</option>
-                <option value="MAJOR">Major</option>
-                <option value="GROUNDED">Aircraft Grounded</option>
-              </select>
-            </div>
+              <div class="col-12 col-md-3">
+                <label class="form-label">Full Name</label>
+                <input class="form-control" id="newName" placeholder="e.g. Sam">
+              </div>
 
-            <div class="col-12">
-              <label class="form-label">Defect</label>
-              <textarea class="form-control" id="newDefect" rows="3" placeholder="Describe the defect..."></textarea>
-            </div>
+              <div class="col-12 col-md-3">
+                <label class="form-label">Severity</label>
+                <select class="form-select" id="newSeverity">
+                  <option value="MINOR" selected>Minor</option>
+                  <option value="MAJOR">Major</option>
+                  <option value="GROUNDED">Aircraft Grounded</option>
+                </select>
+              </div>
 
-            <div class="col-12">
-              <label class="form-label">Effect on Flight</label>
-              <textarea class="form-control" id="newEffect" rows="3" placeholder="Operational effect / limitations..."></textarea>
+              <div class="col-12">
+                <label class="form-label">Defect</label>
+                <textarea class="form-control" id="newDefect" rows="3" placeholder="Describe the defect..."></textarea>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">Effect on Flight</label>
+                <textarea class="form-control" id="newEffect" rows="3" placeholder="Operational effect / limitations..."></textarea>
+              </div>
             </div>
           </div>
 
@@ -162,35 +329,44 @@
 
         <div class="modal-footer">
           <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button class="btn btn-primary" id="saveBtn">Save</button>
+          <button class="btn btn-primary" id="saveBtn">Save defect</button>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="modal fade" id="actionModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+  <div class="modal fade efm-modal" id="actionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="actionTitle">Update defect</h5>
+          <h5 class="modal-title" id="actionTitle">
+            <span>🛠️</span>
+            <span>Update defect</span>
+          </h5>
           <button class="btn-close" data-bs-dismiss="modal"></button>
         </div>
 
         <div class="modal-body">
-          <div class="row g-3">
-            <div class="col-12 col-md-4">
-              <label class="form-label">Aircraft</label>
-              <input class="form-control mono" id="actAircraft" readonly>
-            </div>
-            <div class="col-12 col-md-8">
-              <label class="form-label">Reported At (key)</label>
-              <input class="form-control mono" id="actReportedAt" readonly>
-            </div>
+          <div class="efm-danger-note mb-3" id="actionBanner">
+            Update this defect carefully. Your notes will form part of the aircraft record.
+          </div>
 
-            <div class="col-12">
-              <label class="form-label" id="notesLabel">Notes</label>
-              <textarea class="form-control" id="actNotes" rows="4" placeholder="Enter notes..."></textarea>
-              <div class="form-text" id="notesHelp"></div>
+          <div class="efm-form-card">
+            <div class="row g-3">
+              <div class="col-12 col-md-4">
+                <label class="form-label">Aircraft</label>
+                <input class="form-control mono" id="actAircraft" readonly>
+              </div>
+              <div class="col-12 col-md-8">
+                <label class="form-label">Reported At (key)</label>
+                <input class="form-control mono" id="actReportedAt" readonly>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label" id="notesLabel">Notes</label>
+                <textarea class="form-control" id="actNotes" rows="4" placeholder="Enter notes..."></textarea>
+                <div class="form-text" id="notesHelp"></div>
+              </div>
             </div>
           </div>
 
@@ -200,6 +376,48 @@
         <div class="modal-footer">
           <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
           <button class="btn btn-primary" id="actConfirmBtn">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade efm-modal" id="doneModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <span>✈️</span>
+            <span>Continue workflow</span>
+          </h5>
+          <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="efm-modal-note mb-3">
+            You arrived here from the booking workflow. Would you like to continue to the pre-flight checks now?
+          </div>
+
+          <div class="efm-modal-summary">
+            <div class="row g-3">
+              <div class="col-6">
+                <div class="efm-modal-label">Aircraft</div>
+                <div class="efm-modal-value" id="doneModalAircraft">—</div>
+              </div>
+              <div class="col-6">
+                <div class="efm-modal-label">Next step</div>
+                <div class="efm-modal-value">Pre-flight checks</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" id="doneModalHomeBtn">
+            Return home
+          </button>
+          <button type="button" class="btn btn-primary" id="doneModalNextBtn">
+            Complete pre-flight checks
+          </button>
         </div>
       </div>
     </div>
@@ -411,6 +629,38 @@
     }
 
     let pendingAction = null;
+    let doneModal = null;
+
+    function getDoneModal() {
+      if (!doneModal) {
+        doneModal = new bootstrap.Modal(el("doneModal"));
+      }
+      return doneModal;
+    }
+
+    function showDoneModal() {
+      const reg = normalizeReg(el("aircraftSelect").value || "");
+      el("doneModalAircraft").textContent = reg || "—";
+
+      const modal = getDoneModal();
+      const next = getNextUrl();
+
+      el("doneModalNextBtn").onclick = () => {
+        modal.hide();
+        if (next) {
+          window.location.href = next;
+        } else {
+          window.location.href = "index.html";
+        }
+      };
+
+      el("doneModalHomeBtn").onclick = () => {
+        modal.hide();
+        window.location.href = "index.html";
+      };
+
+      modal.show();
+    }
 
     function openActionModal(actionType, aircraft, reportedAt) {
       pendingAction = { actionType, aircraft, reportedAt };
@@ -420,14 +670,21 @@
       el("actNotes").value = "";
       hideActErr();
 
+      const title = el("actionTitle");
+      const banner = el("actionBanner");
+
       if (actionType === "DEFERRED") {
-        el("actionTitle").textContent = "Defer defect";
+        title.innerHTML = `<span>⏸️</span><span>Defer defect</span>`;
+        banner.textContent = "You are deferring this defect. Record any limitations, controls, or operational notes clearly.";
         el("notesLabel").textContent = "Deferred notes";
         el("notesHelp").textContent = "Enter details of the deferment / limitations.";
+        el("actConfirmBtn").textContent = "Confirm deferment";
       } else {
-        el("actionTitle").textContent = "Rectify defect";
+        title.innerHTML = `<span>✅</span><span>Rectify defect</span>`;
+        banner.textContent = "You are marking this defect as rectified. Record what work was carried out and any important notes.";
         el("notesLabel").textContent = "Rectification notes";
         el("notesHelp").textContent = "Enter details of the fix carried out.";
+        el("actConfirmBtn").textContent = "Confirm rectification";
       }
 
       bootstrap.Modal.getOrCreateInstance(el("actionModal")).show();
@@ -548,12 +805,7 @@
         const next = getNextUrl();
 
         if (next) {
-          const goNext = confirm("Would you like to complete the pre-flight checks now?");
-          if (goNext) {
-            window.location.href = next;
-          } else {
-            window.location.href = "index.html";
-          }
+          showDoneModal();
           return;
         }
 
