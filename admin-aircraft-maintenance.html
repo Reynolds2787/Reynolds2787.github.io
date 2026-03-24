@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>Admin - Aircraft Maintenance</title>
@@ -59,6 +60,11 @@
 
     input[readonly] {
       background-color: #f8f9fa;
+    }
+
+
+    #loadBtn {
+      display: none;
     }
   </style>
 </head>
@@ -122,12 +128,14 @@
 
               <div class="col-12 col-md-6" id="tachoNextWrap">
                 <label class="form-label fw-semibold" for="tachoNext">Remaining Tacho Hours</label>
-                <input id="tachoNext" type="number" step="0.1" class="form-control" placeholder="Calculated automatically" readonly>
+                <input id="tachoNext" type="number" step="0.1" class="form-control"
+                  placeholder="Calculated automatically" readonly>
               </div>
 
               <div class="col-12 col-md-6" id="flightHoursNextWrap">
                 <label class="form-label fw-semibold" for="flightHoursNext">Remaining Flight Hours</label>
-                <input id="flightHoursNext" type="number" step="0.1" class="form-control" placeholder="Calculated automatically" readonly>
+                <input id="flightHoursNext" type="number" step="0.1" class="form-control"
+                  placeholder="Calculated automatically" readonly>
               </div>
 
               <div class="col-12 col-md-6">
@@ -136,7 +144,8 @@
               </div>
 
               <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold" for="currentTacho" id="currentHoursLabel">Current Tacho Hours</label>
+                <label class="form-label fw-semibold" for="currentTacho" id="currentHoursLabel">Current Tacho
+                  Hours</label>
                 <input id="currentTacho" type="number" step="0.1" class="form-control" placeholder="e.g. 1234.5">
               </div>
 
@@ -432,11 +441,19 @@
     el("serviceAt").addEventListener("input", calculateRemainingHours);
     el("currentTacho").addEventListener("input", calculateRemainingHours);
 
-    el("aircraft").addEventListener("change", () => {
+    el("aircraft").addEventListener("change", async () => {
       clearError();
       setStatus("");
-      clearForm();
-      updateMetricVisibility();
+
+      const aircraft = normalizeReg(el("aircraft").value);
+
+      if (!aircraft) {
+        clearForm();
+        updateMetricVisibility();
+        return;
+      }
+
+      await loadAircraft();
     });
   </script>
 
@@ -475,4 +492,5 @@
       .catch(console.error);
   </script>
 </body>
+
 </html>
