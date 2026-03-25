@@ -4,23 +4,42 @@ const FLIGHTS_URL =
 
 const KEMBLE_FR24_FALLBACK = "https://www.flightradar24.com/51.668,-2.056/12";
 
-const flightCardsEl = document.getElementById("flightCards");
-const loadingSpinnerEl = document.getElementById("loadingSpinner");
-const refreshFlightsBtn = document.getElementById("refreshFlightsBtn");
+document.addEventListener("DOMContentLoaded", () => {
+  const flightCardsEl = document.getElementById("flightCards");
+  const loadingSpinnerEl = document.getElementById("loadingSpinner");
+  const refreshFlightsBtn = document.getElementById("refreshFlightsBtn");
 
-if (flightCardsEl) {
-  if (refreshFlightsBtn) {
-    refreshFlightsBtn.addEventListener("click", loadFlights);
+  if (!flightCardsEl) {
+    console.error("flightCards element not found");
+    return;
   }
-  loadFlights();
-}
 
-async function loadFlights() {
-  showLoading(true);
+  console.log("fetch-flight.js loaded successfully");
+  flightCardsEl.innerHTML = `
+    <div class="col-12">
+      <div class="alert alert-info mb-3">Flight script loaded. Fetching active flights…</div>
+    </div>
+  `;
+
+  if (refreshFlightsBtn) {
+    refreshFlightsBtn.addEventListener("click", () => {
+      loadFlights(flightCardsEl, loadingSpinnerEl);
+    });
+  }
+
+  loadFlights(flightCardsEl, loadingSpinnerEl);
+});
+
+async function loadFlights(flightCardsEl, loadingSpinnerEl) {
+  showLoading(loadingSpinnerEl, true);
   flightCardsEl.innerHTML = "";
 
   try {
+    console.log("Fetching active flights from:", FLIGHTS_URL);
+
     const res = await fetch(FLIGHTS_URL, { cache: "no-store" });
+    console.log("Fetch response status:", res.status);
+
     if (!res.ok) throw new Error(`Flight fetch failed: ${res.status}`);
 
     let data = await res.json();
@@ -32,7 +51,7 @@ async function loadFlights() {
     const flights = normaliseFlights(data);
     console.log("Normalised flights:", flights);
 
-    showLoading(false);
+    showLoading(loadingSpinnerEl, false);
 
     if (!flights.length) {
       flightCardsEl.innerHTML = `
@@ -47,7 +66,10 @@ async function loadFlights() {
       return;
     }
 
-    flightCardsEl.innerHTML = flights.map(renderFlightCard).join("");
+    const html = flights.map(renderFlightCard).join("");
+    console.log("Rendered HTML:", html);
+
+    flightCardsEl.innerHTML = html;
 
     flightCardsEl.querySelectorAll("[data-fr24-url]").forEach(card => {
       card.addEventListener("click", () => {
@@ -62,20 +84,19 @@ async function loadFlights() {
 
   } catch (err) {
     console.error("Active flights load error:", err);
-    showLoading(false);
+    showLoading(loadingSpinnerEl, false);
+
     flightCardsEl.innerHTML = `
       <div class="col-12">
-        <div class="empty-state p-4 text-center">
-          <div class="fs-2 mb-2">⚠️</div>
-          <h3 class="h5 mb-1">Unable to load active flights</h3>
-          <p class="text-muted mb-0">Please try again in a moment.</p>
+        <div class="alert alert-danger">
+          Active flights failed to load: ${escapeHtml(err.message || "Unknown error")}
         </div>
       </div>
     `;
   }
 }
 
-function showLoading(isLoading) {
+function showLoading(loadingSpinnerEl, isLoading) {
   if (!loadingSpinnerEl) return;
   loadingSpinnerEl.style.display = isLoading ? "" : "none";
 }
