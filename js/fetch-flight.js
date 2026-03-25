@@ -3,6 +3,7 @@ const FLIGHTS_URL =
   "https://q97yj6cmpe.execute-api.eu-west-2.amazonaws.com/EFM_API/get_all_flights";
 
 const KEMBLE_FR24_FALLBACK = "https://www.flightradar24.com/51.668,-2.056/12";
+
 const flightCardsEl = document.getElementById("flightCards");
 const loadingSpinnerEl = document.getElementById("loadingSpinner");
 const refreshFlightsBtn = document.getElementById("refreshFlightsBtn");
@@ -11,7 +12,6 @@ if (flightCardsEl) {
   if (refreshFlightsBtn) {
     refreshFlightsBtn.addEventListener("click", loadFlights);
   }
-
   loadFlights();
 }
 
@@ -23,8 +23,14 @@ async function loadFlights() {
     const res = await fetch(FLIGHTS_URL, { cache: "no-store" });
     if (!res.ok) throw new Error(`Flight fetch failed: ${res.status}`);
 
-    const data = await res.json();
+    let data = await res.json();
+    console.log("Raw active flights response:", data);
+
+    data = unwrapApiPayload(data);
+    console.log("Unwrapped active flights response:", data);
+
     const flights = normaliseFlights(data);
+    console.log("Normalised flights:", flights);
 
     showLoading(false);
 
@@ -51,13 +57,11 @@ async function loadFlights() {
     });
 
     flightCardsEl.querySelectorAll("[data-fr24-link]").forEach(link => {
-      link.addEventListener("click", (e) => {
-        e.stopPropagation();
-      });
+      link.addEventListener("click", (e) => e.stopPropagation());
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("Active flights load error:", err);
     showLoading(false);
     flightCardsEl.innerHTML = `
       <div class="col-12">
@@ -76,21 +80,88 @@ function showLoading(isLoading) {
   loadingSpinnerEl.style.display = isLoading ? "" : "none";
 }
 
+function unwrapApiPayload(data) {
+  if (!data) return [];
+
+  // Common API Gateway/Lambda proxy pattern: { statusCode, body: "..." }
+  if (typeof data === "object" && typeof data.body === "string") {
+    try {
+      const parsed = JSON.parse(data.body);
+      return parsed;
+    } catch {
+      return [];
+    }
+  }
+
+  return data;
+}
+
 function normaliseFlights(data) {
-  const raw = Array.isArray(data)
-    ? data
-    : Array.isArray(data?.items)
-      ? data.items
-      : Array.isArray(data?.flights)
-        ? data.flights
-        : [];
+  let raw = [];
+
+  if (Array.isArray(data)) {
+    raw = data;
+  } else if (data && typeof data === "object") {
+    raw =
+      data.items ||
+      data.Items ||
+      data.flights ||
+      data.Flights ||
+      data.records ||
+      data.Records ||
+      data.data ||
+      data.Data ||
+      [];
+  }
+
+  // If a single flight object is returned instead of an array
+  if (!Array.isArray(raw) && raw && typeof raw === "object") {
+    raw = [raw];
+  }
 
   return raw.map(item => ({
-    aircraft: item.aircraft || item.registration || item.reg || "Unknown",
-    from: item.from || item.departure || item.origin || "—",
-    to: item.to || item.destination || "—",
-    eta: item.eta || item.ETA || item.arrivalTime || "—",
-    picName: item.picName || item.pic || item.pilot || "",
+    aircraft:
+      item.aircraft ??
+      item.Aircraft ??
+      item.registration ??
+      item.Registration ??
+      item.reg ??
+      item.Reg ??
+      "Unknown",
+
+    from:
+      item.from ??
+      item.From ??
+      item.departure ??
+      item.Departure ??
+      item.origin ??
+      item.Origin ??
+      "—",
+
+    to:
+      item.to ??
+      item.To ??
+      item.destination ??
+      item.Destination ??
+      "—",
+
+    eta:
+      item.eta ??
+      item.ETA ??
+      item.arrivalTime ??
+      item.ArrivalTime ??
+      item.arrival ??
+      item.Arrival ??
+      "—",
+
+    picName:
+      item.picName ??
+      item.PICName ??
+      item.pic ??
+      item.PIC ??
+      item.pilot ??
+      item.Pilot ??
+      ""
   }));
 }
 
@@ -153,8 +224,13 @@ function renderFlightCard(flight) {
 }
 
 function buildFr24Url(aircraft) {
-  if (!aircraft || aircraft === "Unknown") return KEMBLE_FR24_FALLBACK;
-  return `https://www.flightradar24.com/${encodeURIComponent(String(aircraft).replace(/[^A-Za-z0-9-]/g, ""))}`;
+  if (!aircraft || aircraft === "Unknown") {
+    return KEMBLE_FR24_FALLBACK;
+  }
+
+  return `https://www.flightradar24.com/${encodeURIComponent(
+    String(aircraft).replace(/[^A-Za-z0-9-]/g, "")
+  )}`;
 }
 
 function formatEta(value) {
