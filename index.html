@@ -8,132 +8,266 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 
-
-
-<style>
-
-  body {
-    background: linear-gradient(180deg, #ecedef 100%,#f1f2f5 100%);
+  <style>
+    body {
+      background: linear-gradient(180deg, #ecedef 100%, #f1f2f5 100%);
     }
 
+    .clickable-row,
+    .clickable-card {
+      cursor: pointer;
+    }
 
-  .clickable-row, .clickable-card { cursor: pointer; }
+    .table tbody tr.clickable-row:hover > * {
+      background-color: rgba(13, 110, 253, 0.06) !important;
+    }
 
-  .table tbody tr.clickable-row:hover > * {
-    background-color: rgba(13,110,253,0.06) !important;
-  }
+    .clickable-card:hover {
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+      transform: translateY(-1px);
+    }
 
-  .clickable-card:hover {
-    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
-    transform: translateY(-1px);
-  }
+    .fr24-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 8px;
+      font-size: 0.85rem;
+      color: var(--bs-primary);
+      opacity: 0.9;
+      white-space: nowrap;
+    }
 
-  .fr24-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-left: 8px;
-    font-size: 0.85rem;
-    color: var(--bs-primary);
-    opacity: 0.9;
-    white-space: nowrap;
-  }
+    .fr24-icon {
+      display: inline-flex;
+      width: 18px;
+      height: 18px;
+    }
 
-  .fr24-icon {
-    display: inline-flex;
-    width: 18px;
-    height: 18px;
-  }
-  .fr24-icon svg { width: 18px; height: 18px; }
+    .fr24-icon svg {
+      width: 18px;
+      height: 18px;
+    }
 
-  .clickable-row:hover .fr24-link,
-  .clickable-card:hover .fr24-link {
-    opacity: 1;
-    text-decoration: underline;
-  }
+    .clickable-row:hover .fr24-link,
+    .clickable-card:hover .fr24-link {
+      opacity: 1;
+      text-decoration: underline;
+    }
 
-  .skeleton {
-    border-radius: .75rem;
-    background: linear-gradient(90deg,#e9ecef 25%,#f8f9fa 37%,#e9ecef 63%);
-    background-size: 400% 100%;
-    animation: shimmer 1.4s ease infinite;
-  }
-  @keyframes shimmer { 0% { background-position: 100% 0 } 100% { background-position: 0 0 } }
+    .skeleton {
+      border-radius: 0.75rem;
+      background: linear-gradient(90deg, #e9ecef 25%, #f8f9fa 37%, #e9ecef 63%);
+      background-size: 400% 100%;
+      animation: shimmer 1.4s ease infinite;
+    }
 
-</style>
+    @keyframes shimmer {
+      0% { background-position: 100% 0; }
+      100% { background-position: 0 0; }
+    }
 
-<script src="js/auth.js" defer></script>
-<script src="js/logout.js" defer></script>
-<script src="js/admin-guard.js" defer></script>
-<script src="js/due-soon-badge.js" defer></script>
-<script src="js/fetch-flight.js" defer></script>
-<script src="js/fetch-qnh.js" defer></script>
-<script src="js/loadNavbar.js" defer></script>
+    .quick-actions-card {
+      border: 0;
+      border-radius: 1.25rem;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.08);
+      backdrop-filter: blur(6px);
+    }
 
+    .quick-action-tile {
+      display: block;
+      text-decoration: none;
+      border-radius: 1rem;
+      padding: 1rem;
+      height: 100%;
+      transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease;
+      box-shadow: 0 0.35rem 0.9rem rgba(0, 0, 0, 0.06);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
 
+    .quick-action-tile:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0.65rem 1.25rem rgba(0, 0, 0, 0.12);
+      text-decoration: none;
+    }
+
+    .quick-action-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+    }
+
+    .quick-action-title {
+      font-weight: 700;
+      color: #212529;
+      margin-bottom: 0.2rem;
+    }
+
+    .quick-action-subtitle {
+      font-size: 0.9rem;
+      color: #6c757d;
+      margin-bottom: 0;
+      line-height: 1.3;
+    }
+
+    .tile-bookout { background: linear-gradient(180deg, #e8f7ec 0%, #f4fbf6 100%); }
+    .tile-bookings { background: linear-gradient(180deg, #eaf2ff 0%, #f5f9ff 100%); }
+    .tile-status { background: linear-gradient(180deg, #fff7e8 0%, #fffaf2 100%); }
+    .tile-techlog { background: linear-gradient(180deg, #f2edff 0%, #f8f6ff 100%); }
+    .tile-postlog { background: linear-gradient(180deg, #eaf7f8 0%, #f4fbfc 100%); }
+    .tile-defects { background: linear-gradient(180deg, #fff0f0 0%, #fff7f7 100%); }
+
+    .icon-bookout { background: #d1f0d8; }
+    .icon-bookings { background: #d9e8ff; }
+    .icon-status { background: #ffe7b8; }
+    .icon-techlog { background: #e2d8ff; }
+    .icon-postlog { background: #d8f0f2; }
+    .icon-defects { background: #ffd8d8; }
+
+    @media (max-width: 576px) {
+      .quick-action-tile {
+        padding: 0.9rem;
+      }
+
+      .quick-action-title {
+        font-size: 0.95rem;
+      }
+
+      .quick-action-subtitle {
+        font-size: 0.82rem;
+      }
+    }
+  </style>
+
+  <script src="js/auth.js" defer></script>
+  <script src="js/logout.js" defer></script>
+  <script src="js/admin-guard.js" defer></script>
+  <script src="js/due-soon-badge.js" defer></script>
+  <script src="js/fetch-flight.js" defer></script>
+  <script src="js/fetch-qnh.js" defer></script>
+  <script src="js/loadNavbar.js" defer></script>
 </head>
-
 
 <body>
 
-<div class="container-fluid p-2 bg-primary text-white text-center">
-  <h2>EFM WEB APP - HOME PAGE</h2>
-</div>
+  <div class="container-fluid p-2 bg-primary text-white text-center">
+    <h2>EFM WEB APP - HOME PAGE</h2>
+  </div>
 
+  <div id="navbar-placeholder"></div>
 
-<div id="navbar-placeholder"></div>
+  <div class="container mt-3 pb-3">
+    <div class="quick-actions-card p-3 p-md-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h2 class="h4 mb-1">Quick Actions</h2>
+          <p class="text-muted mb-0">Fast access to common flight operations tasks</p>
+        </div>
+        <span class="badge text-bg-primary rounded-pill px-3 py-2 d-none d-md-inline">
+          Pilot Launchpad
+        </span>
+      </div>
 
+      <div class="row g-3">
+        <div class="col-6 col-lg-4">
+          <a href="booking-out-form.html" class="quick-action-tile tile-bookout">
+            <div class="quick-action-icon icon-bookout">✈️</div>
+            <div class="quick-action-title">Book Out</div>
+            <p class="quick-action-subtitle">Start a new flight booking</p>
+          </a>
+        </div>
 
+        <div class="col-6 col-lg-4">
+          <a href="my-bookings.html" class="quick-action-tile tile-bookings">
+            <div class="quick-action-icon icon-bookings">📋</div>
+            <div class="quick-action-title">My Bookings</div>
+            <p class="quick-action-subtitle">View and manage your flights</p>
+          </a>
+        </div>
 
-<div class="container mt-3 pb-3">
-  <h2>Quick Access Bar</h2>
-  <a href="booking-out-form.html" class="btn btn-success">Book Out</a>
-  <a href="my-bookings.html" class="btn btn-primary">My Bookings</a>
-</div>
+        <div class="col-6 col-lg-4">
+          <a href="aircraft-status.html" class="quick-action-tile tile-status">
+            <div class="quick-action-icon icon-status">🛠️</div>
+            <div class="quick-action-title">Aircraft Status</div>
+            <p class="quick-action-subtitle">Check service and aircraft condition</p>
+          </a>
+        </div>
 
+        <div class="col-6 col-lg-4">
+          <a href="aircraft-tech-log.html" class="quick-action-tile tile-techlog">
+            <div class="quick-action-icon icon-techlog">📘</div>
+            <div class="quick-action-title">Tech Log</div>
+            <p class="quick-action-subtitle">Open the aircraft tech log</p>
+          </a>
+        </div>
 
-<div class="container-fluid bg-light border-bottom">
-  <div class="container py-2">
-    <div class="d-flex justify-content-center align-items-center gap-2"
-         id="qnhDisplay"
-         data-bs-toggle="tooltip"
-         data-bs-placement="bottom"
-         title="Loading METAR…"
-         style="cursor: default;">
+        <div class="col-6 col-lg-4">
+          <a href="post-flight-log.html" class="quick-action-tile tile-postlog">
+            <div class="quick-action-icon icon-postlog">🧾</div>
+            <div class="quick-action-title">Post Flight Log</div>
+            <p class="quick-action-subtitle">Complete a finished flight entry</p>
+          </a>
+        </div>
 
-      <span class="badge bg-primary">QNH</span>
-      <span class="fw-semibold" id="metarStation">—</span>
-
-      <span id="qnhValue" class="fs-5 fw-bold text-primary">
-        <span class="spinner-border spinner-border-sm"></span>
-      </span>
-
-      <span class="text-muted small">hPa</span>
+        <div class="col-6 col-lg-4">
+          <a href="defects.html" class="quick-action-tile tile-defects">
+            <div class="quick-action-icon icon-defects">⚠️</div>
+            <div class="quick-action-title">Defects</div>
+            <p class="quick-action-subtitle">Report or review aircraft defects</p>
+          </a>
+        </div>
+      </div>
     </div>
   </div>
-</div>
 
+  <div class="container-fluid bg-light border-bottom">
+    <div class="container py-2">
+      <div class="d-flex justify-content-center align-items-center gap-2"
+           id="qnhDisplay"
+           data-bs-toggle="tooltip"
+           data-bs-placement="bottom"
+           title="Loading METAR…"
+           style="cursor: default;">
 
+        <span class="badge bg-primary">QNH</span>
+        <span class="fw-semibold" id="metarStation">—</span>
 
+        <span id="qnhValue" class="fs-5 fw-bold text-primary">
+          <span class="spinner-border spinner-border-sm"></span>
+        </span>
 
-<div class="container mt-2">
-
-
-  <div id="loadingSpinner" class="text-center my-3">
-    <div class="spinner-border text-primary"></div>
-    <div>Loading flights...</div>
+        <span class="text-muted small">hPa</span>
+      </div>
+    </div>
   </div>
 
-  <div id="flightCards" class="d-block d-md-none"></div>
+  <div class="container mt-2">
+    <div id="loadingSpinner" class="text-center my-3">
+      <div class="spinner-border text-primary"></div>
+      <div>Loading flights...</div>
+    </div>
 
-  <table class="table table-striped table-bordered d-none d-md-table">
-    <thead class="table-dark">
-      <tr><th>AIRCRAFT</th><th>FROM</th><th>TO</th><th>ETA</th></tr>
-    </thead>
-    <tbody id="flightsTableBody"></tbody>
-  </table>
-</div>
+    <div id="flightCards" class="d-block d-md-none"></div>
 
+    <table class="table table-striped table-bordered d-none d-md-table">
+      <thead class="table-dark">
+        <tr>
+          <th>AIRCRAFT</th>
+          <th>FROM</th>
+          <th>TO</th>
+          <th>ETA</th>
+        </tr>
+      </thead>
+      <tbody id="flightsTableBody"></tbody>
+    </table>
+  </div>
 
 </body>
 </html>
