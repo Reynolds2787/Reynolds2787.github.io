@@ -83,11 +83,9 @@ function showLoading(isLoading) {
 function unwrapApiPayload(data) {
   if (!data) return [];
 
-  // Common API Gateway/Lambda proxy pattern: { statusCode, body: "..." }
   if (typeof data === "object" && typeof data.body === "string") {
     try {
-      const parsed = JSON.parse(data.body);
-      return parsed;
+      return JSON.parse(data.body);
     } catch {
       return [];
     }
@@ -114,7 +112,6 @@ function normaliseFlights(data) {
       [];
   }
 
-  // If a single flight object is returned instead of an array
   if (!Array.isArray(raw) && raw && typeof raw === "object") {
     raw = [raw];
   }
@@ -148,6 +145,8 @@ function normaliseFlights(data) {
     eta:
       item.eta ??
       item.ETA ??
+      item["ETA FULL"] ??
+      item["ETA Abbreviated"] ??
       item.arrivalTime ??
       item.ArrivalTime ??
       item.arrival ??
@@ -161,7 +160,18 @@ function normaliseFlights(data) {
       item.PIC ??
       item.pilot ??
       item.Pilot ??
-      ""
+      "—",
+
+    reason:
+      item.reason ??
+      item.Reason ??
+      item["Reason For Flight"] ??
+      "—",
+
+    flightNumber:
+      item.flightNumber ??
+      item.FlightNumber ??
+      "—"
   }));
 }
 
@@ -204,7 +214,15 @@ function renderFlightCard(flight) {
             </div>
             <div class="col-6">
               <div class="meta-label">PIC</div>
-              <div class="meta-value">${escapeHtml(flight.picName || "—")}</div>
+              <div class="meta-value">${escapeHtml(flight.picName)}</div>
+            </div>
+            <div class="col-6">
+              <div class="meta-label">Flight No</div>
+              <div class="meta-value">${escapeHtml(flight.flightNumber)}</div>
+            </div>
+            <div class="col-6">
+              <div class="meta-label">Reason</div>
+              <div class="meta-value">${escapeHtml(flight.reason)}</div>
             </div>
           </div>
 
