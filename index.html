@@ -163,12 +163,32 @@
 
   <div id="navbar-placeholder"></div>
 
+  <div class="container-fluid bg-light border-bottom">
+    <div class="container py-2">
+      <div class="d-flex justify-content-center align-items-center gap-2"
+           id="qnhDisplay"
+           data-bs-toggle="tooltip"
+           data-bs-placement="bottom"
+           title="Loading METAR…"
+           style="cursor: default;">
+
+        <span class="badge bg-primary">QNH</span>
+        <span class="fw-semibold" id="metarStation">—</span>
+
+        <span id="qnhValue" class="fs-5 fw-bold text-primary">
+          <span class="spinner-border spinner-border-sm"></span>
+        </span>
+
+        <span class="text-muted small">hPa</span>
+      </div>
+    </div>
+  </div>
+
   <div class="container mt-3 pb-3">
     <div class="quick-actions-card p-3 p-md-4">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
           <h2 class="h4 mb-1">Quick Actions</h2>
-          <p class="text-muted mb-0">Fast access to common flight operations tasks</p>
         </div>
         <span class="badge text-bg-primary rounded-pill px-3 py-2 d-none d-md-inline">
           Pilot Launchpad
@@ -208,13 +228,6 @@
           </a>
         </div>
 
-        <div class="col-6 col-lg-4">
-          <a href="post-flight-log.html" class="quick-action-tile tile-postlog">
-            <div class="quick-action-icon icon-postlog">🧾</div>
-            <div class="quick-action-title">Post Flight Log</div>
-            <p class="quick-action-subtitle">Complete a finished flight entry</p>
-          </a>
-        </div>
 
         <div class="col-6 col-lg-4">
           <a href="defects.html" class="quick-action-tile tile-defects">
@@ -227,26 +240,7 @@
     </div>
   </div>
 
-  <div class="container-fluid bg-light border-bottom">
-    <div class="container py-2">
-      <div class="d-flex justify-content-center align-items-center gap-2"
-           id="qnhDisplay"
-           data-bs-toggle="tooltip"
-           data-bs-placement="bottom"
-           title="Loading METAR…"
-           style="cursor: default;">
-
-        <span class="badge bg-primary">QNH</span>
-        <span class="fw-semibold" id="metarStation">—</span>
-
-        <span id="qnhValue" class="fs-5 fw-bold text-primary">
-          <span class="spinner-border spinner-border-sm"></span>
-        </span>
-
-        <span class="text-muted small">hPa</span>
-      </div>
-    </div>
-  </div>
+  
 
   <div class="container mt-2">
     <div id="loadingSpinner" class="text-center my-3">
