@@ -4,260 +4,369 @@
   <meta charset="UTF-8" />
   <title>My Bookings</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 
   <style>
-    body.loading { cursor: wait; }
 
-    .fade-in { opacity: 0; transform: translateY(2px); transition: opacity .2s ease, transform .2s ease; }
-    .fade-in.ready { opacity: 1; transform: none; }
-
-    .skeleton {
-      height: 38px;
-      border-radius: .375rem;
-      background: linear-gradient(180deg, #ecedef 100%, #f1f2f5 100%);
-      background-size: 400% 100%;
-      animation: shimmer 1.4s ease infinite;
+    body{
+      background: linear-gradient(180deg,#ecedef 100%,#f1f2f5 100%);
     }
-    @keyframes shimmer { 0% { background-position: 100% 0 } 100% { background-position: 0 0 } }
 
-    .sk-row { height: 18px; border-radius: .25rem; }
+    body.loading{
+      cursor: wait;
+    }
+
+    .page-card{
+      border:0;
+      border-radius:1rem;
+      box-shadow:0 8px 24px rgba(0,0,0,0.06);
+    }
+
+    .booking-card{
+      border:0;
+      border-radius:1rem;
+      box-shadow:0 8px 24px rgba(0,0,0,0.06);
+    }
+
+    .booking-card .aircraft-title{
+      font-weight:700;
+      font-size:1.1rem;
+    }
+
+    .booking-card .route-text{
+      color:#6c757d;
+      font-size:0.92rem;
+    }
+
+    .meta-label{
+      font-size:.74rem;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      color:#6c757d;
+      margin-bottom:.15rem;
+    }
+
+    .meta-value{
+      font-weight:600;
+    }
+
+    .table thead th{
+      white-space:nowrap;
+    }
+
+    .action-cell{
+      min-width:260px;
+    }
+
+    .btn-soft-primary{
+      background:rgba(13,110,253,.08);
+      color:#0d6efd;
+      border:1px solid rgba(13,110,253,.12);
+    }
+
+    .btn-soft-primary:hover{
+      background:rgba(13,110,253,.14);
+      color:#0a58ca;
+    }
+
+    .empty-state{
+      border:2px dashed rgba(0,0,0,.08);
+      border-radius:1rem;
+      background:rgba(255,255,255,.6);
+      padding:2rem 1rem;
+      text-align:center;
+    }
+
+    .skeleton{
+      border-radius:.75rem;
+      background:linear-gradient(90deg,#e9ecef 25%,#f8f9fa 37%,#e9ecef 63%);
+      background-size:400% 100%;
+      animation:shimmer 1.4s ease infinite;
+    }
+
+    @keyframes shimmer{
+      0%{background-position:100% 0}
+      100%{background-position:0 0}
+    }
+
   </style>
 
-  <!-- Auth + shared UI helpers -->
-
-<script src="js/auth.js"></script>
-<script src="js/logout.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/admin-guard.js" defer></script>
-<script src="js/due-soon-badge.js" defer></script>
-
+  <script src="js/auth.js"></script>
+  <script src="js/logout.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/admin-guard.js" defer></script>
+  <script src="js/due-soon-badge.js" defer></script>
+  <script src="js/loadNavbar.js" defer></script>
 
 </head>
-
 <body>
-  <div class="container-fluid p-2 bg-primary text-white text-center">
-    <h2 class="mb-0">BOOKINGS</h2>
-  </div>
 
-  <div id="navbar-placeholder"></div>
-
-   <div class="alert alert-warning">
-  <strong>Warning</strong> Test Mode Only - feel free to experiment!
+<div class="container-fluid p-2 bg-primary text-white text-center">
+  <h2 class="mb-0">BOOKINGS</h2>
 </div>
 
-  <div class="container mt-4">
-    <h3 class="mb-3">My Bookings</h3>
+<div id="navbar-placeholder"></div>
 
-    <!-- Skeletons -->
-    <div id="bookings-skeleton" class="fade-in">
-      <!-- Desktop skeleton table -->
-      <div class="table-responsive d-none d-md-block">
-        <table class="table table-striped align-middle">
-          <thead>
-            <tr>
-              <th>Aircraft</th>
-              <th>ETA</th>
-              <th>Route</th>
-              <th>Reason</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td><div class="skeleton sk-row" style="width:80px"></div></td><td><div class="skeleton sk-row" style="width:140px"></div></td><td><div class="skeleton sk-row" style="width:160px"></div></td><td><div class="skeleton sk-row" style="width:120px"></div></td><td><div class="skeleton" style="height:32px;width:260px"></div></td></tr>
-            <tr><td><div class="skeleton sk-row" style="width:80px"></div></td><td><div class="skeleton sk-row" style="width:140px"></div></td><td><div class="skeleton sk-row" style="width:160px"></div></td><td><div class="skeleton sk-row" style="width:120px"></div></td><td><div class="skeleton" style="height:32px;width:260px"></div></td></tr>
-            <tr><td><div class="skeleton sk-row" style="width:80px"></div></td><td><div class="skeleton sk-row" style="width:140px"></div></td><td><div class="skeleton sk-row" style="width:160px"></div></td><td><div class="skeleton sk-row" style="width:120px"></div></td><td><div class="skeleton" style="height:32px;width:260px"></div></td></tr>
-            <tr><td><div class="skeleton sk-row" style="width:80px"></div></td><td><div class="skeleton sk-row" style="width:140px"></div></td><td><div class="skeleton sk-row" style="width:160px"></div></td><td><div class="skeleton sk-row" style="width:120px"></div></td><td><div class="skeleton" style="height:32px;width:260px"></div></td></tr>
-            <tr><td><div class="skeleton sk-row" style="width:80px"></div></td><td><div class="skeleton sk-row" style="width:140px"></div></td><td><div class="skeleton sk-row" style="width:160px"></div></td><td><div class="skeleton sk-row" style="width:120px"></div></td><td><div class="skeleton" style="height:32px;width:260px"></div></td></tr>
-            <tr><td><div class="skeleton sk-row" style="width:80px"></div></td><td><div class="skeleton sk-row" style="width:140px"></div></td><td><div class="skeleton sk-row" style="width:160px"></div></td><td><div class="skeleton sk-row" style="width:120px"></div></td><td><div class="skeleton" style="height:32px;width:260px"></div></td></tr>
-          </tbody>
-        </table>
-      </div>
+<div class="container mt-4">
 
-      <!-- Mobile skeleton cards -->
-      <div class="d-md-none">
-        <div class="card mb-3"><div class="card-body"><div class="skeleton sk-row" style="width:120px;height:22px"></div><div class="skeleton sk-row mt-2" style="width:220px"></div><div class="skeleton sk-row mt-2" style="width:160px"></div><div class="skeleton" style="height:38px" class="mt-3"></div><div class="skeleton mt-2" style="height:38px"></div><div class="skeleton mt-2" style="height:38px"></div></div></div>
-        <div class="card mb-3"><div class="card-body"><div class="skeleton sk-row" style="width:120px;height:22px"></div><div class="skeleton sk-row mt-2" style="width:220px"></div><div class="skeleton sk-row mt-2" style="width:160px"></div><div class="skeleton" style="height:38px" class="mt-3"></div><div class="skeleton mt-2" style="height:38px"></div><div class="skeleton mt-2" style="height:38px"></div></div></div>
-        <div class="card mb-3"><div class="card-body"><div class="skeleton sk-row" style="width:120px;height:22px"></div><div class="skeleton sk-row mt-2" style="width:220px"></div><div class="skeleton sk-row mt-2" style="width:160px"></div><div class="skeleton" style="height:38px" class="mt-3"></div><div class="skeleton mt-2" style="height:38px"></div><div class="skeleton mt-2" style="height:38px"></div></div></div>
-        <div class="card mb-3"><div class="card-body"><div class="skeleton sk-row" style="width:120px;height:22px"></div><div class="skeleton sk-row mt-2" style="width:220px"></div><div class="skeleton sk-row mt-2" style="width:160px"></div><div class="skeleton" style="height:38px" class="mt-3"></div><div class="skeleton mt-2" style="height:38px"></div><div class="skeleton mt-2" style="height:38px"></div></div></div>
-      </div>
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+      <h3 class="mb-1">My Bookings</h3>
+      <div class="text-muted small">Manage upcoming flights and complete logs.</div>
     </div>
 
-    <!-- Real content -->
-    <div id="bookings" class="fade-in" hidden></div>
+    <a href="booking-out-form.html" class="btn btn-primary shadow-sm">
+      ✈️ Book New Flight
+    </a>
   </div>
 
-  <script>
-    const API_BASE = "https://rj7w2wkpgj.execute-api.eu-west-2.amazonaws.com";
+  <div id="bookings"></div>
 
-    function showSkeleton() {
-      document.body.classList.add("loading");
-      const sk = document.getElementById("bookings-skeleton");
-      const real = document.getElementById("bookings");
-      if (sk) { sk.hidden = false; requestAnimationFrame(() => sk.classList.add("ready")); }
-      if (real) { real.hidden = true; real.classList.remove("ready"); }
-    }
+</div>
 
-    function showReal() {
-      document.body.classList.remove("loading");
-      const sk = document.getElementById("bookings-skeleton");
-      const real = document.getElementById("bookings");
-      if (sk) sk.hidden = true;
-      if (real) { real.hidden = false; requestAnimationFrame(() => real.classList.add("ready")); }
-    }
+<script>
 
-    async function loadBookings() {
-      showSkeleton();
-      try {
-        const res = await authFetch(`${API_BASE}/get_bookings_all`);
-        if (!res || !res.ok) throw new Error(`Load failed (${res?.status || "no response"})`);
-        const data = await res.json();
-        renderBookings(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error(err);
-        showToast("Unable to load bookings.", { variant: "danger" });
-        document.getElementById("bookings").innerHTML = "<p class='text-muted'>No bookings available.</p>";
-      } finally {
-        showReal();
-      }
-    }
+const BOOKINGS_URL = window.BOOKINGS_URL ||
+"https://rj7w2wkpgj.execute-api.eu-west-2.amazonaws.com/get_my_bookings";
 
-    function renderBookings(bookings) {
-      const container = document.getElementById("bookings");
+const COMPLETE_URL = window.COMPLETE_URL ||
+"https://rj7w2wkpgj.execute-api.eu-west-2.amazonaws.com/complete_booking";
 
-      if (!bookings.length) {
-        container.innerHTML = "<p class='text-muted'>No bookings found.</p>";
-        return;
-      }
+const DELETE_URL = window.DELETE_URL ||
+"https://rj7w2wkpgj.execute-api.eu-west-2.amazonaws.com/delete_booking";
 
-      let html = `
-        <div class="table-responsive d-none d-md-block">
-          <table class="table table-striped align-middle">
-            <thead>
-              <tr>
-                <th>Aircraft</th>
-                <th>ETA</th>
-                <th>Route</th>
-                <th>Reason</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-      `;
+function setLoading(v){
+  document.body.classList.toggle("loading",v);
+}
 
-      bookings.forEach(b => {
-        html += `
-          <tr>
-            <td>${b.aircraft ?? ""}</td>
-            <td>${b.eta ?? ""}</td>
-            <td>${b.from ?? ""} → ${b.to ?? ""}</td>
-            <td>${b.reason ?? ""}</td>
-            <td class="d-flex gap-2 flex-wrap">
-              <button class="btn btn-sm btn-success" onclick="completeBooking('${b.bookingId}', this)">Complete Flight</button>
-              <a class="btn btn-sm btn-primary" href="edit-booking.html?id=${b.bookingId}">Edit</a>
-              <button class="btn btn-sm btn-danger" onclick="deleteBooking('${b.bookingId}', this)">Delete</button>
-            </td>
-          </tr>
-        `;
-      });
+async function loadBookings(){
 
-      html += `</tbody></table></div>`;
+  setLoading(true);
 
-      // Mobile cards
-      html += `<div class="d-md-none">`;
-      bookings.forEach(b => {
-        html += `
-          <div class="card mb-3 shadow-sm">
-            <div class="card-body">
-              <h5 class="mb-2">${b.aircraft ?? ""}</h5>
-              <div class="text-muted small mb-2">${b.from ?? ""} → ${b.to ?? ""}</div>
-              <div class="mb-1"><strong>ETA:</strong> ${b.eta ?? ""}</div>
-              <div class="mb-3"><strong>Reason:</strong> ${b.reason ?? ""}</div>
+  try{
 
-              <button class="btn btn-success w-100" onclick="completeBooking('${b.bookingId}', this)">Complete Flight</button>
-              <a class="btn btn-primary w-100 mt-2" href="edit-booking.html?id=${b.bookingId}">Edit Booking</a>
-              <button class="btn btn-danger w-100 mt-2" onclick="deleteBooking('${b.bookingId}', this)">Delete Booking</button>
-            </div>
+    const res = await window.authFetch(BOOKINGS_URL,{method:"GET"});
+
+    if(!res.ok) throw new Error("Failed to load bookings");
+
+    const data = await res.json();
+
+    const bookings = Array.isArray(data?.items)?data.items:data;
+
+    renderBookings(bookings || []);
+
+  }catch(err){
+
+    console.error(err);
+
+    document.getElementById("bookings").innerHTML=`
+      <div class="alert alert-danger">Unable to load bookings</div>
+    `;
+
+  }
+
+  setLoading(false);
+}
+
+function renderBookings(bookings){
+
+  const container=document.getElementById("bookings");
+
+  if(!bookings.length){
+
+    container.innerHTML=`
+      <div class="empty-state">
+        <h5 class="mb-2">No bookings found</h5>
+        <p class="text-muted mb-3">You do not have any active bookings.</p>
+        <a href="booking-out-form.html" class="btn btn-primary">✈️ Book New Flight</a>
+      </div>
+    `;
+
+    return;
+  }
+
+  let html=`
+  <div class="card page-card d-none d-md-block">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+      <table class="table table-striped align-middle mb-0">
+
+      <thead class="table-light">
+      <tr>
+      <th>Aircraft</th>
+      <th>ETA</th>
+      <th>Route</th>
+      <th>Reason</th>
+      <th class="text-end pe-3">Actions</th>
+      </tr>
+      </thead>
+
+      <tbody>
+  `;
+
+  bookings.forEach(b=>{
+
+    html+=`
+
+      <tr>
+
+      <td class="fw-semibold">${b.aircraft||""}</td>
+
+      <td>${b.eta||""}</td>
+
+      <td>${b.from||""} → ${b.to||""}</td>
+
+      <td>${b.reason||""}</td>
+
+      <td class="text-end pe-3 action-cell">
+
+      <div class="d-inline-flex gap-2 flex-wrap justify-content-end">
+
+      <button class="btn btn-sm btn-success" onclick="completeBooking('${b.bookingId}',this)">
+      Complete Flight
+      </button>
+
+      <a class="btn btn-sm btn-soft-primary" href="edit-booking.html?id=${b.bookingId}">
+      Edit
+      </a>
+
+      <button class="btn btn-sm btn-outline-danger" onclick="deleteBooking('${b.bookingId}',this)">
+      Delete
+      </button>
+
+      </div>
+
+      </td>
+
+      </tr>
+
+    `;
+
+  });
+
+  html+=`</tbody></table></div></div></div>`;
+
+  html+=`<div class="d-md-none">`;
+
+  bookings.forEach(b=>{
+
+    html+=`
+
+    <div class="card booking-card mb-3">
+
+      <div class="card-body">
+
+        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+
+          <div>
+
+            <div class="aircraft-title">${b.aircraft||""}</div>
+
+            <div class="route-text">${b.from||""} → ${b.to||""}</div>
+
           </div>
-        `;
-      });
-      html += `</div>`;
 
-      container.innerHTML = html;
-    }
+          <span class="badge text-bg-light border">${b.reason||"Flight"}</span>
 
-    function completeBooking(bookingId, btnEl) {
-      // Completing a booking now means: open the post-flight log page.
-      // The log submission endpoint should remove the active booking once the log is successfully filed.
-      setButtonLoading(btnEl, true, { loadingText: "Opening…" });
-      window.location.href = `post-flight-log.html?id=${encodeURIComponent(bookingId)}`;
-      setButtonLoading(btnEl, false, { loadingText: "Opening…" });
-    }
+        </div>
 
-    async function deleteBooking(bookingId, btnEl) {
-      if (!confirm("Are you sure you want to delete this booking?")) return;
-      setButtonLoading(btnEl, true, { loadingText: "Deleting…" });
+        <div class="row g-3 mb-3">
 
-      try {
-        const res = await authFetch(`${API_BASE}/delete_booking/${bookingId}`, { method: "DELETE" });
-        if (!res || !res.ok) throw new Error(`Delete failed (${res?.status || "no response"})`);
-        showToast("Booking deleted", { variant: "success" });
-        await loadBookings();
-      } catch (err) {
-        console.error(err);
-        showToast("There was a problem deleting the booking.", { variant: "danger" });
-      } finally {
-        setButtonLoading(btnEl, false);
-      }
-    }
+          <div class="col-12">
+
+            <div class="meta-label">ETA</div>
+
+            <div class="meta-value">${b.eta||""}</div>
+
+          </div>
+
+        </div>
+
+        <div class="d-grid gap-2">
+
+          <button class="btn btn-success" onclick="completeBooking('${b.bookingId}',this)">
+          Complete Flight
+          </button>
+
+          <a class="btn btn-soft-primary" href="edit-booking.html?id=${b.bookingId}">
+          Edit Booking
+          </a>
+
+          <button class="btn btn-outline-danger" onclick="deleteBooking('${b.bookingId}',this)">
+          Delete Booking
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    `;
+
+  });
+
+  html+=`</div>`;
+
+  container.innerHTML=html;
+
+}
+
+async function completeBooking(id,btn){
+
+  if(!confirm("Complete this flight?")) return;
+
+  btn.disabled=true;
+
+  try{
+
+    const res = await window.authFetch(`${COMPLETE_URL}/${id}`,{method:"POST"});
+
+    if(!res.ok) throw new Error();
+
+    window.location.href=`post-flight-log.html?id=${id}`;
+
+  }catch{
+
+    alert("Unable to complete booking");
+
+    btn.disabled=false;
+
+  }
+
+}
+
+async function deleteBooking(id,btn){
+
+  if(!confirm("Delete this booking?")) return;
+
+  btn.disabled=true;
+
+  try{
+
+    const res = await window.authFetch(`${DELETE_URL}/${id}`,{method:"DELETE"});
+
+    if(!res.ok) throw new Error();
 
     loadBookings();
-  </script>
 
-  <script>
+  }catch{
 
-      fetch("/partials/navbar.html")
-      .then(r => {
-        if (!r.ok) throw new Error("Failed to load navbar.html");
-        return r.text();
-      })
-      .then(async html => {
-        const mount = document.getElementById("navbar-placeholder");
-        if (!mount) return;
+    alert("Unable to delete booking");
 
-        mount.innerHTML = html;
+    btn.disabled=false;
 
-        // username
-        const userEl = document.getElementById("loggedInUser");
-        if (userEl) userEl.textContent = localStorage.getItem("username") || "User";
+  }
 
-        // highlight current link (NOW the links exist)
-        const currentPath = window.location.pathname.replace(/\/$/, "");
-        document.querySelectorAll(".nav-link").forEach(link => {
-          const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
-          if (linkPath === currentPath) {
-            link.classList.add("active");
-            link.setAttribute("aria-current", "page");
-          }
-        });
+}
 
-        // admin menu visibility
-        if (window.setupAdminMenu) await window.setupAdminMenu();
+window.addEventListener("DOMContentLoaded",loadBookings);
 
-        // enable tooltips in injected navbar
-        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
-          new bootstrap.Tooltip(el);
-        });
-
-        window.dispatchEvent(new Event("navbar:loaded"));
-      })
-      .catch(console.error);
-  </script>
-
-
-
+</script>
 
 </body>
 </html>
