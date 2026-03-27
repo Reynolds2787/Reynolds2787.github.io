@@ -11,88 +11,99 @@
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 
   <style>
-
-    body{
-      background: linear-gradient(180deg,#ecedef 100%,#f1f2f5 100%);
+    body {
+      background: linear-gradient(180deg, #ecedef 100%, #f1f2f5 100%);
     }
 
-    body.loading{
+    body.loading {
       cursor: wait;
     }
 
-    .page-card{
-      border:0;
-      border-radius:1rem;
-      box-shadow:0 8px 24px rgba(0,0,0,0.06);
+    .page-card {
+      border: 0;
+      border-radius: 1rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
     }
 
-    .booking-card{
-      border:0;
-      border-radius:1rem;
-      box-shadow:0 8px 24px rgba(0,0,0,0.06);
+    .booking-card {
+      border: 0;
+      border-radius: 1rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
     }
 
-    .booking-card .aircraft-title{
-      font-weight:700;
-      font-size:1.1rem;
+    .booking-card .aircraft-title {
+      font-weight: 700;
+      font-size: 1.1rem;
     }
 
-    .booking-card .route-text{
-      color:#6c757d;
-      font-size:0.92rem;
+    .booking-card .route-text {
+      color: #6c757d;
+      font-size: 0.92rem;
     }
 
-    .meta-label{
-      font-size:.74rem;
-      letter-spacing:.04em;
-      text-transform:uppercase;
-      color:#6c757d;
-      margin-bottom:.15rem;
+    .meta-label {
+      font-size: 0.74rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #6c757d;
+      margin-bottom: 0.15rem;
     }
 
-    .meta-value{
-      font-weight:600;
+    .meta-value {
+      font-weight: 600;
     }
 
-    .table thead th{
-      white-space:nowrap;
+    .table thead th {
+      white-space: nowrap;
     }
 
-    .action-cell{
-      min-width:260px;
+    .action-cell {
+      min-width: 280px;
     }
 
-    .btn-soft-primary{
-      background:rgba(13,110,253,.08);
-      color:#0d6efd;
-      border:1px solid rgba(13,110,253,.12);
+    .btn-soft-primary {
+      background: rgba(13, 110, 253, 0.08);
+      color: #0d6efd;
+      border: 1px solid rgba(13, 110, 253, 0.12);
     }
 
-    .btn-soft-primary:hover{
-      background:rgba(13,110,253,.14);
-      color:#0a58ca;
+    .btn-soft-primary:hover {
+      background: rgba(13, 110, 253, 0.14);
+      color: #0a58ca;
     }
 
-    .empty-state{
-      border:2px dashed rgba(0,0,0,.08);
-      border-radius:1rem;
-      background:rgba(255,255,255,.6);
-      padding:2rem 1rem;
-      text-align:center;
+    .empty-state {
+      border: 2px dashed rgba(0, 0, 0, 0.08);
+      border-radius: 1rem;
+      background: rgba(255, 255, 255, 0.6);
+      padding: 2rem 1rem;
+      text-align: center;
     }
 
-    .skeleton{
-      border-radius:.75rem;
-      background:linear-gradient(90deg,#e9ecef 25%,#f8f9fa 37%,#e9ecef 63%);
-      background-size:400% 100%;
-      animation:shimmer 1.4s ease infinite;
+    .page-subtitle {
+      color: #6c757d;
+      font-size: 0.92rem;
     }
 
-    @keyframes shimmer{
-      0%{background-position:100% 0}
-      100%{background-position:0 0}
+    .loading-card {
+      border: 0;
+      border-radius: 1rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+      background: #fff;
+      padding: 1rem;
     }
 
+    .skeleton {
+      border-radius: 0.75rem;
+      background: linear-gradient(90deg, #e9ecef 25%, #f8f9fa 37%, #e9ecef 63%);
+      background-size: 400% 100%;
+      animation: shimmer 1.4s ease infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 100% 0; }
+      100% { background-position: 0 0; }
+    }
   </style>
 
   <script src="js/auth.js"></script>
@@ -101,272 +112,240 @@
   <script src="js/admin-guard.js" defer></script>
   <script src="js/due-soon-badge.js" defer></script>
   <script src="js/loadNavbar.js" defer></script>
-
 </head>
 <body>
 
-<div class="container-fluid p-2 bg-primary text-white text-center">
-  <h2 class="mb-0">BOOKINGS</h2>
-</div>
-
-<div id="navbar-placeholder"></div>
-
-<div class="container mt-4">
-
-  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-    <div>
-      <h3 class="mb-1">My Bookings</h3>
-      <div class="text-muted small">Manage upcoming flights and complete logs.</div>
-    </div>
-
-    <a href="booking-out-form.html" class="btn btn-primary shadow-sm">
-      ✈️ Book New Flight
-    </a>
+  <div class="container-fluid p-2 bg-primary text-white text-center">
+    <h2 class="mb-0">BOOKINGS</h2>
   </div>
 
-  <div id="bookings"></div>
+  <div id="navbar-placeholder"></div>
 
-</div>
-
-<script>
-
-const BOOKINGS_URL = window.BOOKINGS_URL ||
-"https://rj7w2wkpgj.execute-api.eu-west-2.amazonaws.com/get_bookings_all";
-
-const COMPLETE_URL = window.COMPLETE_URL ||
-"https://rj7w2wkpgj.execute-api.eu-west-2.amazonaws.com/complete_booking";
-
-const DELETE_URL = window.DELETE_URL ||
-"https://rj7w2wkpgj.execute-api.eu-west-2.amazonaws.com/delete_booking";
-
-function setLoading(v){
-  document.body.classList.toggle("loading",v);
-}
-
-async function loadBookings(){
-
-  setLoading(true);
-
-  try{
-
-    const res = await window.authFetch(BOOKINGS_URL,{method:"GET"});
-
-    if(!res.ok) throw new Error("Failed to load bookings");
-
-    const data = await res.json();
-
-    const bookings = Array.isArray(data?.items)?data.items:data;
-
-    renderBookings(bookings || []);
-
-  }catch(err){
-
-    console.error(err);
-
-    document.getElementById("bookings").innerHTML=`
-      <div class="alert alert-danger">Unable to load bookings</div>
-    `;
-
-  }
-
-  setLoading(false);
-}
-
-function renderBookings(bookings){
-
-  const container=document.getElementById("bookings");
-
-  if(!bookings.length){
-
-    container.innerHTML=`
-      <div class="empty-state">
-        <h5 class="mb-2">No bookings found</h5>
-        <p class="text-muted mb-3">You do not have any active bookings.</p>
-        <a href="booking-out-form.html" class="btn btn-primary">✈️ Book New Flight</a>
+  <div class="container mt-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+      <div>
+        <h3 class="mb-1">My Bookings</h3>
+        <div class="page-subtitle">Manage upcoming flights and continue to post-flight logging.</div>
       </div>
-    `;
 
-    return;
-  }
-
-  let html=`
-  <div class="card page-card d-none d-md-block">
-    <div class="card-body p-0">
-      <div class="table-responsive">
-      <table class="table table-striped align-middle mb-0">
-
-      <thead class="table-light">
-      <tr>
-      <th>Aircraft</th>
-      <th>ETA</th>
-      <th>Route</th>
-      <th>Reason</th>
-      <th class="text-end pe-3">Actions</th>
-      </tr>
-      </thead>
-
-      <tbody>
-  `;
-
-  bookings.forEach(b=>{
-
-    html+=`
-
-      <tr>
-
-      <td class="fw-semibold">${b.aircraft||""}</td>
-
-      <td>${b.eta||""}</td>
-
-      <td>${b.from||""} → ${b.to||""}</td>
-
-      <td>${b.reason||""}</td>
-
-      <td class="text-end pe-3 action-cell">
-
-      <div class="d-inline-flex gap-2 flex-wrap justify-content-end">
-
-      <button class="btn btn-sm btn-success" onclick="completeBooking('${b.bookingId}',this)">
-      Complete Flight
-      </button>
-
-      <a class="btn btn-sm btn-soft-primary" href="edit-booking.html?id=${b.bookingId}">
-      Edit
+      <a href="booking-out-form.html" class="btn btn-primary shadow-sm">
+        ✈️ Book New Flight
       </a>
-
-      <button class="btn btn-sm btn-outline-danger" onclick="deleteBooking('${b.bookingId}',this)">
-      Delete
-      </button>
-
-      </div>
-
-      </td>
-
-      </tr>
-
-    `;
-
-  });
-
-  html+=`</tbody></table></div></div></div>`;
-
-  html+=`<div class="d-md-none">`;
-
-  bookings.forEach(b=>{
-
-    html+=`
-
-    <div class="card booking-card mb-3">
-
-      <div class="card-body">
-
-        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
-
-          <div>
-
-            <div class="aircraft-title">${b.aircraft||""}</div>
-
-            <div class="route-text">${b.from||""} → ${b.to||""}</div>
-
-          </div>
-
-          <span class="badge text-bg-light border">${b.reason||"Flight"}</span>
-
-        </div>
-
-        <div class="row g-3 mb-3">
-
-          <div class="col-12">
-
-            <div class="meta-label">ETA</div>
-
-            <div class="meta-value">${b.eta||""}</div>
-
-          </div>
-
-        </div>
-
-        <div class="d-grid gap-2">
-
-          <button class="btn btn-success" onclick="completeBooking('${b.bookingId}',this)">
-          Complete Flight
-          </button>
-
-          <a class="btn btn-soft-primary" href="edit-booking.html?id=${b.bookingId}">
-          Edit Booking
-          </a>
-
-          <button class="btn btn-outline-danger" onclick="deleteBooking('${b.bookingId}',this)">
-          Delete Booking
-          </button>
-
-        </div>
-
-      </div>
-
     </div>
 
-    `;
+    <div id="bookings">
+      <div class="loading-card">
+        <div class="skeleton mb-3" style="height: 48px;"></div>
+        <div class="skeleton mb-2" style="height: 56px;"></div>
+        <div class="skeleton mb-2" style="height: 56px;"></div>
+        <div class="skeleton" style="height: 56px;"></div>
+      </div>
+    </div>
+  </div>
 
-  });
+  <script>
+    const BOOKINGS_URL =
+      window.BOOKINGS_URL ||
+      "https://rj7w2wkpgj.execute-api.eu-west-2.amazonaws.com/get_bookings_all";
 
-  html+=`</div>`;
+    const DELETE_URL =
+      window.DELETE_URL ||
+      "https://rj7w2wkpgj.execute-api.eu-west-2.amazonaws.com/delete_booking";
 
-  container.innerHTML=html;
+    function setLoading(v) {
+      document.body.classList.toggle("loading", v);
+    }
 
-}
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
 
-async function completeBooking(id,btn){
+    function formatEta(value) {
+      if (!value) return "";
+      return value;
+    }
 
-  if(!confirm("Complete this flight?")) return;
+    async function loadBookings() {
+      setLoading(true);
 
-  btn.disabled=true;
+      try {
+        const res = await window.authFetch(BOOKINGS_URL, { method: "GET" });
 
-  try{
+        if (!res.ok) throw new Error("Failed to load bookings");
 
-    const res = await window.authFetch(`${COMPLETE_URL}/${id}`,{method:"POST"});
+        const data = await res.json();
+        const bookings = Array.isArray(data?.items)
+          ? data.items
+          : Array.isArray(data)
+            ? data
+            : [];
 
-    if(!res.ok) throw new Error();
+        renderBookings(bookings);
+      } catch (err) {
+        console.error(err);
+        document.getElementById("bookings").innerHTML = `
+          <div class="alert alert-danger">
+            Unable to load bookings.
+          </div>
+        `;
+      } finally {
+        setLoading(false);
+      }
+    }
 
-    window.location.href=`post-flight-log.html?id=${id}`;
+    function renderBookings(bookings) {
+      const container = document.getElementById("bookings");
 
-  }catch{
+      if (!bookings.length) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <h5 class="mb-2">No bookings found</h5>
+            <p class="text-muted mb-3">You do not have any active bookings.</p>
+            <a href="booking-out-form.html" class="btn btn-primary">
+              ✈️ Book New Flight
+            </a>
+          </div>
+        `;
+        return;
+      }
 
-    alert("Unable to complete booking");
+      let html = `
+        <div class="card page-card d-none d-md-block">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-striped align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Aircraft</th>
+                    <th>ETA</th>
+                    <th>Route</th>
+                    <th>Reason</th>
+                    <th class="text-end pe-3">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+      `;
 
-    btn.disabled=false;
+      bookings.forEach((b) => {
+        const bookingId = encodeURIComponent(b.bookingId || "");
+        const aircraft = escapeHtml(b.aircraft || "");
+        const eta = escapeHtml(formatEta(b.eta || ""));
+        const from = escapeHtml(b.from || "");
+        const to = escapeHtml(b.to || "");
+        const reason = escapeHtml(b.reason || "");
 
-  }
+        html += `
+          <tr>
+            <td class="fw-semibold">${aircraft}</td>
+            <td>${eta}</td>
+            <td>${from} → ${to}</td>
+            <td>${reason}</td>
+            <td class="text-end pe-3 action-cell">
+              <div class="d-inline-flex gap-2 flex-wrap justify-content-end">
+                <a class="btn btn-sm btn-success" href="post-flight-log.html?id=${bookingId}">
+                  Complete Flight →
+                </a>
 
-}
+                <a class="btn btn-sm btn-soft-primary" href="edit-booking.html?id=${bookingId}">
+                  Edit
+                </a>
 
-async function deleteBooking(id,btn){
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteBooking('${bookingId}', this)">
+                  Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
 
-  if(!confirm("Delete this booking?")) return;
+      html += `
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
 
-  btn.disabled=true;
+      html += `<div class="d-md-none">`;
 
-  try{
+      bookings.forEach((b) => {
+        const bookingId = encodeURIComponent(b.bookingId || "");
+        const aircraft = escapeHtml(b.aircraft || "");
+        const eta = escapeHtml(formatEta(b.eta || ""));
+        const from = escapeHtml(b.from || "");
+        const to = escapeHtml(b.to || "");
+        const reason = escapeHtml(b.reason || "Flight");
 
-    const res = await window.authFetch(`${DELETE_URL}/${id}`,{method:"DELETE"});
+        html += `
+          <div class="card booking-card mb-3">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                <div>
+                  <div class="aircraft-title">${aircraft}</div>
+                  <div class="route-text">${from} → ${to}</div>
+                </div>
 
-    if(!res.ok) throw new Error();
+                <span class="badge text-bg-light border">${reason}</span>
+              </div>
 
-    loadBookings();
+              <div class="row g-3 mb-3">
+                <div class="col-12">
+                  <div class="meta-label">ETA</div>
+                  <div class="meta-value">${eta}</div>
+                </div>
+              </div>
 
-  }catch{
+              <div class="d-grid gap-2">
+                <a class="btn btn-success" href="post-flight-log.html?id=${bookingId}">
+                  Complete Flight →
+                </a>
 
-    alert("Unable to delete booking");
+                <a class="btn btn-soft-primary" href="edit-booking.html?id=${bookingId}">
+                  Edit Booking
+                </a>
 
-    btn.disabled=false;
+                <button class="btn btn-outline-danger" onclick="deleteBooking('${bookingId}', this)">
+                  Delete Booking
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
 
-  }
+      html += `</div>`;
 
-}
+      container.innerHTML = html;
+    }
 
-window.addEventListener("DOMContentLoaded",loadBookings);
+    async function deleteBooking(id, btn) {
+      if (!confirm("Delete this booking?")) return;
 
-</script>
+      btn.disabled = true;
+
+      try {
+        const res = await window.authFetch(`${DELETE_URL}/${id}`, {
+          method: "DELETE"
+        });
+
+        if (!res.ok) throw new Error("Delete failed");
+
+        loadBookings();
+      } catch (err) {
+        console.error(err);
+        alert("Unable to delete booking");
+        btn.disabled = false;
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", loadBookings);
+  </script>
 
 </body>
 </html>
