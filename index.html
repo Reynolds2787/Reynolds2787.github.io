@@ -21,6 +21,34 @@
       backdrop-filter: blur(6px);
     }
 
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .dashboard-title {
+      margin-bottom: 0.15rem;
+    }
+
+    .dashboard-subtitle {
+      margin-bottom: 0;
+      color: #6c757d;
+    }
+
+    .dashboard-badge {
+      background: rgba(13,110,253,0.08);
+      color: #0d6efd;
+      border: 1px solid rgba(13,110,253,0.12);
+      border-radius: 999px;
+      padding: 0.45rem 0.8rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
     .quick-action-tile {
       display: block;
       text-decoration: none;
@@ -39,13 +67,13 @@
     }
 
     .quick-action-icon {
-      width: 2.5rem;
-      height: 2.5rem;
-      border-radius: 0.85rem;
+      width: 2.7rem;
+      height: 2.7rem;
+      border-radius: 0.9rem;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.25rem;
+      font-size: 1.3rem;
       margin-bottom: 0.75rem;
       box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04);
     }
@@ -63,21 +91,23 @@
       line-height: 1.3;
     }
 
-    .tile-bookout { background: linear-gradient(180deg, #e8f7ec 0%, #f4fbf6 100%); }
-    .tile-bookings { background: linear-gradient(180deg, #eaf2ff 0%, #f5f9ff 100%); }
-    .tile-active { background: linear-gradient(180deg, #eef5ff 0%, #f8fbff 100%); }
-    .tile-status { background: linear-gradient(180deg, #fff7e8 0%, #fffaf2 100%); }
-    .tile-techlog { background: linear-gradient(180deg, #f2edff 0%, #f8f6ff 100%); }
-    .tile-postlog { background: linear-gradient(180deg, #eaf7f8 0%, #f4fbfc 100%); }
-    .tile-defects { background: linear-gradient(180deg, #fff0f0 0%, #fff7f7 100%); }
+    .tile-bookout   { background: linear-gradient(180deg, #e8f7ec 0%, #f4fbf6 100%); }
+    .tile-bookings  { background: linear-gradient(180deg, #eaf2ff 0%, #f5f9ff 100%); }
+    .tile-myflights { background: linear-gradient(180deg, #edf5ff 0%, #f8fbff 100%); }
+    .tile-postlog   { background: linear-gradient(180deg, #eaf7f8 0%, #f4fbfc 100%); }
+    .tile-active    { background: linear-gradient(180deg, #eef5ff 0%, #f8fbff 100%); }
+    .tile-status    { background: linear-gradient(180deg, #fff7e8 0%, #fffaf2 100%); }
+    .tile-techlog   { background: linear-gradient(180deg, #f2edff 0%, #f8f6ff 100%); }
+    .tile-defects   { background: linear-gradient(180deg, #fff0f0 0%, #fff7f7 100%); }
 
-    .icon-bookout { background: #d1f0d8; }
-    .icon-bookings { background: #d9e8ff; }
-    .icon-active { background: #dde9ff; }
-    .icon-status { background: #ffe7b8; }
-    .icon-techlog { background: #e2d8ff; }
-    .icon-postlog { background: #d8f0f2; }
-    .icon-defects { background: #ffd8d8; }
+    .icon-bookout   { background: #d1f0d8; }
+    .icon-bookings  { background: #d9e8ff; }
+    .icon-myflights { background: #dde9ff; }
+    .icon-postlog   { background: #d8f0f2; }
+    .icon-active    { background: #dde9ff; }
+    .icon-status    { background: #ffe7b8; }
+    .icon-techlog   { background: #e2d8ff; }
+    .icon-defects   { background: #ffd8d8; }
 
     @media (max-width: 576px) {
       .quick-action-tile {
@@ -90,6 +120,11 @@
 
       .quick-action-subtitle {
         font-size: 0.82rem;
+      }
+
+      .dashboard-badge {
+        width: 100%;
+        text-align: center;
       }
     }
   </style>
@@ -133,16 +168,19 @@
 
   <div class="container mt-3 pb-3">
     <div class="quick-actions-card p-3 p-md-4">
-      <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="dashboard-header">
         <div>
-          <h2 class="h4 mb-1">Quick Actions</h2>
-          <p class="text-muted mb-0">Fast access to common flight operations tasks</p>
+          <h2 class="h4 dashboard-title">Operations Dashboard</h2>
+          <p class="dashboard-subtitle">Fast access to common flight operations tasks</p>
         </div>
-  
+
+        <div class="dashboard-badge">
+          Pilot quick access
+        </div>
       </div>
 
       <div class="row g-3">
-        <div class="col-6 col-lg-4">
+        <div class="col-6 col-lg-3">
           <a href="booking-out-form.html" class="quick-action-tile tile-bookout">
             <div class="quick-action-icon icon-bookout">✈️</div>
             <div class="quick-action-title">Book Out</div>
@@ -150,39 +188,23 @@
           </a>
         </div>
 
-        <div class="col-6 col-lg-4">
+        <div class="col-6 col-lg-3">
           <a href="my-bookings.html" class="quick-action-tile tile-bookings">
             <div class="quick-action-icon icon-bookings">📋</div>
             <div class="quick-action-title">My Bookings</div>
-            <p class="quick-action-subtitle">View and manage your flights</p>
+            <p class="quick-action-subtitle">View and manage current bookings</p>
           </a>
         </div>
 
-        <div class="col-6 col-lg-4">
-          <a href="active-flights.html" class="quick-action-tile tile-active">
-            <div class="quick-action-icon icon-active">🛫</div>
-            <div class="quick-action-title">Active Flights</div>
-            <p class="quick-action-subtitle">See aircraft currently airborne</p>
+        <div class="col-6 col-lg-3">
+          <a href="my-flights.html" class="quick-action-tile tile-myflights">
+            <div class="quick-action-icon icon-myflights">🛩️</div>
+            <div class="quick-action-title">My Flights</div>
+            <p class="quick-action-subtitle">Review your completed flight history</p>
           </a>
         </div>
 
-        <div class="col-6 col-lg-4">
-          <a href="aircraft-status.html" class="quick-action-tile tile-status">
-            <div class="quick-action-icon icon-status">🛠️</div>
-            <div class="quick-action-title">Aircraft Status</div>
-            <p class="quick-action-subtitle">Check service and aircraft condition</p>
-          </a>
-        </div>
-
-        <div class="col-6 col-lg-4">
-          <a href="aircraft-tech-log.html" class="quick-action-tile tile-techlog">
-            <div class="quick-action-icon icon-techlog">📘</div>
-            <div class="quick-action-title">Tech Log</div>
-            <p class="quick-action-subtitle">Open the aircraft tech log</p>
-          </a>
-        </div>
-
-        <div class="col-6 col-lg-4">
+        <div class="col-6 col-lg-3">
           <a href="post-flight-log.html" class="quick-action-tile tile-postlog">
             <div class="quick-action-icon icon-postlog">🧾</div>
             <div class="quick-action-title">Post Flight Log</div>
@@ -190,7 +212,31 @@
           </a>
         </div>
 
-        <div class="col-6 col-lg-4">
+        <div class="col-6 col-lg-3">
+          <a href="active-flights.html" class="quick-action-tile tile-active">
+            <div class="quick-action-icon icon-active">🛫</div>
+            <div class="quick-action-title">Active Flights</div>
+            <p class="quick-action-subtitle">See aircraft currently airborne</p>
+          </a>
+        </div>
+
+        <div class="col-6 col-lg-3">
+          <a href="aircraft-status.html" class="quick-action-tile tile-status">
+            <div class="quick-action-icon icon-status">🛠️</div>
+            <div class="quick-action-title">Aircraft Status</div>
+            <p class="quick-action-subtitle">Check service and aircraft condition</p>
+          </a>
+        </div>
+
+        <div class="col-6 col-lg-3">
+          <a href="aircraft-tech-log.html" class="quick-action-tile tile-techlog">
+            <div class="quick-action-icon icon-techlog">📘</div>
+            <div class="quick-action-title">Tech Log</div>
+            <p class="quick-action-subtitle">Open the aircraft tech log</p>
+          </a>
+        </div>
+
+        <div class="col-6 col-lg-3">
           <a href="defects.html" class="quick-action-tile tile-defects">
             <div class="quick-action-icon icon-defects">⚠️</div>
             <div class="quick-action-title">Defects</div>
@@ -200,8 +246,6 @@
       </div>
     </div>
   </div>
-
-  
 
 </body>
 </html>

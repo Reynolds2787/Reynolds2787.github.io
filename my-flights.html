@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Flights</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+  <style>
+    body {
+      background: linear-gradient(180deg, #ecedef 100%, #f1f2f5 100%);
+    }
+
+    body.loading {
+      cursor: wait;
+    }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(2px);
+      transition: opacity .18s ease, transform .18s ease;
+    }
+
+    .fade-in.ready {
+      opacity: 1;
+      transform: none;
+    }
+
+    .page-card,
+    .summary-card,
+    .flight-card {
+      border: 0;
+      border-radius: 1rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    }
+
+    .section-title {
+      letter-spacing: .04em;
+      font-size: .78rem;
+      text-transform: uppercase;
+      color: #6c757d;
+      font-weight: 700;
+    }
+
+    .metric-tile {
+      border: 1px solid rgba(0,0,0,.08);
+      border-radius: 1rem;
+      padding: 1rem;
+      background: rgba(255,255,255,.65);
+      height: 100%;
+    }
+
+    .metric-value {
+      font-size: 1.7rem;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .metric-subtext {
+      color: #6c757d;
+      font-size: .9rem;
+    }
+
+    .table thead th {
+      white-space: nowrap;
+      font-size: .86rem;
+    }
+
+    .table td {
+      vertical-align: middle;
+      font-size: .92rem;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .summary-table td,
+    .summary-table th {
+      vertical-align: middle;
+    }
+
+    .flight-card .meta-label {
+      font-size: .75rem;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: #6c757d;
+      margin-bottom: .2rem;
+    }
+
+    .flight-card .meta-value {
+      font-weight: 600;
+    }
+
+    .empty-state {
+      border: 2px dashed rgba(0,0,0,.08);
+      border-radius: 1rem;
+      background: rgba(255,255,255,.55);
+    }
+
+    .skeleton {
+      border-radius: .75rem;
+      background: linear-gradient(90deg,#e9ecef 25%,#f8f9fa 37%,#e9ecef 63%);
+      background-size: 400% 100%;
+      animation: shimmer 1.4s ease infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 100% 0; }
+      100% { background-position: 0 0; }
+    }
+
+    @media (max-width: 991.98px) {
+      .desktop-only { display: none !important; }
+    }
+
+    @media (min-width: 992px) {
+      .mobile-only { display: none !important; }
+    }
+  </style>
+
+  <script src="js/auth.js"></script>
+  <script src="js/logout.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/admin-guard.js" defer></script>
+  <script src="js/due-soon-badge.js" defer></script>
+  <script src="js/loadNavbar.js" defer></script>
+</head>
+<body>
+  <div class="container-fluid p-2 bg-primary text-white text-center">
+    <h2 class="mb-0">MY FLIGHTS</h2>
+  </div>
+
+  <div id="navbar-placeholder"></div>
+
+  <div class="container py-4">
+    <div class="card page-card fade-in" id="pageCard">
+      <div class="card-body p-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+          <div>
+            <h1 class="h4 mb-1">My Flight History</h1>
+            <div class="text-muted">Only your completed flights from the FlightLogs table.</div>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <button id="refreshBtn" class="btn btn-outline-primary">Refresh</button>
+            <button id="clearBtn" class="btn btn-outline-secondary">Clear Filters</button>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-12 col-md-4">
+            <label class="form-label fw-semibold" for="aircraftFilter">Aircraft</label>
+            <select id="aircraftFilter" class="form-select">
+              <option value="">All aircraft</option>
+              <option>G-AZWS</option>
+              <option>G-BPAF</option>
+              <option>G-EDGI</option>
+              <option>G-AVYL</option>
+              <option>G-BULL</option>
+            </select>
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label fw-semibold" for="fromDate">From date</label>
+            <input id="fromDate" type="date" class="form-control">
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label fw-semibold" for="toDate">To date</label>
+            <input id="toDate" type="date" class="form-control">
+          </div>
+        </div>
+
+        <div id="errorBox" class="alert alert-danger d-none mb-4"></div>
+
+        <div id="loadingState">
+          <div class="row g-3 mb-4">
+            <div class="col-12 col-md-4"><div class="skeleton" style="height:110px;"></div></div>
+            <div class="col-12 col-md-4"><div class="skeleton" style="height:110px;"></div></div>
+            <div class="col-12 col-md-4"><div class="skeleton" style="height:110px;"></div></div>
+          </div>
+          <div class="skeleton mb-3" style="height:280px;"></div>
+          <div class="skeleton mobile-only mb-3" style="height:180px;"></div>
+          <div class="skeleton mobile-only mb-3" style="height:180px;"></div>
+        </div>
+
+        <div id="contentWrap" class="d-none">
+          <div class="row g-3 mb-4">
+            <div class="col-12 col-md-4">
+              <div class="card summary-card h-100">
+                <div class="card-body">
+                  <div class="section-title">Overall</div>
+                  <div class="metric-value" id="totalFlights">0</div>
+                  <div class="metric-subtext">Total flights</div>
+                  <hr>
+                  <div class="d-flex justify-content-between">
+                    <span class="text-muted">Total air time</span>
+                    <span class="fw-semibold mono" id="totalHours">00:00</span>
+                  </div>
+                  <div class="d-flex justify-content-between mt-2">
+                    <span class="text-muted">Total LFC</span>
+                    <span class="fw-semibold" id="totalLfc">£0.00</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-8">
+              <div class="card summary-card h-100">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="section-title mb-0">Per Aircraft Summary</div>
+                    <div class="small text-muted">Flights, time and LFC total</div>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-sm summary-table align-middle mb-0">
+                      <thead class="table-light">
+                        <tr>
+                          <th>Aircraft</th>
+                          <th class="text-end">Flights</th>
+                          <th class="text-end">Hours</th>
+                          <th class="text-end">LFC</th>
+                        </tr>
+                      </thead>
+                      <tbody id="summaryBody"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="emptyState" class="empty-state text-center p-4 d-none">
+            <h3 class="h5 mb-2">No flights found</h3>
+            <div class="text-muted">Try a different aircraft or date range.</div>
+          </div>
+
+          <div id="resultsWrap">
+            <div class="desktop-only table-responsive">
+              <table class="table table-striped table-hover align-middle">
+                <thead class="table-dark">
+                  <tr>
+                    <th>Flight Date</th>
+                    <th>Aircraft</th>
+                    <th>P2</th>
+                    <th>P3</th>
+                    <th>P4</th>
+                    <th>Off Chocks</th>
+                    <th>Takeoff</th>
+                    <th>Land</th>
+                    <th>On Chocks</th>
+                    <th>Block</th>
+                    <th>Airborne</th>
+                    <th class="text-end">Ldg K</th>
+                    <th class="text-end">Ldg Other</th>
+                    <th class="text-end">Hire</th>
+                    <th class="text-end">Landing</th>
+                    <th class="text-end">Instructor</th>
+                    <th class="text-end">LFC</th>
+                  </tr>
+                </thead>
+                <tbody id="flightsTableBody"></tbody>
+              </table>
+            </div>
+
+            <div id="flightCards" class="mobile-only"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = "https://buxyx7dbhc.execute-api.eu-west-2.amazonaws.com";
+    const FLIGHTS_URL = `${API_BASE}/my-flights`;
+
+    const el = (id) => document.getElementById(id);
+
+    let allFlights = [];
+    let serverSummary = null;
+
+    function normalizeReg(value) {
+      return (value || "").trim().toUpperCase();
+    }
+
+    function showError(msg) {
+      el("errorBox").textContent = msg || "Something went wrong.";
+      el("errorBox").classList.remove("d-none");
+    }
+
+    function clearError() {
+      el("errorBox").textContent = "";
+      el("errorBox").classList.add("d-none");
+    }
+
+    function setLoading(isLoading) {
+      document.body.classList.toggle("loading", isLoading);
+      el("loadingState").classList.toggle("d-none", !isLoading);
+      el("contentWrap").classList.toggle("d-none", isLoading);
+      el("refreshBtn").disabled = isLoading;
+      el("clearBtn").disabled = isLoading;
+      el("aircraftFilter").disabled = isLoading;
+      el("fromDate").disabled = isLoading;
+      el("toDate").disabled = isLoading;
+    }
+
+    function safeText(value) {
+      return value === null || value === undefined || value === "" ? "—" : String(value);
+    }
+
+    function parseDateOnly(value) {
+      if (!value) return null;
+      const raw = String(value).slice(0, 10);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return null;
+      const d = new Date(raw + "T00:00:00");
+      return Number.isNaN(d.getTime()) ? null : d;
+    }
+
+    function formatDate(value) {
+      const d = parseDateOnly(value) || new Date(value);
+      return Number.isNaN(d?.getTime?.()) ? safeText(value) : d.toLocaleDateString();
+    }
+
+    function parseMoney(value) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function formatMoney(value) {
+      return `£${parseMoney(value).toFixed(2)}`;
+    }
+
+    function parseDurationToMinutes(value) {
+      if (!value || typeof value !== "string") return 0;
+      const m = value.match(/^(\d{1,2}):(\d{2})$/);
+      if (!m) return 0;
+      return Number(m[1]) * 60 + Number(m[2]);
+    }
+
+    function formatMinutes(totalMinutes) {
+      const mins = Math.max(0, Number(totalMinutes) || 0);
+      const hh = Math.floor(mins / 60);
+      const mm = mins % 60;
+      return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+    }
+
+    function getFlightDate(flight) {
+      return flight.flightDate || flight.date || flight.createdAt || "";
+    }
+
+    function filteredFlights() {
+      const reg = normalizeReg(el("aircraftFilter").value);
+      const fromDate = el("fromDate").value || "";
+      const toDate = el("toDate").value || "";
+
+      return allFlights.filter(flight => {
+        const aircraftOk = !reg || normalizeReg(flight.aircraft) === reg;
+        if (!aircraftOk) return false;
+
+        const flightDate = String(getFlightDate(flight)).slice(0, 10);
+        if (fromDate && flightDate < fromDate) return false;
+        if (toDate && flightDate > toDate) return false;
+
+        return true;
+      });
+    }
+
+    function buildSummaryRows(flights) {
+      const map = new Map();
+
+      for (const flight of flights) {
+        const reg = normalizeReg(flight.aircraft) || "Unknown";
+        if (!map.has(reg)) {
+          map.set(reg, {
+            aircraft: reg,
+            flights: 0,
+            minutes: 0,
+            lfc: 0
+          });
+        }
+
+        const row = map.get(reg);
+        row.flights += 1;
+        row.minutes += parseDurationToMinutes(flight.airTime || flight.airbornTime || flight.airborneTime);
+        row.lfc += parseMoney(flight.lfcTotal);
+      }
+
+      return Array.from(map.values()).sort((a, b) => a.aircraft.localeCompare(b.aircraft));
+    }
+
+    function renderSummary(flights, summaryOverride = null) {
+      const summaryRows = Array.isArray(summaryOverride?.byAircraft)
+        ? summaryOverride.byAircraft.map(row => ({
+            aircraft: row.aircraft || "Unknown",
+            flights: Number(row.totalFlights ?? row.flights ?? 0),
+            minutes: Number(row.totalMinutes ?? 0),
+            lfc: parseMoney(row.totalLfc ?? row.lfc ?? 0)
+          }))
+        : buildSummaryRows(flights);
+
+      const totalFlights = Number(summaryOverride?.totalFlights ?? flights.length);
+      const totalMinutes = Number(
+        summaryOverride?.totalMinutes ??
+        flights.reduce((sum, f) => sum + parseDurationToMinutes(f.airTime || f.airbornTime || f.airborneTime), 0)
+      );
+      const totalLfc = parseMoney(
+        summaryOverride?.totalLfc ??
+        flights.reduce((sum, f) => sum + parseMoney(f.lfcTotal), 0)
+      );
+
+      el("totalFlights").textContent = String(totalFlights);
+      el("totalHours").textContent = summaryOverride?.totalHours || formatMinutes(totalMinutes);
+      el("totalLfc").textContent = formatMoney(totalLfc);
+
+      const tbody = el("summaryBody");
+      if (!summaryRows.length) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-muted text-center py-3">No summary available</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = summaryRows.map(row => `
+        <tr>
+          <td class="fw-semibold">${row.aircraft}</td>
+          <td class="text-end">${row.flights}</td>
+          <td class="text-end mono">${formatMinutes(row.minutes)}</td>
+          <td class="text-end">${formatMoney(row.lfc)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderTable(flights) {
+      const tbody = el("flightsTableBody");
+      tbody.innerHTML = flights.map(f => `
+        <tr>
+          <td>${formatDate(getFlightDate(f))}</td>
+          <td class="fw-semibold">${safeText(f.aircraft)}</td>
+          <td>${safeText(f.p2)}</td>
+          <td>${safeText(f.p3)}</td>
+          <td>${safeText(f.p4)}</td>
+          <td class="mono">${safeText(f.offChocks)}</td>
+          <td class="mono">${safeText(f.takeoff)}</td>
+          <td class="mono">${safeText(f.land)}</td>
+          <td class="mono">${safeText(f.onChocks)}</td>
+          <td class="mono">${safeText(f.blockTime)}</td>
+          <td class="mono">${safeText(f.airTime || f.airbornTime || f.airborneTime)}</td>
+          <td class="text-end">${safeText(f.landingsKemble)}</td>
+          <td class="text-end">${safeText(f.landingsOther)}</td>
+          <td class="text-end">${formatMoney(f.aircraftHireCost)}</td>
+          <td class="text-end">${formatMoney(f.landingFees)}</td>
+          <td class="text-end">${formatMoney(f.instrucCost || f.instructorCost)}</td>
+          <td class="text-end fw-semibold">${formatMoney(f.lfcTotal)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderCards(flights) {
+      const host = el("flightCards");
+      host.innerHTML = flights.map(f => `
+        <div class="card flight-card mb-3">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+              <div>
+                <div class="h5 mb-1">${safeText(f.aircraft)}</div>
+                <div class="text-muted">${formatDate(getFlightDate(f))}</div>
+              </div>
+              <div class="text-end">
+                <div class="meta-label">LFC Total</div>
+                <div class="fw-bold">${formatMoney(f.lfcTotal)}</div>
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-6"><div class="meta-label">P2</div><div class="meta-value">${safeText(f.p2)}</div></div>
+              <div class="col-6"><div class="meta-label">P3</div><div class="meta-value">${safeText(f.p3)}</div></div>
+              <div class="col-6"><div class="meta-label">P4</div><div class="meta-value">${safeText(f.p4)}</div></div>
+              <div class="col-6"><div class="meta-label">Aircraft</div><div class="meta-value">${safeText(f.aircraft)}</div></div>
+
+              <div class="col-6"><div class="meta-label">Off Chocks</div><div class="meta-value mono">${safeText(f.offChocks)}</div></div>
+              <div class="col-6"><div class="meta-label">Takeoff</div><div class="meta-value mono">${safeText(f.takeoff)}</div></div>
+              <div class="col-6"><div class="meta-label">Land</div><div class="meta-value mono">${safeText(f.land)}</div></div>
+              <div class="col-6"><div class="meta-label">On Chocks</div><div class="meta-value mono">${safeText(f.onChocks)}</div></div>
+
+              <div class="col-6"><div class="meta-label">Block Time</div><div class="meta-value mono">${safeText(f.blockTime)}</div></div>
+              <div class="col-6"><div class="meta-label">Airborne Time</div><div class="meta-value mono">${safeText(f.airTime || f.airbornTime || f.airborneTime)}</div></div>
+              <div class="col-6"><div class="meta-label">Landings Kemble</div><div class="meta-value">${safeText(f.landingsKemble)}</div></div>
+              <div class="col-6"><div class="meta-label">Landings Elsewhere</div><div class="meta-value">${safeText(f.landingsOther)}</div></div>
+
+              <div class="col-6"><div class="meta-label">Hire Cost</div><div class="meta-value">${formatMoney(f.aircraftHireCost)}</div></div>
+              <div class="col-6"><div class="meta-label">Landing Fees</div><div class="meta-value">${formatMoney(f.landingFees)}</div></div>
+              <div class="col-6"><div class="meta-label">Instructor Cost</div><div class="meta-value">${formatMoney(f.instrucCost || f.instructorCost)}</div></div>
+              <div class="col-6"><div class="meta-label">LFC Total</div><div class="meta-value">${formatMoney(f.lfcTotal)}</div></div>
+            </div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderFlights() {
+      const flights = filteredFlights().sort((a, b) => String(getFlightDate(b)).localeCompare(String(getFlightDate(a))));
+
+      const usingUnfilteredServerSummary = !el("aircraftFilter").value && !el("fromDate").value && !el("toDate").value;
+      renderSummary(flights, usingUnfilteredServerSummary ? serverSummary : null);
+
+      const empty = flights.length === 0;
+      el("emptyState").classList.toggle("d-none", !empty);
+      el("resultsWrap").classList.toggle("d-none", empty);
+
+      if (empty) {
+        el("flightsTableBody").innerHTML = "";
+        el("flightCards").innerHTML = "";
+        return;
+      }
+
+      renderTable(flights);
+      renderCards(flights);
+    }
+
+    function clearFilters() {
+      el("aircraftFilter").value = "";
+      el("fromDate").value = "";
+      el("toDate").value = "";
+      renderFlights();
+    }
+
+    async function waitForAuthFetch(maxMs = 2500) {
+      const start = Date.now();
+      while (Date.now() - start < maxMs) {
+        if (typeof window.authFetch === "function") return true;
+        await new Promise(r => setTimeout(r, 50));
+      }
+      return false;
+    }
+
+    async function loadFlights() {
+      clearError();
+      setLoading(true);
+
+      try {
+        const ok = await waitForAuthFetch();
+        if (!ok) throw new Error("Authentication helper not ready.");
+
+        const res = await window.authFetch(FLIGHTS_URL, { method: "GET" });
+        if (!res || !res.ok) {
+          throw new Error(`Flight history load failed (${res?.status || "no response"})`);
+        }
+
+        const data = await res.json();
+        allFlights = Array.isArray(data?.items) ? data.items : (Array.isArray(data) ? data : []);
+        serverSummary = data?.summary || null;
+        renderFlights();
+      } catch (err) {
+        console.error(err);
+        allFlights = [];
+        serverSummary = null;
+        renderFlights();
+        showError(err.message || "Unable to load your flight history.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      requestAnimationFrame(() => el("pageCard")?.classList.add("ready"));
+
+      el("refreshBtn").addEventListener("click", loadFlights);
+      el("clearBtn").addEventListener("click", clearFilters);
+      el("aircraftFilter").addEventListener("change", renderFlights);
+      el("fromDate").addEventListener("change", renderFlights);
+      el("toDate").addEventListener("change", renderFlights);
+
+      loadFlights();
+    });
+  </script>
+</body>
+</html>
