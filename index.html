@@ -8,6 +8,8 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 
+  <link rel="stylesheet" href="/css/styles.css">
+
   <style>
     body {
       background: linear-gradient(180deg, #ecedef 100%, #f1f2f5 100%);
@@ -127,6 +129,7 @@
         text-align: center;
       }
     }
+
   </style>
 
   <script src="js/auth.js" defer></script>
@@ -135,13 +138,23 @@
   <script src="js/due-soon-badge.js" defer></script>
   <script src="js/fetch-qnh.js" defer></script>
   <script src="js/loadNavbar.js" defer></script>
+
+  <script>
+  document.addEventListener("navbar:loaded", () => {
+    const titleEl = document.getElementById("pageTitle");
+    const pageTitle = document.body?.dataset?.pageTitle || "";
+    if (titleEl) titleEl.textContent = pageTitle;
+  });
+</script>
+
 </head>
+
 
 <body>
 
   <div class="container-fluid p-2 bg-primary text-white text-center">
     <h2>EFM WEB APP - HOME PAGE</h2>
-  </div>
+ </div>
 
   <div id="navbar-placeholder"></div>
   

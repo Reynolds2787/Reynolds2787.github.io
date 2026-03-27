@@ -1,0 +1,19 @@
+.efm-navbar {
+  background: linear-gradient(90deg, #1f2328 0%, #2c3137 100%);
+}
+
+.efm-navbar .navbar-brand {
+  letter-spacing: 0.03em;
+}
+
+#pageTitle {
+  opacity: 0.9;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+@media (max-width: 575.98px) {
+  #pageTitle {
+    display: none !important;
+  }
+}
