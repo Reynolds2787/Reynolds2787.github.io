@@ -912,7 +912,7 @@
         if (days < 0) return `Overdue by ${Math.abs(days)} day(s)`;
         if (days === 0) return "Due today";
         if (days <= 30) return "Due soon";
-        return "Within limits";
+        return "";
       }
 
       host.innerHTML = `
