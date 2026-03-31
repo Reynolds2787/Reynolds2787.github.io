@@ -150,9 +150,15 @@
                 </div>
               </div>
 
-              <div class="col-12 col-md-4 d-flex flex-wrap justify-content-md-end gap-2">
-                <button id="loadBtn" class="btn btn-outline-primary">Load</button>
-                <button id="extendBtn" class="btn btn-outline-warning">Apply 5 Hr Extension</button>
+              <div class="col-12 col-md-4">
+                <label class="form-label fw-semibold d-block">5 Hr Extension</label>
+                <div class="form-check form-switch mt-2">
+                  <input class="form-check-input" type="checkbox" id="extendToggle">
+                  <label class="form-check-label" for="extendToggle">Apply 5 Hr Extension</label>
+                </div>
+              </div>
+
+              <div class="col-12 d-flex flex-wrap justify-content-md-end gap-2">
                 <button id="saveBtn" class="btn btn-primary">Save</button>
               </div>
             </div>
@@ -358,7 +364,7 @@
 
     function setBusy(isBusy) {
       document.body.classList.toggle("loading", isBusy);
-      ["loadBtn", "saveBtn", "extendBtn", "addLogRowBtn", "aircraft", "useFlightHours"].forEach(id => {
+      ["saveBtn", "addLogRowBtn", "aircraft", "useFlightHours", "extendToggle"].forEach(id => {
         const node = el(id);
         if (node) node.disabled = isBusy;
       });
@@ -420,7 +426,7 @@
       const useFlight = useFlightMetric();
       const current = Number(currentRecord.currentHours);
       const baseServiceAt = getLatestServiceLogNextServiceAt();
-      const extension = Number(el("extendBtn").dataset.extensionApplied || 0);
+      const extension = el("extendToggle").checked ? 5 : 0;
 
       const effectiveServiceAt =
         Number.isFinite(baseServiceAt)
@@ -648,26 +654,11 @@
       });
     }
 
-    function applyFiveHourExtension() {
-      const latestServiceAt = getLatestServiceLogNextServiceAt();
-      if (!Number.isFinite(latestServiceAt)) {
-        showError("Cannot apply extension until there is at least one MAINTENANCE_SERVICE log entry.");
-        return;
-      }
-
-      el("extendBtn").dataset.extensionApplied = "5";
-      el("extendBtn").dataset.extensionBase = String(latestServiceAt);
-      syncSummaryDisplaysWithExtension();
-    }
-
     async function loadAircraft() {
       clearError();
 
       const aircraft = normalizeReg(el("aircraft").value);
-      if (!aircraft) {
-        showError("Please select an aircraft first.");
-        return;
-      }
+      if (!aircraft) return;
 
       setBusy(true);
       setStatus("Loading...");
@@ -699,8 +690,7 @@
         renderHistory(maintenanceHistoryItems);
         clearNewLogRows();
 
-        el("extendBtn").dataset.extensionApplied = "";
-        el("extendBtn").dataset.extensionBase = "";
+        el("extendToggle").checked = false;
 
         syncSummaryDisplays();
         setStatus("Loaded.");
@@ -815,7 +805,7 @@
       setStatus("Saving...");
 
       try {
-        const extensionHoursApplied = Number(el("extendBtn").dataset.extensionApplied || 0);
+        const extensionHoursApplied = el("extendToggle").checked ? 5 : 0;
         const latestServiceAt = getLatestServiceLogNextServiceAt();
         const current = Number(currentRecord.currentHours);
 
@@ -859,8 +849,7 @@
         setStatus("Saved.");
         setTimeout(() => setStatus(""), 1500);
 
-        el("extendBtn").dataset.extensionApplied = "";
-        el("extendBtn").dataset.extensionBase = "";
+        el("extendToggle").checked = false;
 
         await loadAircraft();
       } catch (err) {
@@ -874,14 +863,13 @@
     document.addEventListener("DOMContentLoaded", () => {
       requestAnimationFrame(() => el("pageCard")?.classList.add("ready"));
 
-      el("loadBtn").addEventListener("click", loadAircraft);
       el("saveBtn").addEventListener("click", saveAircraft);
       el("saveHistoryEditBtn").addEventListener("click", saveHistoryEdit);
       el("confirmDeleteHistoryBtn").addEventListener("click", deleteHistoryRow);
 
-      el("extendBtn").addEventListener("click", () => {
+      el("extendToggle").addEventListener("change", () => {
         clearError();
-        applyFiveHourExtension();
+        syncSummaryDisplaysWithExtension();
       });
 
       el("addLogRowBtn").addEventListener("click", () => {
@@ -890,6 +878,13 @@
 
       el("useFlightHours").addEventListener("change", () => {
         syncSummaryDisplaysWithExtension();
+      });
+
+      el("aircraft").addEventListener("change", async () => {
+        clearError();
+        const aircraft = normalizeReg(el("aircraft").value);
+        if (!aircraft) return;
+        await loadAircraft();
       });
 
       const params = new URLSearchParams(window.location.search);
