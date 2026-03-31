@@ -189,50 +189,6 @@
       border: 1px solid rgba(255, 193, 7, .22);
     }
 
-
-    .maint-alert-panel {
-      border-radius: 1rem;
-      padding: 1rem;
-      border: 1px solid rgba(0, 0, 0, .06);
-      background: #f8f9fa;
-    }
-
-    .maint-alert-panel-danger {
-      background: linear-gradient(180deg, rgba(220, 53, 69, .10), rgba(255, 255, 255, .98));
-      border-color: rgba(220, 53, 69, .16);
-    }
-
-    .maint-alert-panel-warning {
-      background: linear-gradient(180deg, rgba(255, 193, 7, .16), rgba(255, 255, 255, .98));
-      border-color: rgba(255, 193, 7, .22);
-    }
-
-    .maint-alert-panel-success {
-      background: linear-gradient(180deg, rgba(25, 135, 84, .10), rgba(255, 255, 255, .98));
-      border-color: rgba(25, 135, 84, .18);
-    }
-
-    .maint-alert-title {
-      font-size: .78rem;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      font-weight: 800;
-      color: #6c757d;
-      margin-bottom: .45rem;
-    }
-
-    .maint-alert-value {
-      font-size: 1.35rem;
-      font-weight: 800;
-      line-height: 1.1;
-      margin-bottom: .25rem;
-    }
-
-    .maint-alert-sub {
-      color: #6c757d;
-      font-size: .92rem;
-    }
-
     .maintenance-item-card {
       border: 1px solid rgba(0, 0, 0, .08);
       border-radius: 1rem;
@@ -284,6 +240,41 @@
     .mobile-stack-meta {
       display: grid;
       gap: .8rem;
+    }
+
+    .due-date-card {
+      border: 1px solid rgba(0, 0, 0, .08);
+      border-left: 6px solid #198754;
+      border-radius: 1rem;
+      background: linear-gradient(180deg, #ffffff, #fbfcfd);
+      box-shadow: 0 3px 10px rgba(16, 24, 40, .04);
+    }
+
+    .due-date-card.warning {
+      border-left-color: #ffc107;
+    }
+
+    .due-date-card.danger {
+      border-left-color: #dc3545;
+    }
+
+    .due-date-title {
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: #6c757d;
+      font-weight: 800;
+    }
+
+    .due-date-value {
+      font-size: 1.25rem;
+      font-weight: 800;
+      line-height: 1.15;
+    }
+
+    .due-date-subtext {
+      color: #6c757d;
+      font-size: .92rem;
     }
 
     @media (max-width: 767.98px) {
@@ -338,49 +329,6 @@
         justify-content: center;
       }
 
-      .maint-alert-value {
-        font-size: 1.15rem;
-      }
-    }
-
-
-
-    .due-date-card {
-      border: 1px solid rgba(0, 0, 0, .08);
-      border-left: 6px solid #198754;
-      border-radius: 1rem;
-      background: linear-gradient(180deg, #ffffff, #fbfcfd);
-      box-shadow: 0 3px 10px rgba(16, 24, 40, .04);
-    }
-
-    .due-date-card.warning {
-      border-left-color: #ffc107;
-    }
-
-    .due-date-card.danger {
-      border-left-color: #dc3545;
-    }
-
-    .due-date-title {
-      font-size: .78rem;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: #6c757d;
-      font-weight: 800;
-    }
-
-    .due-date-value {
-      font-size: 1.25rem;
-      font-weight: 800;
-      line-height: 1.15;
-    }
-
-    .due-date-subtext {
-      color: #6c757d;
-      font-size: .92rem;
-    }
-
-    @media (max-width: 767.98px) {
       .due-date-value {
         font-size: 1.1rem;
       }
@@ -469,7 +417,6 @@
         </div>
 
         <div class="tab-content pt-3">
-          <!-- DEFECTS TAB -->
           <div class="tab-pane fade show active" id="pane-defects" role="tabpanel" aria-labelledby="tab-defects">
 
             <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-3">
@@ -506,7 +453,6 @@
             </div>
           </div>
 
-          <!-- COMPLIANCE TAB -->
           <div class="tab-pane fade" id="pane-compliance" role="tabpanel" aria-labelledby="tab-compliance">
             <div id="complianceSkeleton" class="d-none">
               <div class="skeleton mb-2" style="height: 110px;"></div>
@@ -518,7 +464,6 @@
             </div>
           </div>
 
-          <!-- MAINTENANCE TAB -->
           <div class="tab-pane fade" id="pane-maintenance" role="tabpanel" aria-labelledby="tab-maintenance">
             <div id="maintenanceSkeleton" class="d-none">
               <div class="skeleton mb-2" style="height: 110px;"></div>
@@ -535,7 +480,6 @@
     </div>
   </div>
 
-  <!-- Add defect modal -->
   <div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
       <div class="modal-content">
@@ -593,7 +537,6 @@
     </div>
   </div>
 
-  <!-- Admin action modal -->
   <div class="modal fade" id="actionModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
       <div class="modal-content">
@@ -973,35 +916,35 @@
       }
 
       host.innerHTML = `
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-      <div>
-        <div class="fw-semibold">Aircraft Due Dates</div>
-        <div class="text-muted small">Regulatory and scheduled date-based items.</div>
-      </div>
-    </div>
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+          <div>
+            <div class="fw-semibold">Aircraft Due Dates</div>
+            <div class="text-muted small">Regulatory and scheduled date-based items.</div>
+          </div>
+        </div>
 
-    <div class="row g-3">
-      ${items.map(item => `
-        <div class="col-12 col-md-6">
-          <div class="card due-date-card ${dueCardClass(item.days)} h-100">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-start gap-3">
-                <div>
-                  <div class="due-date-title">${item.label}</div>
-                  <div class="due-date-value">${formatDateOnly(item.date)}</div>
-                  <div class="due-date-subtext mt-2">${dueSubtext(item.days)}</div>
-                </div>
+        <div class="row g-3">
+          ${items.map(item => `
+            <div class="col-12 col-md-6">
+              <div class="card due-date-card ${dueCardClass(item.days)} h-100">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-start gap-3">
+                    <div>
+                      <div class="due-date-title">${item.label}</div>
+                      <div class="due-date-value">${formatDateOnly(item.date)}</div>
+                      <div class="due-date-subtext mt-2">${dueSubtext(item.days)}</div>
+                    </div>
 
-                <div class="text-end">
-                  <span class="badge ${complianceBadge(item.days)}">${complianceText(item.days)}</span>
+                    <div class="text-end">
+                      <span class="badge ${complianceBadge(item.days)}">${complianceText(item.days)}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          `).join("")}
         </div>
-      `).join("")}
-    </div>
-  `;
+      `;
     }
 
     function renderMaintenance(data, aircraft) {
@@ -1010,6 +953,10 @@
 
       const reg = normalizeReg(aircraft);
       const useFlight = USES_FLIGHT_HOURS.has(reg);
+
+      const hoursLabel = useFlight
+        ? "Flight Hours to Next Service"
+        : "Tacho Hours to Next Service";
 
       const serviceAtLabel = useFlight
         ? "Service At Flight Hours"
@@ -1042,134 +989,119 @@
       const overdue = trackedItems.filter(x => x.days <= 0);
       const upcoming = trackedItems.filter(x => x.days > 0 && x.days <= 30);
 
-      let panelClass = "maint-alert-panel-success";
-      let panelTitle = "Status";
-      let panelValue = "No urgent items";
-      let panelSub = "All tracked items are more than 30 days away.";
-
-      if (overdue.length > 0) {
-        panelClass = "maint-alert-panel-danger";
-        panelTitle = "Warning";
-        panelValue = `${overdue.length} overdue item${overdue.length === 1 ? "" : "s"}`;
-        panelSub = "Immediate attention recommended.";
-      } else if (upcoming.length > 0) {
-        panelClass = "maint-alert-panel-warning";
-        panelTitle = "Caution";
-        panelValue = `${upcoming.length} upcoming item${upcoming.length === 1 ? "" : "s"}`;
-        panelSub = "Due within the next 30 days.";
-      }
-
       host.innerHTML = `
-    <div class="row g-3 mb-3">
-      <div class="col-12 col-lg-6">
-        <div class="card status-card h-100">
-          <div class="card-body">
-            <div class="section-title">${hoursLabel}</div>
-            <div class="big-value">${formatHours(hoursValue)}</div>
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-lg-6">
+            <div class="card status-card h-100">
+              <div class="card-body">
+                <div class="section-title">${hoursLabel}</div>
+                <div class="big-value">${formatHours(hoursValue)}</div>
 
-            <div class="row g-3 mt-1">
-              <div class="col-12 col-sm-6">
-                <div class="section-title">${serviceAtLabel}</div>
-                <div class="fw-semibold fs-5">${formatHours(serviceAtValue)}</div>
-              </div>
+                <div class="row g-3 mt-1">
+                  <div class="col-12 col-sm-6">
+                    <div class="section-title">${serviceAtLabel}</div>
+                    <div class="fw-semibold fs-5">${formatHours(serviceAtValue)}</div>
+                  </div>
 
-            <div class="col-12 col-sm-6">
-            <div class="section-title">${currentHoursLabel}</div>
-           <div class="fw-semibold fs-5">${formatHours(currentHoursValue)}</div>
-            </div>
-
-            <div class="small text-muted mt-2">Current values from maintenance record</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-lg-6">
-        <div class="card status-card h-100">
-          <div class="card-body">
-            <div class="section-title">Maintenance Summary</div>
-
-            <div class="mt-3 d-flex flex-wrap gap-2">
-              ${overdue.length > 0 ? `
-                <span class="summary-pill summary-pill-danger">Overdue: ${overdue.length}</span>
-              ` : ``}
-
-              ${upcoming.length > 0 ? `
-                <span class="summary-pill summary-pill-warning">Upcoming: ${upcoming.length}</span>
-              ` : ``}
-            </div>
-
-            ${isAdmin ? `
-              <div class="mt-3">
-                <a class="btn btn-sm btn-outline-primary" href="admin-aircraft-maintenance.html?aircraft=${encodeURIComponent(reg)}">
-                  Open Maintenance Editor
-                </a>
-              </div>
-            ` : ``}
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card status-card">
-      <div class="card-body">
-        <div class="fw-semibold mb-3">Upcoming / Overdue Items</div>
-
-        ${trackedItems.length
-          ? `
-              <div class="d-none d-md-block">
-                <div class="table-responsive">
-                  <table class="table subtle-table align-middle mb-0">
-                    <thead class="table-light">
-                      <tr>
-                        <th>Type</th>
-                        <th>Due Date</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      ${trackedItems.map(item => `
-                        <tr>
-                          <td>${escapeHtml(item.type)}</td>
-                          <td>${formatDateOnly(item.dueDate)}</td>
-                          <td>
-                            <span class="badge ${complianceBadge(item.days)}">${complianceText(item.days)}</span>
-                          </td>
-                        </tr>
-                      `).join("")}
-                    </tbody>
-                  </table>
+                  <div class="col-12 col-sm-6">
+                    <div class="section-title">${currentHoursLabel}</div>
+                    <div class="fw-semibold fs-5">${formatHours(currentHoursValue)}</div>
+                  </div>
                 </div>
-              </div>
 
-              <div class="d-md-none">
-                ${trackedItems.map(item => `
-                  <div class="maintenance-item-card p-3">
-                    <div class="mobile-stack-meta">
-                      <div>
-                        <div class="section-title">Type</div>
-                        <div class="fw-semibold">${escapeHtml(item.type)}</div>
-                      </div>
-                      <div>
-                        <div class="section-title">Due Date</div>
-                        <div class="fw-semibold">${formatDateOnly(item.dueDate)}</div>
-                      </div>
-                      <div>
-                        <div class="section-title">Status</div>
-                        <div class="mt-1">
-                          <span class="badge ${complianceBadge(item.days)}">${complianceText(item.days)}</span>
-                        </div>
-                      </div>
+                <div class="small text-muted mt-2">Current values from maintenance record</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-6">
+            <div class="card status-card h-100">
+              <div class="card-body">
+                <div class="section-title">Maintenance Summary</div>
+
+                <div class="mt-3 d-flex flex-wrap gap-2">
+                  ${overdue.length > 0 ? `
+                    <span class="summary-pill summary-pill-danger">Overdue: ${overdue.length}</span>
+                  ` : ``}
+
+                  ${upcoming.length > 0 ? `
+                    <span class="summary-pill summary-pill-warning">Upcoming: ${upcoming.length}</span>
+                  ` : ``}
+                </div>
+
+                ${isAdmin ? `
+                  <div class="mt-3">
+                    <a class="btn btn-sm btn-outline-primary" href="admin-aircraft-maintenance.html?aircraft=${encodeURIComponent(reg)}">
+                      Open Maintenance Editor
+                    </a>
+                  </div>
+                ` : ``}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card status-card">
+          <div class="card-body">
+            <div class="fw-semibold mb-3">Upcoming / Overdue Items</div>
+
+            ${trackedItems.length
+              ? `
+                  <div class="d-none d-md-block">
+                    <div class="table-responsive">
+                      <table class="table subtle-table align-middle mb-0">
+                        <thead class="table-light">
+                          <tr>
+                            <th>Type</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          ${trackedItems.map(item => `
+                            <tr>
+                              <td>${escapeHtml(item.type)}</td>
+                              <td>${formatDateOnly(item.dueDate)}</td>
+                              <td>
+                                <span class="badge ${complianceBadge(item.days)}">${complianceText(item.days)}</span>
+                              </td>
+                            </tr>
+                          `).join("")}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
-                `).join("")}
-              </div>
-            `
-          : `<div class="text-muted">No tracked maintenance items found for this aircraft.</div>`
-        }
-      </div>
-    </div>
-  `;
+
+                  <div class="d-md-none">
+                    ${trackedItems.map(item => `
+                      <div class="maintenance-item-card p-3">
+                        <div class="mobile-stack-meta">
+                          <div>
+                            <div class="section-title">Type</div>
+                            <div class="fw-semibold">${escapeHtml(item.type)}</div>
+                          </div>
+                          <div>
+                            <div class="section-title">Due Date</div>
+                            <div class="fw-semibold">${formatDateOnly(item.dueDate)}</div>
+                          </div>
+                          <div>
+                            <div class="section-title">Status</div>
+                            <div class="mt-1">
+                              <span class="badge ${complianceBadge(item.days)}">${complianceText(item.days)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    `).join("")}
+                  </div>
+                `
+              : `<div class="text-muted">No tracked maintenance items found for this aircraft.</div>`
+            }
+          </div>
+        </div>
+      `;
     }
+
     async function loadCompliance(aircraft) {
       clearError();
       const reg = normalizeReg(aircraft);
