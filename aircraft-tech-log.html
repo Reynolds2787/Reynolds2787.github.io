@@ -750,7 +750,7 @@
       const q = getQuery();
       const aircraft = q.get("aircraft") || "";
       let tab = "defects";
-      if (activeTabId === "tab-compliance") tab = "due dates";
+      if (activeTabId === "tab-compliance") tab = "compliance";
       if (activeTabId === "tab-maintenance") tab = "maintenance";
       setQuery({ aircraft, tab });
     }
@@ -964,6 +964,7 @@
       let panelClass = "maint-alert-panel-success";
       let panelTitle = "Status";
       let panelValue = "No urgent items";
+      let panelSub = "All tracked items are more than 30 days away.";
 
       if (overdue.length > 0) {
         panelClass = "maint-alert-panel-danger";
