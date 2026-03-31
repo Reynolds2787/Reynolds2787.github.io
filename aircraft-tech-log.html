@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>Aircraft Tech Log</title>
@@ -12,7 +13,7 @@
   <style>
     body {
       background:
-        radial-gradient(circle at top, rgba(13,110,253,0.05), transparent 28%),
+        radial-gradient(circle at top, rgba(13, 110, 253, 0.05), transparent 28%),
         linear-gradient(180deg, #edf0f3 0%, #f5f6f8 100%);
       color: #212529;
     }
@@ -40,8 +41,13 @@
     }
 
     @keyframes shimmer {
-      0% { background-position: 100% 0; }
-      100% { background-position: 0 0; }
+      0% {
+        background-position: 100% 0;
+      }
+
+      100% {
+        background-position: 0 0;
+      }
     }
 
     .mono {
@@ -52,7 +58,7 @@
       border: 0;
       border-radius: 1.25rem;
       overflow: hidden;
-      background: rgba(255,255,255,0.9);
+      background: rgba(255, 255, 255, 0.9);
       backdrop-filter: blur(8px);
       box-shadow:
         0 10px 30px rgba(16, 24, 40, 0.08),
@@ -64,9 +70,9 @@
     }
 
     .hero-strip {
-      border: 1px solid rgba(13,110,253,.10);
+      border: 1px solid rgba(13, 110, 253, .10);
       border-radius: 1rem;
-      background: linear-gradient(135deg, rgba(13,110,253,.08), rgba(255,255,255,.92));
+      background: linear-gradient(135deg, rgba(13, 110, 253, .08), rgba(255, 255, 255, .92));
       padding: 1rem;
       margin-bottom: 1rem;
     }
@@ -113,8 +119,8 @@
       min-width: 110px;
       padding: .7rem .9rem;
       border-radius: .95rem;
-      background: rgba(255,255,255,.75);
-      border: 1px solid rgba(0,0,0,.05);
+      background: rgba(255, 255, 255, .75);
+      border: 1px solid rgba(0, 0, 0, .05);
     }
 
     .top-stat-label {
@@ -152,13 +158,13 @@
       padding: .6rem 1rem;
       font-weight: 600;
       color: #495057;
-      background: rgba(0,0,0,.04);
+      background: rgba(0, 0, 0, .04);
     }
 
     .tabs-scroll .nav-link.active {
       color: #fff;
       background: linear-gradient(135deg, #0d6efd, #3d8bfd);
-      box-shadow: 0 6px 16px rgba(13,110,253,.25);
+      box-shadow: 0 6px 16px rgba(13, 110, 253, .25);
     }
 
     .summary-pill {
@@ -172,38 +178,38 @@
     }
 
     .summary-pill-danger {
-      background: rgba(220,53,69,.10);
+      background: rgba(220, 53, 69, .10);
       color: #b02a37;
-      border: 1px solid rgba(220,53,69,.12);
+      border: 1px solid rgba(220, 53, 69, .12);
     }
 
     .summary-pill-warning {
-      background: rgba(255,193,7,.18);
+      background: rgba(255, 193, 7, .18);
       color: #7a5b00;
-      border: 1px solid rgba(255,193,7,.22);
+      border: 1px solid rgba(255, 193, 7, .22);
     }
 
 
     .maint-alert-panel {
       border-radius: 1rem;
       padding: 1rem;
-      border: 1px solid rgba(0,0,0,.06);
+      border: 1px solid rgba(0, 0, 0, .06);
       background: #f8f9fa;
     }
 
     .maint-alert-panel-danger {
-      background: linear-gradient(180deg, rgba(220,53,69,.10), rgba(255,255,255,.98));
-      border-color: rgba(220,53,69,.16);
+      background: linear-gradient(180deg, rgba(220, 53, 69, .10), rgba(255, 255, 255, .98));
+      border-color: rgba(220, 53, 69, .16);
     }
 
     .maint-alert-panel-warning {
-      background: linear-gradient(180deg, rgba(255,193,7,.16), rgba(255,255,255,.98));
-      border-color: rgba(255,193,7,.22);
+      background: linear-gradient(180deg, rgba(255, 193, 7, .16), rgba(255, 255, 255, .98));
+      border-color: rgba(255, 193, 7, .22);
     }
 
     .maint-alert-panel-success {
-      background: linear-gradient(180deg, rgba(25,135,84,.10), rgba(255,255,255,.98));
-      border-color: rgba(25,135,84,.18);
+      background: linear-gradient(180deg, rgba(25, 135, 84, .10), rgba(255, 255, 255, .98));
+      border-color: rgba(25, 135, 84, .18);
     }
 
     .maint-alert-title {
@@ -228,13 +234,13 @@
     }
 
     .maintenance-item-card {
-      border: 1px solid rgba(0,0,0,.08);
+      border: 1px solid rgba(0, 0, 0, .08);
       border-radius: 1rem;
       background: linear-gradient(180deg, #ffffff, #fbfcfd);
-      box-shadow: 0 3px 10px rgba(16,24,40,.04);
+      box-shadow: 0 3px 10px rgba(16, 24, 40, .04);
     }
 
-    .maintenance-item-card + .maintenance-item-card {
+    .maintenance-item-card+.maintenance-item-card {
       margin-top: .8rem;
     }
 
@@ -252,10 +258,10 @@
     }
 
     .defect-card {
-      border: 1px solid rgba(0,0,0,.06);
+      border: 1px solid rgba(0, 0, 0, .06);
       border-radius: 1rem;
       background: linear-gradient(180deg, #ffffff, #fcfcfd);
-      box-shadow: 0 4px 12px rgba(16,24,40,.04);
+      box-shadow: 0 4px 12px rgba(16, 24, 40, .04);
     }
 
     .defect-card .card-body {
@@ -336,6 +342,49 @@
         font-size: 1.15rem;
       }
     }
+
+
+
+    .due-date-card {
+      border: 1px solid rgba(0, 0, 0, .08);
+      border-left: 6px solid #198754;
+      border-radius: 1rem;
+      background: linear-gradient(180deg, #ffffff, #fbfcfd);
+      box-shadow: 0 3px 10px rgba(16, 24, 40, .04);
+    }
+
+    .due-date-card.warning {
+      border-left-color: #ffc107;
+    }
+
+    .due-date-card.danger {
+      border-left-color: #dc3545;
+    }
+
+    .due-date-title {
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: #6c757d;
+      font-weight: 800;
+    }
+
+    .due-date-value {
+      font-size: 1.25rem;
+      font-weight: 800;
+      line-height: 1.15;
+    }
+
+    .due-date-subtext {
+      color: #6c757d;
+      font-size: .92rem;
+    }
+
+    @media (max-width: 767.98px) {
+      .due-date-value {
+        font-size: 1.1rem;
+      }
+    }
   </style>
 
   <script src="js/auth.js"></script>
@@ -399,17 +448,20 @@
         <div class="tabs-scroll mb-2">
           <ul class="nav nav-tabs" id="techlogTabs" role="tablist">
             <li class="nav-item" role="presentation">
-              <button class="nav-link active" id="tab-defects" data-bs-toggle="tab" data-bs-target="#pane-defects" type="button" role="tab">
+              <button class="nav-link active" id="tab-defects" data-bs-toggle="tab" data-bs-target="#pane-defects"
+                type="button" role="tab">
                 Defects <span class="badge bg-danger ms-1 d-none" id="tabDefectsBadge">0</span>
               </button>
             </li>
             <li class="nav-item" role="presentation">
-              <button class="nav-link" id="tab-compliance" data-bs-toggle="tab" data-bs-target="#pane-compliance" type="button" role="tab">
+              <button class="nav-link" id="tab-compliance" data-bs-toggle="tab" data-bs-target="#pane-compliance"
+                type="button" role="tab">
                 Due Dates
               </button>
             </li>
             <li class="nav-item" role="presentation">
-              <button class="nav-link" id="tab-maintenance" data-bs-toggle="tab" data-bs-target="#pane-maintenance" type="button" role="tab">
+              <button class="nav-link" id="tab-maintenance" data-bs-toggle="tab" data-bs-target="#pane-maintenance"
+                type="button" role="tab">
                 Maintenance
               </button>
             </li>
@@ -525,7 +577,8 @@
 
             <div class="col-12">
               <label class="form-label">Effect on Flight</label>
-              <textarea class="form-control" id="newEffect" rows="3" placeholder="Operational effect / limitations..."></textarea>
+              <textarea class="form-control" id="newEffect" rows="3"
+                placeholder="Operational effect / limitations..."></textarea>
             </div>
           </div>
 
@@ -843,12 +896,12 @@
             </div>
           `
           : status === "DEFERRED"
-          ? `
+            ? `
             <div class="mt-2 small text-muted">
               ${d.deferredNotes ? `<div><span class="fw-semibold">Deferred notes:</span> ${escapeHtml(d.deferredNotes)}</div>` : ""}
             </div>
           `
-          : ``;
+            : ``;
 
         const card = document.createElement("div");
         card.className = "card defect-card";
@@ -904,83 +957,109 @@
         days: daysUntil(item.date)
       }));
 
+      function dueCardClass(days) {
+        if (days === null) return "";
+        if (days <= 0) return "danger";
+        if (days <= 30) return "warning";
+        return "";
+      }
+
+      function dueSubtext(days) {
+        if (days === null) return "No date recorded";
+        if (days < 0) return `Overdue by ${Math.abs(days)} day(s)`;
+        if (days === 0) return "Due today";
+        if (days <= 30) return "Due soon";
+        return "Within limits";
+      }
+
       host.innerHTML = `
-        <div class="row g-3">
-          ${items.map(item => `
-            <div class="col-12 col-md-6">
-              <div class="card shadow-sm status-card h-100">
-                <div class="card-body">
-                  <div class="d-flex justify-content-between align-items-start gap-3">
-                    <div>
-                      <div class="section-title">${item.label}</div>
-                      <div class="big-value">${formatDateOnly(item.date)}</div>
-                    </div>
-                    <span class="badge ${complianceBadge(item.days)}">${complianceText(item.days)}</span>
-                  </div>
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <div>
+        <div class="fw-semibold">Aircraft Due Dates</div>
+        <div class="text-muted small">Regulatory and scheduled date-based items.</div>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      ${items.map(item => `
+        <div class="col-12 col-md-6">
+          <div class="card due-date-card ${dueCardClass(item.days)} h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start gap-3">
+                <div>
+                  <div class="due-date-title">${item.label}</div>
+                  <div class="due-date-value">${formatDateOnly(item.date)}</div>
+                  <div class="due-date-subtext mt-2">${dueSubtext(item.days)}</div>
+                </div>
+
+                <div class="text-end">
+                  <span class="badge ${complianceBadge(item.days)}">${complianceText(item.days)}</span>
                 </div>
               </div>
             </div>
-          `).join("")}
+          </div>
         </div>
-      `;
+      `).join("")}
+    </div>
+  `;
     }
 
     function renderMaintenance(data, aircraft) {
-  const host = el("maintenanceContent");
-  if (!host) return;
+      const host = el("maintenanceContent");
+      if (!host) return;
 
-  const reg = normalizeReg(aircraft);
-  const useFlight = USES_FLIGHT_HOURS.has(reg);
+      const reg = normalizeReg(aircraft);
+      const useFlight = USES_FLIGHT_HOURS.has(reg);
 
-  const hoursLabel = useFlight
-    ? "Flight Hours to Next Service"
-    : "Tacho Hours to Next Service";
+      const serviceAtLabel = useFlight
+        ? "Service At Flight Hours"
+        : "Service At Tacho Hours";
 
-  const serviceAtLabel = useFlight
-    ? "Service At Flight Hours"
-    : "Service At Tacho Hours";
+      const currentHoursLabel = useFlight
+        ? "Current Flight Hours"
+        : "Current Tacho Hours";
 
-  const hoursValue = useFlight
-    ? data?.flightHoursToNextService
-    : data?.tachoHoursToNextService;
+      const hoursValue = useFlight
+        ? data?.flightHoursToNextService
+        : data?.tachoHoursToNextService;
 
-  const serviceAtValue = data?.serviceAt ?? null;
-  const currentTachoValue = data?.currentHours ?? null;
+      const serviceAtValue = data?.serviceAt ?? null;
+      const currentHoursValue = data?.currentHours ?? null;
 
-  const trackedItems = [
-    { type: "ARC", dueDate: data?.arcDueDate || null },
-    { type: "Insurance", dueDate: data?.insuranceDueDate || null },
-    { type: "MOD Waiver", dueDate: data?.modWaiverDueDate || null },
-    { type: "Annual", dueDate: data?.annualDueDate || null }
-  ]
-    .map(item => ({
-      ...item,
-      days: daysUntil(item.dueDate)
-    }))
-    .filter(item => item.days !== null)
-    .sort((a, b) => a.days - b.days);
+      const trackedItems = [
+        { type: "ARC", dueDate: data?.arcDueDate || null },
+        { type: "Insurance", dueDate: data?.insuranceDueDate || null },
+        { type: "MOD Waiver", dueDate: data?.modWaiverDueDate || null },
+        { type: "Annual", dueDate: data?.annualDueDate || null }
+      ]
+        .map(item => ({
+          ...item,
+          days: daysUntil(item.dueDate)
+        }))
+        .filter(item => item.days !== null)
+        .sort((a, b) => a.days - b.days);
 
-  const overdue = trackedItems.filter(x => x.days <= 0);
-  const upcoming = trackedItems.filter(x => x.days > 0 && x.days <= 30);
+      const overdue = trackedItems.filter(x => x.days <= 0);
+      const upcoming = trackedItems.filter(x => x.days > 0 && x.days <= 30);
 
-  let panelClass = "maint-alert-panel-success";
-  let panelTitle = "Status";
-  let panelValue = "No urgent items";
-  let panelSub = "All tracked items are more than 30 days away.";
+      let panelClass = "maint-alert-panel-success";
+      let panelTitle = "Status";
+      let panelValue = "No urgent items";
+      let panelSub = "All tracked items are more than 30 days away.";
 
-  if (overdue.length > 0) {
-    panelClass = "maint-alert-panel-danger";
-    panelTitle = "Warning";
-    panelValue = `${overdue.length} overdue item${overdue.length === 1 ? "" : "s"}`;
-    panelSub = "Immediate attention recommended.";
-  } else if (upcoming.length > 0) {
-    panelClass = "maint-alert-panel-warning";
-    panelTitle = "Caution";
-    panelValue = `${upcoming.length} upcoming item${upcoming.length === 1 ? "" : "s"}`;
-    panelSub = "Due within the next 30 days.";
-  }
+      if (overdue.length > 0) {
+        panelClass = "maint-alert-panel-danger";
+        panelTitle = "Warning";
+        panelValue = `${overdue.length} overdue item${overdue.length === 1 ? "" : "s"}`;
+        panelSub = "Immediate attention recommended.";
+      } else if (upcoming.length > 0) {
+        panelClass = "maint-alert-panel-warning";
+        panelTitle = "Caution";
+        panelValue = `${upcoming.length} upcoming item${upcoming.length === 1 ? "" : "s"}`;
+        panelSub = "Due within the next 30 days.";
+      }
 
-  host.innerHTML = `
+      host.innerHTML = `
     <div class="row g-3 mb-3">
       <div class="col-12 col-lg-6">
         <div class="card status-card h-100">
@@ -994,10 +1073,9 @@
                 <div class="fw-semibold fs-5">${formatHours(serviceAtValue)}</div>
               </div>
 
-              <div class="col-12 col-sm-6">
-                <div class="section-title">Current Tacho Hours</div>
-                <div class="fw-semibold fs-5">${formatHours(currentTachoValue)}</div>
-              </div>
+            <div class="col-12 col-sm-6">
+            <div class="section-title">${currentHoursLabel}</div>
+           <div class="fw-semibold fs-5">${formatHours(currentHoursValue)}</div>
             </div>
 
             <div class="small text-muted mt-2">Current values from maintenance record</div>
@@ -1036,9 +1114,8 @@
       <div class="card-body">
         <div class="fw-semibold mb-3">Upcoming / Overdue Items</div>
 
-        ${
-          trackedItems.length
-            ? `
+        ${trackedItems.length
+          ? `
               <div class="d-none d-md-block">
                 <div class="table-responsive">
                   <table class="table subtle-table align-middle mb-0">
@@ -1087,12 +1164,12 @@
                 `).join("")}
               </div>
             `
-            : `<div class="text-muted">No tracked maintenance items found for this aircraft.</div>`
+          : `<div class="text-muted">No tracked maintenance items found for this aircraft.</div>`
         }
       </div>
     </div>
   `;
-}
+    }
     async function loadCompliance(aircraft) {
       clearError();
       const reg = normalizeReg(aircraft);
@@ -1351,4 +1428,5 @@
     });
   </script>
 </body>
+
 </html>
