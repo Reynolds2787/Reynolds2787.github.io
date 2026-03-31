@@ -164,7 +164,7 @@
             <div class="metric-card">
               <div class="section-title" id="remainingLabel">Remaining Hours</div>
               <div class="metric-value" id="remainingDisplay">—</div>
-              <div class="metric-sub">Calculated from latest maintenance log entry</div>
+              <div class="metric-sub">Calculated from latest maintenance service log</div>
             </div>
           </div>
 
@@ -232,7 +232,7 @@
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
               <div>
                 <div class="section-title">Maintenance History</div>
-                <div class="small text-muted">Read-only audit history from AircraftMaintenanceLog.</div>
+                <div class="small text-muted">Read-only for flight rows. Maintenance rows can be edited or deleted.</div>
               </div>
             </div>
 
@@ -242,6 +242,76 @@
           </div>
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit history modal -->
+  <div class="modal fade" id="editHistoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Maintenance History</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <input type="hidden" id="editHistoryAircraft">
+          <input type="hidden" id="editHistorySk">
+
+          <div class="row g-3">
+            <div class="col-12 col-md-3">
+              <label class="form-label">Service Date</label>
+              <input type="date" class="form-control" id="editHistoryServiceDate">
+            </div>
+
+            <div class="col-12 col-md-3">
+              <label class="form-label">Service Type</label>
+              <input type="text" class="form-control" id="editHistoryServiceType">
+            </div>
+
+            <div class="col-12 col-md-3">
+              <label class="form-label">Next Service</label>
+              <input type="number" step="0.1" class="form-control" id="editHistoryNextService">
+            </div>
+
+            <div class="col-12 col-md-3">
+              <label class="form-label">Comment</label>
+              <input type="text" class="form-control" id="editHistoryComment">
+            </div>
+          </div>
+
+          <div class="alert alert-danger d-none mt-3 mb-0" id="editHistoryErr"></div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-primary" id="saveHistoryEditBtn">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete history modal -->
+  <div class="modal fade" id="deleteHistoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Delete Maintenance History</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <input type="hidden" id="deleteHistoryAircraft">
+          <input type="hidden" id="deleteHistorySk">
+          <p class="mb-0">Deleting this entry may change the current Service At and remaining hours. Continue?</p>
+          <div class="alert alert-danger d-none mt-3 mb-0" id="deleteHistoryErr"></div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-danger" id="confirmDeleteHistoryBtn">Delete</button>
+        </div>
       </div>
     </div>
   </div>
@@ -329,7 +399,6 @@
 
     function syncSummaryDisplays() {
       const useFlight = useFlightMetric();
-
       const current = Number(currentRecord.currentHours);
       const latestServiceAt = getLatestServiceLogNextServiceAt();
 
@@ -345,6 +414,31 @@
       el("remainingDisplay").textContent = Number.isFinite(remaining) ? remaining.toFixed(1) : "—";
       el("currentDisplay").textContent = Number.isFinite(current) ? current.toFixed(1) : "—";
       el("serviceAtDisplay").textContent = Number.isFinite(latestServiceAt) ? latestServiceAt.toFixed(1) : "—";
+    }
+
+    function syncSummaryDisplaysWithExtension() {
+      const useFlight = useFlightMetric();
+      const current = Number(currentRecord.currentHours);
+      const baseServiceAt = getLatestServiceLogNextServiceAt();
+      const extension = Number(el("extendBtn").dataset.extensionApplied || 0);
+
+      const effectiveServiceAt =
+        Number.isFinite(baseServiceAt)
+          ? baseServiceAt + extension
+          : null;
+
+      const remaining =
+        Number.isFinite(effectiveServiceAt) && Number.isFinite(current)
+          ? effectiveServiceAt - current
+          : null;
+
+      el("remainingLabel").textContent = useFlight ? "Remaining Flight Hours" : "Remaining Tacho Hours";
+      el("currentLabel").textContent = useFlight ? "Current Flight Hours" : "Current Tacho Hours";
+      el("serviceAtLabel").textContent = useFlight ? "Service At Flight Hours" : "Service At Tacho Hours";
+
+      el("remainingDisplay").textContent = Number.isFinite(remaining) ? remaining.toFixed(1) : "—";
+      el("currentDisplay").textContent = Number.isFinite(current) ? current.toFixed(1) : "—";
+      el("serviceAtDisplay").textContent = Number.isFinite(effectiveServiceAt) ? effectiveServiceAt.toFixed(1) : "—";
     }
 
     function fillForm(data) {
@@ -434,6 +528,50 @@
       );
     }
 
+    function showEditHistoryErr(msg) {
+      const box = el("editHistoryErr");
+      box.textContent = msg;
+      box.classList.remove("d-none");
+    }
+
+    function hideEditHistoryErr() {
+      const box = el("editHistoryErr");
+      box.textContent = "";
+      box.classList.add("d-none");
+    }
+
+    function showDeleteHistoryErr(msg) {
+      const box = el("deleteHistoryErr");
+      box.textContent = msg;
+      box.classList.remove("d-none");
+    }
+
+    function hideDeleteHistoryErr() {
+      const box = el("deleteHistoryErr");
+      box.textContent = "";
+      box.classList.add("d-none");
+    }
+
+    function openEditHistoryModal(item) {
+      hideEditHistoryErr();
+      el("editHistoryAircraft").value = item.aircraft || "";
+      el("editHistorySk").value = item.sk || "";
+      el("editHistoryServiceDate").value = item.serviceDate || "";
+      el("editHistoryServiceType").value = item.serviceType || "";
+      el("editHistoryNextService").value = item.nextServiceAt ?? "";
+      el("editHistoryComment").value = item.comment || "";
+
+      bootstrap.Modal.getOrCreateInstance(el("editHistoryModal")).show();
+    }
+
+    function openDeleteHistoryModal(item) {
+      hideDeleteHistoryErr();
+      el("deleteHistoryAircraft").value = item.aircraft || "";
+      el("deleteHistorySk").value = item.sk || "";
+
+      bootstrap.Modal.getOrCreateInstance(el("deleteHistoryModal")).show();
+    }
+
     function renderHistory(items) {
       const host = el("maintenanceHistory");
       host.innerHTML = "";
@@ -451,6 +589,12 @@
         let badgeClass = "badge-soft";
         if (eventType === "MAINTENANCE_EXTENSION") badgeClass = "badge-soft-warning";
         if (eventType === "MAINTENANCE_EDIT") badgeClass = "badge-soft-danger";
+
+        const canModify = [
+          "MAINTENANCE_SERVICE",
+          "MAINTENANCE_EXTENSION",
+          "MAINTENANCE_EDIT"
+        ].includes(eventType);
 
         card.innerHTML = `
           <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
@@ -479,9 +623,26 @@
                 ? `<div class="history-meta">Service At Before: ${fmtHours(item.serviceAtBefore)}</div>` : ``}
               ${item.serviceAtAfter !== null && item.serviceAtAfter !== undefined
                 ? `<div class="history-meta">Service At After: ${fmtHours(item.serviceAtAfter)}</div>` : ``}
+
+              ${canModify ? `
+                <div class="mt-3 d-flex flex-wrap gap-2 justify-content-md-end">
+                  <button class="btn btn-sm btn-outline-secondary history-edit-btn">Edit</button>
+                  <button class="btn btn-sm btn-outline-danger history-delete-btn">Delete</button>
+                </div>
+              ` : ``}
             </div>
           </div>
         `;
+
+        if (canModify) {
+          card.querySelector(".history-edit-btn")?.addEventListener("click", () => {
+            openEditHistoryModal(item);
+          });
+
+          card.querySelector(".history-delete-btn")?.addEventListener("click", () => {
+            openDeleteHistoryModal(item);
+          });
+        }
 
         host.appendChild(card);
       });
@@ -497,32 +658,6 @@
       el("extendBtn").dataset.extensionApplied = "5";
       el("extendBtn").dataset.extensionBase = String(latestServiceAt);
       syncSummaryDisplaysWithExtension();
-    }
-
-    function syncSummaryDisplaysWithExtension() {
-      const useFlight = useFlightMetric();
-
-      const current = Number(currentRecord.currentHours);
-      const baseServiceAt = getLatestServiceLogNextServiceAt();
-      const extension = Number(el("extendBtn").dataset.extensionApplied || 0);
-
-      const effectiveServiceAt =
-        Number.isFinite(baseServiceAt)
-          ? baseServiceAt + extension
-          : null;
-
-      const remaining =
-        Number.isFinite(effectiveServiceAt) && Number.isFinite(current)
-          ? effectiveServiceAt - current
-          : null;
-
-      el("remainingLabel").textContent = useFlight ? "Remaining Flight Hours" : "Remaining Tacho Hours";
-      el("currentLabel").textContent = useFlight ? "Current Flight Hours" : "Current Tacho Hours";
-      el("serviceAtLabel").textContent = useFlight ? "Service At Flight Hours" : "Service At Tacho Hours";
-
-      el("remainingDisplay").textContent = Number.isFinite(remaining) ? remaining.toFixed(1) : "—";
-      el("currentDisplay").textContent = Number.isFinite(current) ? current.toFixed(1) : "—";
-      el("serviceAtDisplay").textContent = Number.isFinite(effectiveServiceAt) ? effectiveServiceAt.toFixed(1) : "—";
     }
 
     async function loadAircraft() {
@@ -575,6 +710,95 @@
         showError(err.message || "Failed to load aircraft maintenance.");
       } finally {
         setBusy(false);
+      }
+    }
+
+    async function saveHistoryEdit() {
+      hideEditHistoryErr();
+
+      const aircraft = normalizeReg(el("editHistoryAircraft").value);
+      const sk = String(el("editHistorySk").value || "").trim();
+
+      if (!aircraft || !sk) {
+        showEditHistoryErr("Missing row key.");
+        return;
+      }
+
+      const payload = {
+        aircraft,
+        sk,
+        serviceDate: el("editHistoryServiceDate").value || null,
+        serviceType: el("editHistoryServiceType").value?.trim() || null,
+        nextServiceAt: el("editHistoryNextService").value === ""
+          ? null
+          : Number(el("editHistoryNextService").value),
+        comment: el("editHistoryComment").value?.trim() || null
+      };
+
+      const btn = el("saveHistoryEditBtn");
+      btn.disabled = true;
+      const oldText = btn.textContent;
+      btn.textContent = "Saving...";
+
+      try {
+        const res = await authFetch(`${API_BASE}/admin/aircraft-maintenance/log`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res?.ok) {
+          const txt = await res.text().catch(() => "");
+          throw new Error(txt || `Update failed (${res?.status || "no response"})`);
+        }
+
+        bootstrap.Modal.getInstance(el("editHistoryModal"))?.hide();
+        await loadAircraft();
+      } catch (err) {
+        console.error(err);
+        showEditHistoryErr(err.message || "Failed to update history row.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = oldText;
+      }
+    }
+
+    async function deleteHistoryRow() {
+      hideDeleteHistoryErr();
+
+      const aircraft = normalizeReg(el("deleteHistoryAircraft").value);
+      const sk = String(el("deleteHistorySk").value || "").trim();
+
+      if (!aircraft || !sk) {
+        showDeleteHistoryErr("Missing row key.");
+        return;
+      }
+
+      const btn = el("confirmDeleteHistoryBtn");
+      btn.disabled = true;
+      const oldText = btn.textContent;
+      btn.textContent = "Deleting...";
+
+      try {
+        const res = await authFetch(`${API_BASE}/admin/aircraft-maintenance/log`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ aircraft, sk })
+        });
+
+        if (!res?.ok) {
+          const txt = await res.text().catch(() => "");
+          throw new Error(txt || `Delete failed (${res?.status || "no response"})`);
+        }
+
+        bootstrap.Modal.getInstance(el("deleteHistoryModal"))?.hide();
+        await loadAircraft();
+      } catch (err) {
+        console.error(err);
+        showDeleteHistoryErr(err.message || "Failed to delete history row.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = oldText;
       }
     }
 
@@ -652,6 +876,8 @@
 
       el("loadBtn").addEventListener("click", loadAircraft);
       el("saveBtn").addEventListener("click", saveAircraft);
+      el("saveHistoryEditBtn").addEventListener("click", saveHistoryEdit);
+      el("confirmDeleteHistoryBtn").addEventListener("click", deleteHistoryRow);
 
       el("extendBtn").addEventListener("click", () => {
         clearError();
