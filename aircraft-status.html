@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <title>Aircraft Status</title>
   <meta charset="utf-8">
@@ -14,8 +15,8 @@
     }
 
     .status-hero {
-      background: linear-gradient(135deg, rgba(13,110,253,.10), rgba(255,255,255,.75));
-      border: 1px solid rgba(13,110,253,.10);
+      background: linear-gradient(135deg, rgba(13, 110, 253, .10), rgba(255, 255, 255, .75));
+      border: 1px solid rgba(13, 110, 253, .10);
       border-radius: 1rem;
     }
 
@@ -30,7 +31,7 @@
 
     .aircraft-status-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 .75rem 1.5rem rgba(0,0,0,.12);
+      box-shadow: 0 .75rem 1.5rem rgba(0, 0, 0, .12);
     }
 
     .aircraft-status-card .card-body {
@@ -51,18 +52,18 @@
       height: .7rem;
       border-radius: 50%;
       background: var(--bs-success);
-      box-shadow: 0 0 0 .18rem rgba(25,135,84,.16);
+      box-shadow: 0 0 0 .18rem rgba(25, 135, 84, .16);
       flex: 0 0 auto;
     }
 
     .reg-dot.warning {
       background: var(--bs-warning);
-      box-shadow: 0 0 0 .18rem rgba(255,193,7,.16);
+      box-shadow: 0 0 0 .18rem rgba(255, 193, 7, .16);
     }
 
     .reg-dot.danger {
       background: var(--bs-danger);
-      box-shadow: 0 0 0 .18rem rgba(220,53,69,.16);
+      box-shadow: 0 0 0 .18rem rgba(220, 53, 69, .16);
     }
 
     .ops-label {
@@ -103,8 +104,8 @@
     }
 
     .overdue-strip {
-      border: 1px solid rgba(220,53,69,.18);
-      background: rgba(220,53,69,.06);
+      border: 1px solid rgba(220, 53, 69, .18);
+      background: rgba(220, 53, 69, .06);
       color: #b02a37;
       border-radius: .8rem;
       padding: .6rem .75rem;
@@ -114,15 +115,20 @@
 
     .skeleton {
       border-radius: 1rem;
-      background: linear-gradient(90deg,#e9ecef 25%,#f8f9fa 37%,#e9ecef 63%);
+      background: linear-gradient(90deg, #e9ecef 25%, #f8f9fa 37%, #e9ecef 63%);
       background-size: 400% 100%;
       animation: shimmer 1.4s ease infinite;
       min-height: 220px;
     }
 
     @keyframes shimmer {
-      0% { background-position: 100% 0; }
-      100% { background-position: 0 0; }
+      0% {
+        background-position: 100% 0;
+      }
+
+      100% {
+        background-position: 0 0;
+      }
     }
   </style>
 
@@ -131,6 +137,7 @@
   <script src="js/admin-guard.js" defer></script>
   <script src="js/due-soon-badge.js" defer></script>
 </head>
+
 <body>
   <div class="container-fluid p-2 bg-primary text-white text-center">
     <h2 class="mb-0">AIRCRAFT STATUS</h2>
@@ -152,9 +159,15 @@
     <div id="statusError" class="alert alert-danger d-none"></div>
 
     <div id="cardsSkeleton" class="row g-3">
-      <div class="col-12 col-md-6 col-xl-4"><div class="skeleton"></div></div>
-      <div class="col-12 col-md-6 col-xl-4"><div class="skeleton"></div></div>
-      <div class="col-12 col-md-6 col-xl-4"><div class="skeleton"></div></div>
+      <div class="col-12 col-md-6 col-xl-4">
+        <div class="skeleton"></div>
+      </div>
+      <div class="col-12 col-md-6 col-xl-4">
+        <div class="skeleton"></div>
+      </div>
+      <div class="col-12 col-md-6 col-xl-4">
+        <div class="skeleton"></div>
+      </div>
     </div>
 
     <div id="aircraftCards" class="row g-3 d-none"></div>
@@ -252,25 +265,76 @@
 
     async function fetchMaintenanceSummary(aircraft) {
       const reg = normalizeReg(aircraft);
-      const url = `${MAINT_API_BASE}/admin/aircraft-maintenance?aircraft=${encodeURIComponent(reg)}`;
 
-      const res = await authFetch(url, { method: "GET" });
-      if (!res.ok) {
+      const recordUrl = `${MAINT_API_BASE}/admin/aircraft-maintenance?aircraft=${encodeURIComponent(reg)}`;
+      const logUrl = `${MAINT_API_BASE}/admin/aircraft-maintenance/log?aircraft=${encodeURIComponent(reg)}`;
+
+      const [recordRes, logRes] = await Promise.all([
+        authFetch(recordUrl, { method: "GET" }),
+        authFetch(logUrl, { method: "GET" })
+      ]);
+
+      const useFlight = USES_FLIGHT_HOURS.has(reg);
+      const hoursLabel = useFlight ? "Flight hrs remaining" : "Tacho hrs remaining";
+
+      // Fallback if either request fails
+      if (!recordRes.ok) {
         return {
-          hoursLabel: USES_FLIGHT_HOURS.has(reg) ? "Flight hrs remaining" : "Tacho hrs remaining",
+          hoursLabel,
           hoursValue: null
         };
       }
 
-      const data = await res.json();
-      const useFlight = USES_FLIGHT_HOURS.has(reg);
-      const value = useFlight ? data?.flightHoursToNextService : data?.tachoHoursToNextService;
+      const record = await recordRes.json();
+
+      // If log cannot be read, fall back to stored maintenance record value
+      if (!logRes.ok) {
+        const fallbackValue = useFlight
+          ? record?.flightHoursToNextService
+          : record?.tachoHoursToNextService;
+
+        return {
+          hoursLabel,
+          hoursValue: typeof fallbackValue === "number"
+            ? fallbackValue
+            : (fallbackValue === null || fallbackValue === undefined || fallbackValue === "" ? null : Number(fallbackValue))
+        };
+      }
+
+      const logData = await logRes.json();
+      const items = Array.isArray(logData?.items) ? logData.items : [];
+
+      const latestServiceLog = items
+        .filter(item =>
+          String(item?.eventType || "").toUpperCase() === "MAINTENANCE_SERVICE" &&
+          item?.nextServiceAt !== null &&
+          item?.nextServiceAt !== undefined &&
+          Number.isFinite(Number(item.nextServiceAt))
+        )
+        .sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")))[0];
+
+      const currentHours = Number(record?.currentHours);
+
+      let hoursValue = null;
+
+      if (latestServiceLog && Number.isFinite(currentHours)) {
+        hoursValue = Number(latestServiceLog.nextServiceAt) - currentHours;
+      } else {
+        const fallbackValue = useFlight
+          ? record?.flightHoursToNextService
+          : record?.tachoHoursToNextService;
+
+        hoursValue = typeof fallbackValue === "number"
+          ? fallbackValue
+          : (fallbackValue === null || fallbackValue === undefined || fallbackValue === "" ? null : Number(fallbackValue));
+      }
 
       return {
-        hoursLabel: useFlight ? "Flight hrs remaining" : "Tacho hrs remaining",
-        hoursValue: typeof value === "number" ? value : (value === null || value === undefined || value === "" ? null : Number(value))
+        hoursLabel,
+        hoursValue: Number.isFinite(hoursValue) ? hoursValue : null
       };
     }
+
 
     function formatHours(value) {
       if (value === null || value === undefined || Number.isNaN(Number(value))) return "—";
@@ -449,4 +513,5 @@
       .catch(console.error);
   </script>
 </body>
+
 </html>
