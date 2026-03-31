@@ -750,7 +750,7 @@
       const q = getQuery();
       const aircraft = q.get("aircraft") || "";
       let tab = "defects";
-      if (activeTabId === "tab-compliance") tab = "compliance";
+      if (activeTabId === "tab-compliance") tab = "due dates";
       if (activeTabId === "tab-maintenance") tab = "maintenance";
       setQuery({ aircraft, tab });
     }
