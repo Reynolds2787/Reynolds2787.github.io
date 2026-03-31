@@ -886,127 +886,132 @@
     }
 
     function renderMaintenance(data, dueItems, aircraft) {
-      const host = el("maintenanceContent");
-      if (!host) return;
+  const host = el("maintenanceContent");
+  if (!host) return;
 
-      const reg = normalizeReg(aircraft);
-      const useFlight = USES_FLIGHT_HOURS.has(reg);
+  const reg = normalizeReg(aircraft);
+  const useFlight = USES_FLIGHT_HOURS.has(reg);
 
-      const hoursLabel = useFlight
-        ? "Flight Hours to Next Service"
-        : "Tacho Hours to Next Service";
+  const hoursLabel = useFlight
+    ? "Flight Hours to Next Service"
+    : "Tacho Hours to Next Service";
 
-      const hoursValue = useFlight
-        ? data?.flightHoursToNextService
-        : data?.tachoHoursToNextService;
+  const hoursValue = useFlight
+    ? data?.flightHoursToNextService
+    : data?.tachoHoursToNextService;
 
-      const relevantDue = (dueItems || [])
-        .filter(x => normalizeReg(x.aircraft) === reg)
-        .map(x => ({
-          ...x,
-          days: daysUntil(x.nextDueDate)
-        }))
-        .filter(x => x.days !== null)
-        .sort((a, b) => a.days - b.days);
+  // Build maintenance items directly from the aircraft maintenance record
+  const trackedItems = [
+    { type: "ARC", dueDate: data?.arcDueDate || null },
+    { type: "Insurance", dueDate: data?.insuranceDueDate || null },
+    { type: "MOD Waiver", dueDate: data?.modWaiverDueDate || null },
+    { type: "Annual", dueDate: data?.annualDueDate || null }
+  ]
+    .map(item => ({
+      ...item,
+      days: daysUntil(item.dueDate)
+    }))
+    .filter(item => item.days !== null)
+    .sort((a, b) => a.days - b.days);
 
-      const overdue = relevantDue.filter(x => x.days <= 0);
-      const upcoming = relevantDue.filter(x => x.days > 0);
+  const overdue = trackedItems.filter(x => x.days <= 0);
+  const upcoming = trackedItems.filter(x => x.days > 0);
 
-      host.innerHTML = `
-        <div class="row g-3 mb-3">
-          <div class="col-12 col-lg-6">
-            <div class="card status-card h-100">
-              <div class="card-body">
-                <div class="section-title">${hoursLabel}</div>
-                <div class="big-value">${formatHours(hoursValue)}</div>
-                <div class="small text-muted mt-2">Current value from maintenance record</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-12 col-lg-6">
-            <div class="card status-card h-100">
-              <div class="card-body">
-                <div class="section-title">Maintenance Summary</div>
-
-                <div class="mt-3 d-flex flex-wrap gap-2">
-                  <span class="summary-pill summary-pill-danger">Overdue: ${overdue.length}</span>
-                  <span class="summary-pill summary-pill-warning">Upcoming: ${upcoming.length}</span>
-                </div>
-
-                ${isAdmin ? `
-                  <div class="mt-3">
-                    <a class="btn btn-sm btn-outline-primary" href="admin-aircraft-maintenance.html?aircraft=${encodeURIComponent(reg)}">
-                      Open Maintenance Editor
-                    </a>
-                  </div>
-                ` : ``}
-              </div>
-            </div>
+  host.innerHTML = `
+    <div class="row g-3 mb-3">
+      <div class="col-12 col-lg-6">
+        <div class="card status-card h-100">
+          <div class="card-body">
+            <div class="section-title">${hoursLabel}</div>
+            <div class="big-value">${formatHours(hoursValue)}</div>
+            <div class="small text-muted mt-2">Current value from maintenance record</div>
           </div>
         </div>
+      </div>
 
-        <div class="card status-card">
+      <div class="col-12 col-lg-6">
+        <div class="card status-card h-100">
           <div class="card-body">
-            <div class="fw-semibold mb-3">Upcoming / Overdue Items</div>
+            <div class="section-title">Maintenance Summary</div>
 
-            ${
-              relevantDue.length
-                ? `
-                  <div class="d-none d-md-block">
-                    <div class="table-responsive">
-                      <table class="table subtle-table align-middle mb-0">
-                        <thead class="table-light">
-                          <tr>
-                            <th>Type</th>
-                            <th>Due Date</th>
-                            <th>Status</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          ${relevantDue.map(item => `
-                            <tr>
-                              <td>${escapeHtml(item.nextDueType || "Maintenance")}</td>
-                              <td>${formatDateOnly(item.nextDueDate)}</td>
-                              <td>
-                                <span class="badge ${complianceBadge(item.days)}">${complianceText(item.days)}</span>
-                              </td>
-                            </tr>
-                          `).join("")}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
+            <div class="mt-3 d-flex flex-wrap gap-2">
+              <span class="summary-pill summary-pill-danger">Overdue: ${overdue.length}</span>
+              <span class="summary-pill summary-pill-warning">Upcoming: ${upcoming.length}</span>
+            </div>
 
-                  <div class="d-md-none">
-                    ${relevantDue.map(item => `
-                      <div class="maintenance-item-card p-3">
-                        <div class="mobile-stack-meta">
-                          <div>
-                            <div class="section-title">Type</div>
-                            <div class="fw-semibold">${escapeHtml(item.nextDueType || "Maintenance")}</div>
-                          </div>
-                          <div>
-                            <div class="section-title">Due Date</div>
-                            <div class="fw-semibold">${formatDateOnly(item.nextDueDate)}</div>
-                          </div>
-                          <div>
-                            <div class="section-title">Status</div>
-                            <div class="mt-1">
-                              <span class="badge ${complianceBadge(item.days)}">${complianceText(item.days)}</span>
-                            </div>
-                          </div>
+            ${isAdmin ? `
+              <div class="mt-3">
+                <a class="btn btn-sm btn-outline-primary" href="admin-aircraft-maintenance.html?aircraft=${encodeURIComponent(reg)}">
+                  Open Maintenance Editor
+                </a>
+              </div>
+            ` : ``}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card status-card">
+      <div class="card-body">
+        <div class="fw-semibold mb-3">Upcoming / Overdue Items</div>
+
+        ${
+          trackedItems.length
+            ? `
+              <div class="d-none d-md-block">
+                <div class="table-responsive">
+                  <table class="table subtle-table align-middle mb-0">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Type</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${trackedItems.map(item => `
+                        <tr>
+                          <td>${escapeHtml(item.type)}</td>
+                          <td>${formatDateOnly(item.dueDate)}</td>
+                          <td>
+                            <span class="badge ${complianceBadge(item.days)}">${complianceText(item.days)}</span>
+                          </td>
+                        </tr>
+                      `).join("")}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="d-md-none">
+                ${trackedItems.map(item => `
+                  <div class="maintenance-item-card p-3">
+                    <div class="mobile-stack-meta">
+                      <div>
+                        <div class="section-title">Type</div>
+                        <div class="fw-semibold">${escapeHtml(item.type)}</div>
+                      </div>
+                      <div>
+                        <div class="section-title">Due Date</div>
+                        <div class="fw-semibold">${formatDateOnly(item.dueDate)}</div>
+                      </div>
+                      <div>
+                        <div class="section-title">Status</div>
+                        <div class="mt-1">
+                          <span class="badge ${complianceBadge(item.days)}">${complianceText(item.days)}</span>
                         </div>
                       </div>
-                    `).join("")}
+                    </div>
                   </div>
-                `
-                : `<div class="text-muted">No due-soon items found for this aircraft.</div>`
-            }
-          </div>
-        </div>
-      `;
-    }
+                `).join("")}
+              </div>
+            `
+            : `<div class="text-muted">No tracked maintenance items found for this aircraft.</div>`
+        }
+      </div>
+    </div>
+  `;
+}
 
     async function loadCompliance(aircraft) {
       clearError();
