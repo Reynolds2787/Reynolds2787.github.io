@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <title>Admin - Aircraft Maintenance</title>
@@ -14,9 +13,7 @@
       background: linear-gradient(180deg, #ecedef 100%, #f1f2f5 100%);
     }
 
-    body.loading {
-      cursor: wait;
-    }
+    body.loading { cursor: wait; }
 
     .fade-in {
       opacity: 0;
@@ -29,10 +26,6 @@
       transform: none;
     }
 
-    .status-text {
-      min-height: 1.25rem;
-    }
-
     .section-title {
       letter-spacing: .04em;
       font-size: .78rem;
@@ -41,30 +34,30 @@
       font-weight: 700;
     }
 
-    .hint-card {
-      border: 0;
+    .card {
       border-radius: 1rem;
+      margin-bottom: 1rem;
     }
 
-    .card {
-      margin-bottom: 10px;
+    .log-row {
+      border: 1px solid rgba(0,0,0,.08);
+      border-radius: 1rem;
+      padding: .75rem;
+      background: #fff;
     }
 
     .metric-card {
+      border: 1px solid rgba(0,0,0,.06);
       border-radius: 1rem;
+      background: linear-gradient(180deg, #fff, #fbfcfd);
+      padding: 1rem;
+      height: 100%;
     }
 
-    .metric-card .card-body {
-      padding-bottom: 1rem;
-    }
-
-    input[readonly] {
-      background-color: #f8f9fa;
-    }
-
-
-    #loadBtn {
-      display: none;
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      line-height: 1.1;
     }
   </style>
 </head>
@@ -83,79 +76,84 @@
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
           <div>
             <h1 class="h4 mb-1">Aircraft Maintenance (Admin)</h1>
-            <div class="small text-muted">Update service-hours and compliance dates for each aircraft.</div>
+            <div class="small text-muted">Update current values and review maintenance history.</div>
           </div>
-
-          <div class="status-text small text-muted" id="saveStatus"></div>
-        </div>
-
-        <div class="row g-3 align-items-end mb-4">
-          <div class="col-12 col-md-4">
-            <label class="form-label fw-semibold" for="aircraft">Aircraft</label>
-            <select id="aircraft" class="form-select">
-              <option value="">Select...</option>
-              <option>G-AZWS</option>
-              <option>G-BPAF</option>
-              <option>G-EDGI</option>
-              <option>G-AVYL</option>
-              <option>G-BULL</option>
-            </select>
-          </div>
-
-          <div class="col-12 col-md-8 text-md-end">
-            <button id="loadBtn" class="btn btn-outline-primary">Load</button>
-            <button id="saveBtn" class="btn btn-primary">Save</button>
-          </div>
+          <div class="small text-muted" id="saveStatus"></div>
         </div>
 
         <div class="alert alert-danger d-none mb-4" id="errorBox"></div>
 
-        <div class="card shadow-sm hint-card">
-          <div class="card-body">
-            <div class="form-check form-switch mb-0">
-              <input class="form-check-input" type="checkbox" id="useFlightHours">
-              <label class="form-check-label fw-semibold" for="useFlightHours">Use Flight Hours</label>
-            </div>
-            <div class="small text-muted mt-2">
-              When enabled, the editor will use flight hours for service tracking and hide the tacho-hours field.
-            </div>
-          </div>
-        </div>
-
-        <div class="card shadow-sm metric-card">
-          <div class="card-body pb-3">
-            <div class="row g-3">
-
-              <div class="col-12 col-md-6" id="tachoNextWrap">
-                <label class="form-label fw-semibold" for="tachoNext">Remaining Tacho Hours</label>
-                <input id="tachoNext" type="number" step="0.1" class="form-control"
-                  placeholder="Calculated automatically" readonly>
-              </div>
-
-              <div class="col-12 col-md-6" id="flightHoursNextWrap">
-                <label class="form-label fw-semibold" for="flightHoursNext">Remaining Flight Hours</label>
-                <input id="flightHoursNext" type="number" step="0.1" class="form-control"
-                  placeholder="Calculated automatically" readonly>
-              </div>
-
-              <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold" for="serviceAt" id="serviceAtLabel">Service At Tacho Hours</label>
-                <input id="serviceAt" type="number" step="0.1" class="form-control" placeholder="e.g. 1234.5">
-              </div>
-
-              <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold" for="currentTacho" id="currentHoursLabel">Current Tacho
-                  Hours</label>
-                <input id="currentTacho" type="number" step="0.1" class="form-control" placeholder="e.g. 1234.5">
-              </div>
-
-            </div>
-          </div>
-        </div>
-
         <div class="card shadow-sm">
           <div class="card-body">
+            <div class="row g-3 align-items-end">
+              <div class="col-12 col-md-4">
+                <label class="form-label fw-semibold" for="aircraft">Aircraft</label>
+                <select id="aircraft" class="form-select">
+                  <option value="">Select...</option>
+                  <option>G-AZWS</option>
+                  <option>G-BPAF</option>
+                  <option>G-EDGI</option>
+                  <option>G-AVYL</option>
+                  <option>G-BULL</option>
+                </select>
+              </div>
+
+              <div class="col-12 col-md-8 text-md-end d-flex flex-wrap justify-content-md-end gap-2">
+                <button id="loadBtn" class="btn btn-outline-primary">Load</button>
+                <button id="extendBtn" class="btn btn-outline-warning">Apply 5 Hr Extension</button>
+                <button id="saveBtn" class="btn btn-primary">Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-12 col-lg-4">
+            <div class="metric-card">
+              <div class="section-title" id="remainingLabel">Remaining Hours</div>
+              <div class="metric-value" id="remainingDisplay">—</div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-4">
+            <div class="metric-card">
+              <div class="section-title" id="currentLabel">Current Hours</div>
+              <div class="metric-value" id="currentDisplay">—</div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-4">
+            <div class="metric-card">
+              <div class="section-title" id="serviceAtLabel">Service At</div>
+              <div class="metric-value" id="serviceAtDisplay">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card shadow-sm mt-3">
+          <div class="card-body">
+            <div class="section-title mb-3">Current Maintenance Record</div>
+
             <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-semibold" for="tachoNext">Remaining Tacho Hours</label>
+                <input id="tachoNext" type="number" step="0.1" class="form-control">
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-semibold" for="flightHoursNext">Remaining Flight Hours</label>
+                <input id="flightHoursNext" type="number" step="0.1" class="form-control">
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-semibold" for="currentHours">Current Hours</label>
+                <input id="currentHours" type="number" step="0.1" class="form-control">
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-semibold" for="serviceAt">Service At</label>
+                <input id="serviceAt" type="number" step="0.1" class="form-control">
+              </div>
 
               <div class="col-12 col-md-6">
                 <label class="form-label fw-semibold" for="arcDue">ARC Due Date</label>
@@ -180,6 +178,20 @@
           </div>
         </div>
 
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+              <div>
+                <div class="section-title">Maintenance Log</div>
+                <div class="small text-muted">Newest row drives the current “Service At” value.</div>
+              </div>
+              <button id="addLogRowBtn" class="btn btn-outline-primary btn-sm">Add Log Row</button>
+            </div>
+
+            <div id="maintenanceLogRows" class="vstack gap-3"></div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -191,14 +203,19 @@
 
   <script>
     const API_BASE = "https://dssjr33iy8.execute-api.eu-west-2.amazonaws.com";
+    const USES_FLIGHT_HOURS = new Set(["G-AZWS", "G-BULL"]);
     const el = (id) => document.getElementById(id);
+
+    function normalizeReg(value) {
+      return (value || "").trim().toUpperCase();
+    }
 
     function setBusy(isBusy) {
       document.body.classList.toggle("loading", isBusy);
-      el("loadBtn").disabled = isBusy;
-      el("saveBtn").disabled = isBusy;
-      el("aircraft").disabled = isBusy;
-      el("useFlightHours").disabled = isBusy;
+      ["loadBtn", "saveBtn", "extendBtn", "addLogRowBtn", "aircraft"].forEach(id => {
+        const node = el(id);
+        if (node) node.disabled = isBusy;
+      });
     }
 
     function showError(msg) {
@@ -213,124 +230,151 @@
       box.classList.add("d-none");
     }
 
-    const statusEl = el("saveStatus");
     function setStatus(msg) {
-      if (statusEl) statusEl.textContent = msg || "";
+      el("saveStatus").textContent = msg || "";
     }
 
-    async function waitForAuthFetch(maxMs = 2500) {
-      const start = Date.now();
-      while (Date.now() - start < maxMs) {
-        if (typeof window.authFetch === "function") return true;
-        await new Promise(r => setTimeout(r, 50));
+    function useFlightMetric() {
+      return USES_FLIGHT_HOURS.has(normalizeReg(el("aircraft").value));
+    }
+
+    function makeLogRow(row = {}) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "log-row";
+      wrapper.innerHTML = `
+        <div class="row g-3 align-items-end">
+          <div class="col-12 col-md-2">
+            <label class="form-label">Service Date</label>
+            <input type="date" class="form-control log-service-date" value="${row.serviceDate || ""}">
+          </div>
+          <div class="col-12 col-md-3">
+            <label class="form-label">Service Type</label>
+            <input type="text" class="form-control log-service-type" value="${row.serviceType || ""}">
+          </div>
+          <div class="col-12 col-md-2">
+            <label class="form-label">Next Service</label>
+            <input type="number" step="0.1" class="form-control log-next-service" value="${row.nextServiceAt ?? ""}">
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label">Comment</label>
+            <input type="text" class="form-control log-comment" value="${row.comment || ""}">
+          </div>
+          <div class="col-12 col-md-1 d-grid">
+            <button type="button" class="btn btn-outline-danger btn-sm remove-log-row">X</button>
+          </div>
+        </div>
+      `;
+
+      wrapper.querySelector(".remove-log-row").addEventListener("click", () => {
+        wrapper.remove();
+        syncFromLatestLog();
+      });
+
+      wrapper.querySelectorAll("input").forEach(input => {
+        input.addEventListener("input", syncFromLatestLog);
+        input.addEventListener("change", syncFromLatestLog);
+      });
+
+      return wrapper;
+    }
+
+    function collectLogRows() {
+      return [...document.querySelectorAll(".log-row")].map(row => ({
+        serviceDate: row.querySelector(".log-service-date")?.value || "",
+        serviceType: row.querySelector(".log-service-type")?.value?.trim() || "",
+        nextServiceAt: row.querySelector(".log-next-service")?.value === ""
+          ? null
+          : Number(row.querySelector(".log-next-service")?.value),
+        comment: row.querySelector(".log-comment")?.value?.trim() || ""
+      }));
+    }
+
+    function syncSummaryDisplays() {
+      const useFlight = useFlightMetric();
+      const remaining = useFlight ? Number(el("flightHoursNext").value || "") : Number(el("tachoNext").value || "");
+      const current = Number(el("currentHours").value || "");
+      const serviceAt = Number(el("serviceAt").value || "");
+
+      el("remainingLabel").textContent = useFlight ? "Remaining Flight Hours" : "Remaining Tacho Hours";
+      el("currentLabel").textContent = useFlight ? "Current Flight Hours" : "Current Tacho Hours";
+      el("serviceAtLabel").textContent = useFlight ? "Service At Flight Hours" : "Service At Tacho Hours";
+
+      el("remainingDisplay").textContent = Number.isFinite(remaining) ? remaining.toFixed(1) : "—";
+      el("currentDisplay").textContent = Number.isFinite(current) ? current.toFixed(1) : "—";
+      el("serviceAtDisplay").textContent = Number.isFinite(serviceAt) ? serviceAt.toFixed(1) : "—";
+    }
+
+    function syncFromLatestLog() {
+      const rows = collectLogRows()
+        .filter(r => r.serviceDate && Number.isFinite(r.nextServiceAt))
+        .sort((a, b) => b.serviceDate.localeCompare(a.serviceDate));
+
+      if (rows.length) {
+        const latest = rows[0];
+        el("serviceAt").value = latest.nextServiceAt.toFixed(1);
+
+        const current = Number(el("currentHours").value || 0);
+        const remaining = latest.nextServiceAt - current;
+
+        if (useFlightMetric()) {
+          el("flightHoursNext").value = remaining.toFixed(1);
+        } else {
+          el("tachoNext").value = remaining.toFixed(1);
+        }
       }
-      return false;
-    }
 
-    function normalizeReg(value) {
-      return (value || "").trim().toUpperCase();
-    }
-
-    function getAircraftFromQuery() {
-      const params = new URLSearchParams(window.location.search);
-      return normalizeReg(params.get("aircraft") || "");
-    }
-
-    function calculateRemainingHours() {
-      const useFlight = !!el("useFlightHours").checked;
-
-      const serviceAtRaw = el("serviceAt").value;
-      const currentRaw = el("currentTacho").value;
-
-      const serviceAt = serviceAtRaw === "" ? null : Number(serviceAtRaw);
-      const current = currentRaw === "" ? null : Number(currentRaw);
-
-      let remaining = null;
-
-      if (
-        serviceAt !== null &&
-        current !== null &&
-        Number.isFinite(serviceAt) &&
-        Number.isFinite(current)
-      ) {
-        remaining = Number((serviceAt - current).toFixed(1));
-      }
-
-      if (useFlight) {
-        el("flightHoursNext").value = remaining ?? "";
-        el("tachoNext").value = "";
-      } else {
-        el("tachoNext").value = remaining ?? "";
-        el("flightHoursNext").value = "";
-      }
-    }
-
-    function updateMetricVisibility() {
-      const useFlight = !!el("useFlightHours").checked;
-
-      el("flightHoursNextWrap").classList.toggle("d-none", !useFlight);
-      el("tachoNextWrap").classList.toggle("d-none", useFlight);
-
-      el("serviceAtLabel").textContent = useFlight
-        ? "Service At Flight Hours"
-        : "Service At Tacho Hours";
-
-      el("currentHoursLabel").textContent = useFlight
-        ? "Current Flight Hours"
-        : "Current Tacho Hours";
-
-      el("serviceAt").placeholder = useFlight
-        ? "e.g. 6000.0 flight hours"
-        : "e.g. 1234.5 tacho hours";
-
-      el("currentTacho").placeholder = useFlight
-        ? "e.g. 5020.0 flight hours"
-        : "e.g. 1222.0 tacho hours";
-
-      calculateRemainingHours();
+      syncSummaryDisplays();
     }
 
     function fillForm(data) {
-      const useFlight =
-        data?.useFlightHours === true ||
-        data?.serviceMetric === "FLIGHT_HOURS";
-
-      el("useFlightHours").checked = !!useFlight;
-
+      el("tachoNext").value = data?.tachoHoursToNextService ?? "";
+      el("flightHoursNext").value = data?.flightHoursToNextService ?? "";
+      el("currentHours").value = data?.currentHours ?? "";
       el("serviceAt").value = data?.serviceAt ?? "";
-      el("currentTacho").value = data?.currentHours ?? data?.currentTacho ?? "";
       el("arcDue").value = data?.arcDueDate ?? "";
       el("insuranceDue").value = data?.insuranceDueDate ?? "";
       el("modWaiverDue").value = data?.modWaiverDueDate ?? "";
       el("annualDue").value = data?.annualDueDate ?? "";
-
-      updateMetricVisibility();
-      calculateRemainingHours();
+      syncSummaryDisplays();
     }
 
-    function clearForm() {
-      fillForm({});
+    function fillLogRows(items) {
+      const host = el("maintenanceLogRows");
+      host.innerHTML = "";
+      (items || []).forEach(item => host.appendChild(makeLogRow(item)));
+      if (!items || !items.length) host.appendChild(makeLogRow());
     }
 
     function readForm() {
-      const useFlight = !!el("useFlightHours").checked;
-
       return {
-        useFlightHours: useFlight,
-        serviceMetric: useFlight ? "FLIGHT_HOURS" : "TACHO_HOURS",
-        tachoHoursToNextService: useFlight
-          ? null
-          : (el("tachoNext").value === "" ? null : Number(el("tachoNext").value)),
-        flightHoursToNextService: useFlight
-          ? (el("flightHoursNext").value === "" ? null : Number(el("flightHoursNext").value))
-          : null,
-        currentHours: el("currentTacho").value === "" ? null : Number(el("currentTacho").value),
+        tachoHoursToNextService: el("tachoNext").value === "" ? null : Number(el("tachoNext").value),
+        flightHoursToNextService: el("flightHoursNext").value === "" ? null : Number(el("flightHoursNext").value),
+        currentHours: el("currentHours").value === "" ? null : Number(el("currentHours").value),
+        serviceAt: el("serviceAt").value === "" ? null : Number(el("serviceAt").value),
         arcDueDate: el("arcDue").value || null,
         insuranceDueDate: el("insuranceDue").value || null,
         modWaiverDueDate: el("modWaiverDue").value || null,
-        annualDueDate: el("annualDue").value || null,
-        serviceAt: el("serviceAt").value === "" ? null : Number(el("serviceAt").value)
+        annualDueDate: el("annualDue").value || null
       };
+    }
+
+    function applyFiveHourExtension() {
+      const useFlight = useFlightMetric();
+      const currentServiceAt = Number(el("serviceAt").value || 0);
+      const newServiceAt = currentServiceAt + 5;
+
+      el("serviceAt").value = newServiceAt.toFixed(1);
+
+      const current = Number(el("currentHours").value || 0);
+      const remaining = newServiceAt - current;
+
+      if (useFlight) {
+        el("flightHoursNext").value = remaining.toFixed(1);
+      } else {
+        el("tachoNext").value = remaining.toFixed(1);
+      }
+
+      syncSummaryDisplays();
     }
 
     async function loadAircraft() {
@@ -346,22 +390,30 @@
       setStatus("Loading...");
 
       try {
-        const res = await window.authFetch(`${API_BASE}/admin/aircraft-maintenance?aircraft=${encodeURIComponent(aircraft)}`, {
-          method: "GET"
-        });
+        const [recordRes, logRes] = await Promise.all([
+          authFetch(`${API_BASE}/admin/aircraft-maintenance?aircraft=${encodeURIComponent(aircraft)}`, {
+            method: "GET"
+          }),
+          authFetch(`${API_BASE}/admin/aircraft-maintenance/log?aircraft=${encodeURIComponent(aircraft)}`, {
+            method: "GET"
+          })
+        ]);
 
-        if (!res || !res.ok) {
-          throw new Error(`Load failed (${res?.status || "no response"})`);
-        }
+        if (!recordRes.ok) throw new Error("Failed to load maintenance record.");
+        if (!logRes.ok) throw new Error("Failed to load maintenance log.");
 
-        const data = await res.json();
-        fillForm(data);
+        const record = await recordRes.json();
+        const logData = await logRes.json();
+
+        fillForm(record);
+        fillLogRows(logData?.items || []);
+        syncFromLatestLog();
+
         setStatus("Loaded.");
         setTimeout(() => setStatus(""), 1500);
       } catch (err) {
         console.error(err);
-        setStatus("");
-        showError(err.message || "Failed to load aircraft maintenance record.");
+        showError(err.message || "Failed to load aircraft.");
       } finally {
         setBusy(false);
       }
@@ -376,121 +428,55 @@
         return;
       }
 
-      calculateRemainingHours();
-
       setBusy(true);
       setStatus("Saving...");
 
       try {
         const payload = {
           aircraft,
-          ...readForm()
+          useFlightHours: useFlightMetric(),
+          ...readForm(),
+          maintenanceLog: collectLogRows()
+            .filter(r => r.serviceDate || r.serviceType || r.comment || Number.isFinite(r.nextServiceAt))
         };
 
-        const res = await window.authFetch(`${API_BASE}/admin/aircraft-maintenance`, {
+        const res = await authFetch(`${API_BASE}/admin/aircraft-maintenance`, {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
 
-        if (!res || !res.ok) {
+        if (!res.ok) {
           const txt = await res.text().catch(() => "");
-          throw new Error(txt || `Save failed (${res?.status || "no response"})`);
+          throw new Error(txt || "Failed to save maintenance.");
         }
 
         setStatus("Saved.");
         setTimeout(() => setStatus(""), 1500);
-        window.showToast?.("Maintenance record saved", { variant: "success" });
       } catch (err) {
         console.error(err);
-        setStatus("");
-        showError(err.message || "Failed to save aircraft maintenance record.");
+        showError(err.message || "Failed to save aircraft.");
       } finally {
         setBusy(false);
       }
     }
 
-    document.addEventListener("DOMContentLoaded", async () => {
+    document.addEventListener("DOMContentLoaded", () => {
       requestAnimationFrame(() => el("pageCard")?.classList.add("ready"));
-      updateMetricVisibility();
 
-      const ok = await waitForAuthFetch();
-      if (!ok) {
-        showError("Authentication helper failed to load.");
-        return;
-      }
+      el("loadBtn").addEventListener("click", loadAircraft);
+      el("saveBtn").addEventListener("click", saveAircraft);
+      el("extendBtn").addEventListener("click", applyFiveHourExtension);
 
-      const isAdmin = await window.isAdminUser?.();
-      if (!isAdmin) {
-        window.location.href = "index.html";
-        return;
-      }
+      el("addLogRowBtn").addEventListener("click", () => {
+        el("maintenanceLogRows").appendChild(makeLogRow());
+      });
 
-      const aircraftFromQuery = getAircraftFromQuery();
-      if (aircraftFromQuery) {
-        el("aircraft").value = aircraftFromQuery;
-        await loadAircraft();
-      }
+      ["aircraft", "tachoNext", "flightHoursNext", "currentHours", "serviceAt"].forEach(id => {
+        el(id).addEventListener("input", syncSummaryDisplays);
+        el(id).addEventListener("change", syncSummaryDisplays);
+      });
     });
-
-    el("loadBtn").addEventListener("click", loadAircraft);
-    el("saveBtn").addEventListener("click", saveAircraft);
-    el("useFlightHours").addEventListener("change", updateMetricVisibility);
-    el("serviceAt").addEventListener("input", calculateRemainingHours);
-    el("currentTacho").addEventListener("input", calculateRemainingHours);
-
-    el("aircraft").addEventListener("change", async () => {
-      clearError();
-      setStatus("");
-
-      const aircraft = normalizeReg(el("aircraft").value);
-
-      if (!aircraft) {
-        clearForm();
-        updateMetricVisibility();
-        return;
-      }
-
-      await loadAircraft();
-    });
-  </script>
-
-  <script>
-    fetch("/partials/navbar.html")
-      .then(r => {
-        if (!r.ok) throw new Error("Failed to load navbar.html");
-        return r.text();
-      })
-      .then(async html => {
-        const mount = document.getElementById("navbar-placeholder");
-        if (!mount) return;
-
-        mount.innerHTML = html;
-
-        const userEl = document.getElementById("loggedInUser");
-        if (userEl) userEl.textContent = localStorage.getItem("username") || "User";
-
-        const currentPath = window.location.pathname.replace(/\/$/, "");
-        document.querySelectorAll(".nav-link").forEach(link => {
-          const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
-          if (linkPath === currentPath) {
-            link.classList.add("active");
-            link.setAttribute("aria-current", "page");
-          }
-        });
-
-        if (window.setupAdminMenu) await window.setupAdminMenu();
-
-        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
-          new bootstrap.Tooltip(el);
-        });
-
-        window.dispatchEvent(new Event("navbar:loaded"));
-      })
-      .catch(console.error);
   </script>
 </body>
-
 </html>
