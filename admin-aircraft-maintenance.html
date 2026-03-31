@@ -98,11 +98,6 @@
       border: 1px solid rgba(220,53,69,.14);
     }
 
-    .form-text-inline {
-      font-size: .85rem;
-      color: #6c757d;
-    }
-
     @media (max-width: 767.98px) {
       .metric-value {
         font-size: 1.35rem;
@@ -125,7 +120,7 @@
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
           <div>
             <h1 class="h4 mb-1">Aircraft Maintenance (Admin)</h1>
-            <div class="small text-muted">Current values, due dates, maintenance log and extension control.</div>
+            <div class="small text-muted">Due dates, service metric, maintenance log and extension control.</div>
           </div>
           <div class="small text-muted" id="saveStatus"></div>
         </div>
@@ -147,7 +142,15 @@
                 </select>
               </div>
 
-              <div class="col-12 col-md-8 d-flex flex-wrap justify-content-md-end gap-2">
+              <div class="col-12 col-md-4">
+                <label class="form-label fw-semibold d-block">Service Metric</label>
+                <div class="form-check form-switch mt-2">
+                  <input class="form-check-input" type="checkbox" id="useFlightHours">
+                  <label class="form-check-label" for="useFlightHours">Use Flight Hours</label>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-4 d-flex flex-wrap justify-content-md-end gap-2">
                 <button id="loadBtn" class="btn btn-outline-primary">Load</button>
                 <button id="extendBtn" class="btn btn-outline-warning">Apply 5 Hr Extension</button>
                 <button id="saveBtn" class="btn btn-primary">Save</button>
@@ -161,7 +164,7 @@
             <div class="metric-card">
               <div class="section-title" id="remainingLabel">Remaining Hours</div>
               <div class="metric-value" id="remainingDisplay">—</div>
-              <div class="metric-sub">Current remaining value</div>
+              <div class="metric-sub">Calculated from latest maintenance log entry</div>
             </div>
           </div>
 
@@ -169,7 +172,7 @@
             <div class="metric-card">
               <div class="section-title" id="currentLabel">Current Hours</div>
               <div class="metric-value" id="currentDisplay">—</div>
-              <div class="metric-sub">Current live reading</div>
+              <div class="metric-sub">From current maintenance record</div>
             </div>
           </div>
 
@@ -177,36 +180,16 @@
             <div class="metric-card">
               <div class="section-title" id="serviceAtLabel">Service At</div>
               <div class="metric-value" id="serviceAtDisplay">—</div>
-              <div class="metric-sub">Latest service target</div>
+              <div class="metric-sub">Latest MAINTENANCE_SERVICE log entry</div>
             </div>
           </div>
         </div>
 
         <div class="card shadow-sm">
           <div class="card-body">
-            <div class="section-title mb-3">Current Maintenance Record</div>
+            <div class="section-title mb-3">Due Dates</div>
 
             <div class="row g-3">
-              <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold" for="tachoNext">Remaining Tacho Hours</label>
-                <input id="tachoNext" type="number" step="0.1" class="form-control">
-              </div>
-
-              <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold" for="flightHoursNext">Remaining Flight Hours</label>
-                <input id="flightHoursNext" type="number" step="0.1" class="form-control">
-              </div>
-
-              <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold" for="currentHours">Current Hours</label>
-                <input id="currentHours" type="number" step="0.1" class="form-control">
-              </div>
-
-              <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold" for="serviceAt">Service At</label>
-                <input id="serviceAt" type="number" step="0.1" class="form-control">
-              </div>
-
               <div class="col-12 col-md-6">
                 <label class="form-label fw-semibold" for="arcDue">ARC Due Date</label>
                 <input id="arcDue" type="date" class="form-control">
@@ -226,19 +209,6 @@
                 <label class="form-label fw-semibold" for="annualDue">Annual Due Date</label>
                 <input id="annualDue" type="date" class="form-control">
               </div>
-
-              <div class="col-12">
-                <label class="form-label fw-semibold" for="editComment">Edit Comment</label>
-                <input id="editComment" type="text" class="form-control" placeholder="Optional note for manual edit event">
-                <div class="form-text">Used if you choose to log a manual maintenance edit.</div>
-              </div>
-
-              <div class="col-12">
-                <div class="form-check form-switch">
-                  <input class="form-check-input" type="checkbox" id="createEditEvent">
-                  <label class="form-check-label" for="createEditEvent">Create maintenance edit history event on save</label>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -248,7 +218,7 @@
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
               <div>
                 <div class="section-title">New Maintenance Log Entries</div>
-                <div class="small text-muted">Add new service rows here. Existing history appears below.</div>
+                <div class="small text-muted">Add new service rows here. Latest service row drives Service At.</div>
               </div>
               <button id="addLogRowBtn" class="btn btn-outline-primary btn-sm">Add Log Row</button>
             </div>
@@ -287,6 +257,15 @@
     const USES_FLIGHT_HOURS = new Set(["G-AZWS", "G-BULL"]);
     const el = (id) => document.getElementById(id);
 
+    let currentRecord = {
+      tachoHoursToNextService: null,
+      flightHoursToNextService: null,
+      currentHours: null,
+      serviceAt: null
+    };
+
+    let maintenanceHistoryItems = [];
+
     function normalizeReg(value) {
       return (value || "").trim().toUpperCase();
     }
@@ -309,7 +288,7 @@
 
     function setBusy(isBusy) {
       document.body.classList.toggle("loading", isBusy);
-      ["loadBtn", "saveBtn", "extendBtn", "addLogRowBtn", "aircraft"].forEach(id => {
+      ["loadBtn", "saveBtn", "extendBtn", "addLogRowBtn", "aircraft", "useFlightHours"].forEach(id => {
         const node = el(id);
         if (node) node.disabled = isBusy;
       });
@@ -332,44 +311,64 @@
     }
 
     function useFlightMetric() {
-      return USES_FLIGHT_HOURS.has(normalizeReg(el("aircraft").value));
+      return el("useFlightHours").checked;
+    }
+
+    function getLatestServiceLogNextServiceAt() {
+      const latest = (maintenanceHistoryItems || [])
+        .filter(item =>
+          String(item.eventType || "").toUpperCase() === "MAINTENANCE_SERVICE" &&
+          item.nextServiceAt !== null &&
+          item.nextServiceAt !== undefined &&
+          Number.isFinite(Number(item.nextServiceAt))
+        )
+        .sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")))[0];
+
+      return latest ? Number(latest.nextServiceAt) : null;
     }
 
     function syncSummaryDisplays() {
       const useFlight = useFlightMetric();
-      const remaining = useFlight
-        ? Number(el("flightHoursNext").value || "")
-        : Number(el("tachoNext").value || "");
-      const current = Number(el("currentHours").value || "");
-      const serviceAt = Number(el("serviceAt").value || "");
+
+      const current = Number(currentRecord.currentHours);
+      const latestServiceAt = getLatestServiceLogNextServiceAt();
+
+      const remaining =
+        Number.isFinite(latestServiceAt) && Number.isFinite(current)
+          ? latestServiceAt - current
+          : null;
 
       el("remainingLabel").textContent = useFlight ? "Remaining Flight Hours" : "Remaining Tacho Hours";
       el("currentLabel").textContent = useFlight ? "Current Flight Hours" : "Current Tacho Hours";
       el("serviceAtLabel").textContent = useFlight ? "Service At Flight Hours" : "Service At Tacho Hours";
 
-      el("remainingDisplay").textContent = fmtHours(remaining);
-      el("currentDisplay").textContent = fmtHours(current);
-      el("serviceAtDisplay").textContent = fmtHours(serviceAt);
+      el("remainingDisplay").textContent = Number.isFinite(remaining) ? remaining.toFixed(1) : "—";
+      el("currentDisplay").textContent = Number.isFinite(current) ? current.toFixed(1) : "—";
+      el("serviceAtDisplay").textContent = Number.isFinite(latestServiceAt) ? latestServiceAt.toFixed(1) : "—";
     }
 
     function fillForm(data) {
-      el("tachoNext").value = data?.tachoHoursToNextService ?? "";
-      el("flightHoursNext").value = data?.flightHoursToNextService ?? "";
-      el("currentHours").value = data?.currentHours ?? "";
-      el("serviceAt").value = data?.serviceAt ?? "";
+      el("useFlightHours").checked =
+        data?.useFlightHours === true ||
+        data?.serviceMetric === "FLIGHT_HOURS";
+
       el("arcDue").value = data?.arcDueDate ?? "";
       el("insuranceDue").value = data?.insuranceDueDate ?? "";
       el("modWaiverDue").value = data?.modWaiverDueDate ?? "";
       el("annualDue").value = data?.annualDueDate ?? "";
+
+      currentRecord = {
+        tachoHoursToNextService: data?.tachoHoursToNextService ?? null,
+        flightHoursToNextService: data?.flightHoursToNextService ?? null,
+        currentHours: data?.currentHours ?? null,
+        serviceAt: data?.serviceAt ?? null
+      };
+
       syncSummaryDisplays();
     }
 
     function readForm() {
       return {
-        tachoHoursToNextService: el("tachoNext").value === "" ? null : Number(el("tachoNext").value),
-        flightHoursToNextService: el("flightHoursNext").value === "" ? null : Number(el("flightHoursNext").value),
-        currentHours: el("currentHours").value === "" ? null : Number(el("currentHours").value),
-        serviceAt: el("serviceAt").value === "" ? null : Number(el("serviceAt").value),
         arcDueDate: el("arcDue").value || null,
         insuranceDueDate: el("insuranceDue").value || null,
         modWaiverDueDate: el("modWaiverDue").value || null,
@@ -461,10 +460,7 @@
                 ${item.serviceType ? `<span class="fw-semibold">${item.serviceType}</span>` : ``}
               </div>
 
-              <div class="history-meta">
-                Created: ${fmtDateTime(item.createdAt)}
-              </div>
-
+              <div class="history-meta">Created: ${fmtDateTime(item.createdAt)}</div>
               ${item.serviceDate ? `<div class="history-meta">Service Date: ${fmtDateOnly(item.serviceDate)}</div>` : ``}
               ${item.nextServiceAt !== null && item.nextServiceAt !== undefined ? `<div class="history-meta">Next Service: ${fmtHours(item.nextServiceAt)}</div>` : ``}
               ${item.extensionHours !== null && item.extensionHours !== undefined ? `<div class="history-meta">Extension Hours: ${fmtHours(item.extensionHours)}</div>` : ``}
@@ -492,23 +488,41 @@
     }
 
     function applyFiveHourExtension() {
-      const useFlight = useFlightMetric();
-      const currentServiceAt = Number(el("serviceAt").value || 0);
-      const newServiceAt = currentServiceAt + 5;
-
-      el("serviceAt").value = newServiceAt.toFixed(1);
-
-      const current = Number(el("currentHours").value || 0);
-      const remaining = newServiceAt - current;
-
-      if (useFlight) {
-        el("flightHoursNext").value = remaining.toFixed(1);
-      } else {
-        el("tachoNext").value = remaining.toFixed(1);
+      const latestServiceAt = getLatestServiceLogNextServiceAt();
+      if (!Number.isFinite(latestServiceAt)) {
+        showError("Cannot apply extension until there is at least one MAINTENANCE_SERVICE log entry.");
+        return;
       }
 
-      syncSummaryDisplays();
       el("extendBtn").dataset.extensionApplied = "5";
+      el("extendBtn").dataset.extensionBase = String(latestServiceAt);
+      syncSummaryDisplaysWithExtension();
+    }
+
+    function syncSummaryDisplaysWithExtension() {
+      const useFlight = useFlightMetric();
+
+      const current = Number(currentRecord.currentHours);
+      const baseServiceAt = getLatestServiceLogNextServiceAt();
+      const extension = Number(el("extendBtn").dataset.extensionApplied || 0);
+
+      const effectiveServiceAt =
+        Number.isFinite(baseServiceAt)
+          ? baseServiceAt + extension
+          : null;
+
+      const remaining =
+        Number.isFinite(effectiveServiceAt) && Number.isFinite(current)
+          ? effectiveServiceAt - current
+          : null;
+
+      el("remainingLabel").textContent = useFlight ? "Remaining Flight Hours" : "Remaining Tacho Hours";
+      el("currentLabel").textContent = useFlight ? "Current Flight Hours" : "Current Tacho Hours";
+      el("serviceAtLabel").textContent = useFlight ? "Service At Flight Hours" : "Service At Tacho Hours";
+
+      el("remainingDisplay").textContent = Number.isFinite(remaining) ? remaining.toFixed(1) : "—";
+      el("currentDisplay").textContent = Number.isFinite(current) ? current.toFixed(1) : "—";
+      el("serviceAtDisplay").textContent = Number.isFinite(effectiveServiceAt) ? effectiveServiceAt.toFixed(1) : "—";
     }
 
     async function loadAircraft() {
@@ -544,10 +558,16 @@
         const record = await recordRes.json();
         const logData = await logRes.json();
 
+        maintenanceHistoryItems = logData?.items || [];
+
         fillForm(record);
-        renderHistory(logData?.items || []);
+        renderHistory(maintenanceHistoryItems);
         clearNewLogRows();
+
         el("extendBtn").dataset.extensionApplied = "";
+        el("extendBtn").dataset.extensionBase = "";
+
+        syncSummaryDisplays();
         setStatus("Loaded.");
         setTimeout(() => setStatus(""), 1500);
       } catch (err) {
@@ -572,15 +592,29 @@
 
       try {
         const extensionHoursApplied = Number(el("extendBtn").dataset.extensionApplied || 0);
+        const latestServiceAt = getLatestServiceLogNextServiceAt();
+        const current = Number(currentRecord.currentHours);
+
+        const effectiveServiceAt =
+          Number.isFinite(latestServiceAt)
+            ? latestServiceAt + extensionHoursApplied
+            : null;
+
+        const remaining =
+          Number.isFinite(effectiveServiceAt) && Number.isFinite(current)
+            ? effectiveServiceAt - current
+            : null;
 
         const payload = {
           aircraft,
           useFlightHours: useFlightMetric(),
           ...readForm(),
+          currentHours: currentRecord.currentHours,
+          serviceAt: effectiveServiceAt,
+          tachoHoursToNextService: useFlightMetric() ? currentRecord.tachoHoursToNextService : remaining,
+          flightHoursToNextService: useFlightMetric() ? remaining : currentRecord.flightHoursToNextService,
           maintenanceLog: collectLogRows(),
-          extensionHoursApplied: extensionHoursApplied > 0 ? extensionHoursApplied : undefined,
-          createEditEvent: el("createEditEvent").checked,
-          editComment: el("editComment").value?.trim() || undefined
+          extensionHoursApplied: extensionHoursApplied > 0 ? extensionHoursApplied : undefined
         };
 
         Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
@@ -602,8 +636,7 @@
         setTimeout(() => setStatus(""), 1500);
 
         el("extendBtn").dataset.extensionApplied = "";
-        el("createEditEvent").checked = false;
-        el("editComment").value = "";
+        el("extendBtn").dataset.extensionBase = "";
 
         await loadAircraft();
       } catch (err) {
@@ -621,6 +654,7 @@
       el("saveBtn").addEventListener("click", saveAircraft);
 
       el("extendBtn").addEventListener("click", () => {
+        clearError();
         applyFiveHourExtension();
       });
 
@@ -628,9 +662,8 @@
         el("maintenanceLogRows").appendChild(makeLogRow());
       });
 
-      ["aircraft", "tachoNext", "flightHoursNext", "currentHours", "serviceAt"].forEach(id => {
-        el(id).addEventListener("input", syncSummaryDisplays);
-        el(id).addEventListener("change", syncSummaryDisplays);
+      el("useFlightHours").addEventListener("change", () => {
+        syncSummaryDisplaysWithExtension();
       });
 
       const params = new URLSearchParams(window.location.search);
