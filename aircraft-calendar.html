@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aircraft Calendar</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+  <style>
+    :root {
+      --efm-border: rgba(0,0,0,.08);
+      --efm-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+      --time-col-w: 78px;
+      --resource-col-w: 150px;
+      --day-col-w: 190px;
+      --hour-h: 64px;
+      --header-h: 58px;
+      --grid-top: 58px;
+    }
+
+    body {
+      background: linear-gradient(180deg, #ecedef 100%, #f1f2f5 100%);
+    }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(2px);
+      transition: opacity .18s ease, transform .18s ease;
+    }
+
+    .fade-in.ready {
+      opacity: 1;
+      transform: none;
+    }
+
+    .card-shell {
+      border: 0;
+      border-radius: 1rem;
+      box-shadow: var(--efm-shadow);
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .section-title {
+      letter-spacing: .04em;
+      font-size: .78rem;
+      text-transform: uppercase;
+      color: #6c757d;
+      font-weight: 700;
+    }
+
+    .toolbar-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      padding: .45rem .75rem;
+      border-radius: 999px;
+      background: rgba(13,110,253,.08);
+      color: #0d6efd;
+      font-size: .85rem;
+      font-weight: 600;
+    }
+
+    .calendar-shell {
+      overflow: auto;
+      background: #fff;
+    }
+
+    .week-grid {
+      display: grid;
+      grid-template-columns: var(--resource-col-w) var(--time-col-w) repeat(7, var(--day-col-w));
+      min-width: calc(var(--resource-col-w) + var(--time-col-w) + (7 * var(--day-col-w)));
+      border-top: 1px solid var(--efm-border);
+      border-left: 1px solid var(--efm-border);
+      position: relative;
+    }
+
+    .grid-cell {
+      border-right: 1px solid var(--efm-border);
+      border-bottom: 1px solid var(--efm-border);
+      background: #fff;
+    }
+
+    .sticky-left {
+      position: sticky;
+      left: 0;
+      z-index: 4;
+      background: #fff;
+    }
+
+    .sticky-left-2 {
+      position: sticky;
+      left: var(--resource-col-w);
+      z-index: 4;
+      background: #fff;
+    }
+
+    .top-left {
+      min-height: var(--header-h);
+      display: flex;
+      align-items: center;
+      padding: .9rem 1rem;
+      background: linear-gradient(135deg, #f8f9fb, #eef2f7);
+      font-weight: 700;
+    }
+
+    .blank-top {
+      min-height: var(--header-h);
+      background: linear-gradient(180deg, #fbfcfd, #f3f6f9);
+    }
+
+    .day-header {
+      min-height: var(--header-h);
+      padding: .7rem .75rem;
+      background: linear-gradient(180deg, #fbfcfd, #f3f6f9);
+      text-align: center;
+    }
+
+    .day-header .dow {
+      font-size: .76rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: #6c757d;
+      font-weight: 700;
+    }
+
+    .day-header .date {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .resource-cell {
+      min-height: calc(var(--hour-h) * 10);
+      padding: 1rem .85rem;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      flex-direction: column;
+      gap: .2rem;
+    }
+
+    .resource-reg {
+      font-weight: 700;
+      letter-spacing: .03em;
+    }
+
+    .resource-sub {
+      color: #6c757d;
+      font-size: .82rem;
+    }
+
+    .time-col {
+      min-height: calc(var(--hour-h) * 10);
+      position: relative;
+      background: linear-gradient(180deg, #fcfcfd, #f9fafb);
+    }
+
+    .time-marker {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: var(--hour-h);
+      border-bottom: 1px solid #edf0f2;
+      padding: .2rem .5rem;
+      font-size: .76rem;
+      color: #6c757d;
+      font-weight: 600;
+      background: transparent;
+    }
+
+    .day-col {
+      min-height: calc(var(--hour-h) * 10);
+      position: relative;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          #ffffff 0,
+          #ffffff calc(var(--hour-h) - 1px),
+          #edf0f2 calc(var(--hour-h) - 1px),
+          #edf0f2 var(--hour-h)
+        );
+    }
+
+    .day-col:hover {
+      background:
+        linear-gradient(0deg, rgba(13,110,253,.04), rgba(13,110,253,.04)),
+        repeating-linear-gradient(
+          to bottom,
+          #ffffff 0,
+          #ffffff calc(var(--hour-h) - 1px),
+          #edf0f2 calc(var(--hour-h) - 1px),
+          #edf0f2 var(--hour-h)
+        );
+    }
+
+    .reservation-block {
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      border-radius: .9rem;
+      padding: .45rem .55rem;
+      color: #212529;
+      border: 1px solid rgba(0,0,0,.08);
+      box-shadow: 0 6px 16px rgba(0,0,0,.08);
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .reservation-block.solo {
+      background: linear-gradient(180deg, #ffffff 0%, #f4f9ff 100%);
+      border-left: 4px solid #0d6efd;
+    }
+
+    .reservation-block.instruction {
+      background: linear-gradient(180deg, #ffffff 0%, #f4fff8 100%);
+      border-left: 4px solid #198754;
+    }
+
+    .reservation-block.checkout {
+      background: linear-gradient(180deg, #ffffff 0%, #fffdf4 100%);
+      border-left: 4px solid #ffc107;
+    }
+
+    .reservation-block.block {
+      background: linear-gradient(180deg, #ffffff 0%, #fff5f5 100%);
+      border-left: 4px solid #dc3545;
+    }
+
+    .res-name {
+      font-size: .88rem;
+      font-weight: 700;
+      line-height: 1.05;
+      margin-bottom: .1rem;
+    }
+
+    .res-time,
+    .res-sub {
+      font-size: .74rem;
+      color: #6c757d;
+      line-height: 1.1;
+    }
+
+    .month-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      border-top: 1px solid var(--efm-border);
+      border-left: 1px solid var(--efm-border);
+    }
+
+    .month-head,
+    .month-cell {
+      border-right: 1px solid var(--efm-border);
+      border-bottom: 1px solid var(--efm-border);
+      background: #fff;
+    }
+
+    .month-head {
+      padding: .75rem;
+      background: #f3f6f9;
+      font-size: .8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #6c757d;
+      text-align: center;
+    }
+
+    .month-cell {
+      min-height: 140px;
+      padding: .6rem;
+      display: flex;
+      flex-direction: column;
+      gap: .35rem;
+      cursor: pointer;
+    }
+
+    .month-cell.other-month {
+      background: #fafbfc;
+      color: #adb5bd;
+    }
+
+    .month-cell:hover {
+      background: rgba(13,110,253,.04);
+    }
+
+    .month-date {
+      font-weight: 700;
+      font-size: .9rem;
+    }
+
+    .month-pill {
+      border-radius: 999px;
+      padding: .22rem .5rem;
+      font-size: .72rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .month-pill.solo { background: rgba(13,110,253,.10); color: #0d6efd; }
+    .month-pill.instruction { background: rgba(25,135,84,.10); color: #198754; }
+    .month-pill.checkout { background: rgba(255,193,7,.18); color: #8a6d00; }
+    .month-pill.block { background: rgba(220,53,69,.12); color: #b02a37; }
+
+    .mini-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+    }
+
+    .legend-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      padding: .35rem .65rem;
+      border-radius: 999px;
+      font-size: .8rem;
+      font-weight: 600;
+      background: #fff;
+      border: 1px solid var(--efm-border);
+    }
+
+    .legend-dot {
+      width: .65rem;
+      height: .65rem;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .empty-state {
+      border: 1px dashed rgba(13,110,253,.22);
+      background: rgba(13,110,253,.03);
+      border-radius: 1rem;
+      padding: 1rem;
+      color: #6c757d;
+    }
+
+    @media (max-width: 1200px) {
+      :root {
+        --resource-col-w: 132px;
+        --time-col-w: 72px;
+        --day-col-w: 170px;
+      }
+    }
+  </style>
+
+  <script src="js/auth.js" defer></script>
+  <script src="js/logout.js" defer></script>
+  <script src="js/ui.js" defer></script>
+  <script src="js/admin-guard.js" defer></script>
+  <script src="js/due-soon-badge.js" defer></script>
+  <script src="js/loadNavbar.js" defer></script>
+</head>
+<body>
+  <div class="container-fluid p-2 bg-primary text-white text-center">
+    <h2 class="mb-0">AIRCRAFT CALENDAR</h2>
+  </div>
+
+  <div id="navbar-placeholder"></div>
+
+  <main class="container py-4">
+    <div class="card-shell fade-in mb-3" id="toolbarCard">
+      <div class="card-body p-3 p-md-4">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-3">
+          <div>
+            <h1 class="h4 mb-1">Shared Aircraft Reservations</h1>
+            <div class="text-muted small">Reserve aircraft time slots for solo hire or instruction. Route details stay in the book-out flow.</div>
+          </div>
+          <div class="d-flex flex-wrap gap-2 align-items-center">
+            <span class="toolbar-chip">Google-style Week View</span>
+            <button class="btn btn-primary" id="newReservationBtn">New Reservation</button>
+          </div>
+        </div>
+
+        <div class="row g-3 align-items-end">
+          <div class="col-12 col-md-3 col-lg-2">
+            <label class="form-label fw-semibold" for="viewMode">View</label>
+            <select class="form-select" id="viewMode">
+              <option value="week">Week</option>
+              <option value="month">Month</option>
+            </select>
+          </div>
+
+          <div class="col-12 col-md-3 col-lg-2">
+            <label class="form-label fw-semibold" for="anchorDate">Date</label>
+            <input class="form-control" id="anchorDate" type="date">
+          </div>
+
+          <div class="col-6 col-md-3 col-lg-2">
+            <button class="btn btn-outline-secondary w-100" id="prevBtn" type="button">← Previous</button>
+          </div>
+
+          <div class="col-6 col-md-3 col-lg-2">
+            <button class="btn btn-outline-secondary w-100" id="nextBtn" type="button">Next →</button>
+          </div>
+
+          <div class="col-12 col-md-3 col-lg-2">
+            <label class="form-label fw-semibold" for="aircraftFilter">Aircraft</label>
+            <select class="form-select" id="aircraftFilter">
+              <option value="">All aircraft</option>
+            </select>
+          </div>
+
+          <div class="col-12 col-md-3 col-lg-2">
+            <button class="btn btn-outline-primary w-100" id="todayBtn" type="button">Today</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-shell fade-in" id="calendarCard">
+      <div class="card-body p-0">
+        <div class="p-3 border-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+          <div>
+            <div class="section-title mb-1">Schedule</div>
+            <div class="fw-semibold" id="rangeLabel">Loading…</div>
+          </div>
+          <div class="mini-legend">
+            <span class="legend-pill"><span class="legend-dot" style="background:#0d6efd"></span> Solo</span>
+            <span class="legend-pill"><span class="legend-dot" style="background:#198754"></span> Instruction</span>
+            <span class="legend-pill"><span class="legend-dot" style="background:#ffc107"></span> Checkout</span>
+            <span class="legend-pill"><span class="legend-dot" style="background:#dc3545"></span> Block</span>
+          </div>
+        </div>
+
+        <div class="calendar-shell" id="calendarHost"></div>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal fade" id="reservationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="reservationModalTitle">New Reservation</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="reservationForm" novalidate>
+            <input type="hidden" id="reservationId">
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-semibold" for="resAircraft">Aircraft</label>
+                <select class="form-select" id="resAircraft" required></select>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-semibold" for="resType">Booking Type</label>
+                <select class="form-select" id="resType" required>
+                  <option value="SOLO">Solo</option>
+                  <option value="INSTRUCTION">Instruction</option>
+                  <option value="CHECKOUT">Checkout</option>
+                </select>
+              </div>
+
+              <div class="col-12 col-md-4">
+                <label class="form-label fw-semibold" for="resDate">Date</label>
+                <input class="form-control" id="resDate" type="date" required>
+              </div>
+
+              <div class="col-12 col-md-4">
+                <label class="form-label fw-semibold" for="resStart">Start</label>
+                <input class="form-control" id="resStart" type="time" step="900" required>
+              </div>
+
+              <div class="col-12 col-md-4">
+                <label class="form-label fw-semibold" for="resEnd">End</label>
+                <input class="form-control" id="resEnd" type="time" step="900" required>
+              </div>
+
+              <div class="col-12 d-none" id="instructorWrap">
+                <label class="form-label fw-semibold" for="resInstructor">Instructor</label>
+                <select class="form-select" id="resInstructor">
+                  <option value="">Select instructor...</option>
+                  <option value="inst-alex">Alex</option>
+                  <option value="inst-james">James</option>
+                  <option value="inst-emma">Emma</option>
+                </select>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label fw-semibold" for="resNotes">Notes</label>
+                <textarea class="form-control" id="resNotes" rows="3" placeholder="Optional notes, e.g. lesson booking or morning slot"></textarea>
+              </div>
+            </div>
+          </form>
+
+          <div class="alert alert-danger d-none mt-3 mb-0" id="reservationError"></div>
+        </div>
+        <div class="modal-footer justify-content-between">
+          <button class="btn btn-outline-danger d-none" id="deleteReservationBtn" type="button">Delete</button>
+          <div class="ms-auto d-flex gap-2">
+            <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Close</button>
+            <button class="btn btn-primary" id="saveReservationBtn" type="button">Save Reservation</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const AIRCRAFT_LIST = ["G-AZWS", "G-BPAF", "G-EDGI", "G-AVYL", "G-BULL"];
+    const DAY_START_HOUR = 8;
+    const DAY_END_HOUR = 18;
+    const PX_PER_MIN = 64 / 60; // matches --hour-h
+
+    const state = {
+      viewMode: "week",
+      anchorDate: new Date(),
+      aircraftFilter: "",
+      reservations: [
+        {
+          reservationId: "res_001",
+          aircraft: "G-AZWS",
+          date: offsetDate(0),
+          start: "08:30",
+          end: "11:00",
+          bookingType: "SOLO",
+          memberName: "Sam",
+          instructorId: "",
+          instructorName: "",
+          notes: "Morning slot"
+        },
+        {
+          reservationId: "res_002",
+          aircraft: "G-BPAF",
+          date: offsetDate(1),
+          start: "10:00",
+          end: "12:30",
+          bookingType: "INSTRUCTION",
+          memberName: "Chris",
+          instructorId: "inst-alex",
+          instructorName: "Alex",
+          notes: "PPL lesson"
+        },
+        {
+          reservationId: "res_003",
+          aircraft: "G-BULL",
+          date: offsetDate(2),
+          start: "13:00",
+          end: "15:00",
+          bookingType: "CHECKOUT",
+          memberName: "Taylor",
+          instructorId: "inst-emma",
+          instructorName: "Emma",
+          notes: "Club checkout"
+        }
+      ],
+      blocks: [
+        {
+          reservationId: "blk_001",
+          aircraft: "G-EDGI",
+          date: offsetDate(3),
+          start: "09:00",
+          end: "14:30",
+          bookingType: "BLOCK",
+          memberName: "Maintenance",
+          instructorId: "",
+          instructorName: "",
+          notes: "50-hour check"
+        }
+      ]
+    };
+
+    let reservationModal;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      reservationModal = new bootstrap.Modal(document.getElementById("reservationModal"));
+      populateAircraftSelectors();
+      bindEvents();
+      syncToolbar();
+      render();
+      requestAnimationFrame(() => {
+        document.getElementById("toolbarCard")?.classList.add("ready");
+        document.getElementById("calendarCard")?.classList.add("ready");
+      });
+    });
+
+    function bindEvents() {
+      document.getElementById("viewMode").addEventListener("change", e => {
+        state.viewMode = e.target.value;
+        render();
+      });
+
+      document.getElementById("anchorDate").addEventListener("change", e => {
+        state.anchorDate = parseDateInput(e.target.value);
+        render();
+      });
+
+      document.getElementById("aircraftFilter").addEventListener("change", e => {
+        state.aircraftFilter = e.target.value;
+        render();
+      });
+
+      document.getElementById("prevBtn").addEventListener("click", () => {
+        state.anchorDate = state.viewMode === "week"
+          ? addDays(state.anchorDate, -7)
+          : new Date(state.anchorDate.getFullYear(), state.anchorDate.getMonth() - 1, 1);
+        syncToolbar();
+        render();
+      });
+
+      document.getElementById("nextBtn").addEventListener("click", () => {
+        state.anchorDate = state.viewMode === "week"
+          ? addDays(state.anchorDate, 7)
+          : new Date(state.anchorDate.getFullYear(), state.anchorDate.getMonth() + 1, 1);
+        syncToolbar();
+        render();
+      });
+
+      document.getElementById("todayBtn").addEventListener("click", () => {
+        state.anchorDate = new Date();
+        syncToolbar();
+        render();
+      });
+
+      document.getElementById("newReservationBtn").addEventListener("click", () => openReservationModal());
+      document.getElementById("saveReservationBtn").addEventListener("click", saveReservation);
+      document.getElementById("deleteReservationBtn").addEventListener("click", deleteReservation);
+      document.getElementById("resType").addEventListener("change", toggleInstructorField);
+    }
+
+    function populateAircraftSelectors() {
+      const filter = document.getElementById("aircraftFilter");
+      const modal = document.getElementById("resAircraft");
+
+      AIRCRAFT_LIST.forEach(reg => {
+        const fOpt = document.createElement("option");
+        fOpt.value = reg;
+        fOpt.textContent = reg;
+        filter.appendChild(fOpt);
+
+        const mOpt = document.createElement("option");
+        mOpt.value = reg;
+        mOpt.textContent = reg;
+        modal.appendChild(mOpt);
+      });
+    }
+
+    function syncToolbar() {
+      document.getElementById("viewMode").value = state.viewMode;
+      document.getElementById("anchorDate").value = formatDateInput(state.anchorDate);
+    }
+
+    function render() {
+      syncToolbar();
+      renderRangeLabel();
+      if (state.viewMode === "week") renderWeekView();
+      else renderMonthView();
+    }
+
+    function renderRangeLabel() {
+      const label = document.getElementById("rangeLabel");
+      if (state.viewMode === "week") {
+        const start = startOfWeek(state.anchorDate);
+        const end = addDays(start, 6);
+        label.textContent = `${formatPrettyDate(start)} – ${formatPrettyDate(end)}`;
+      } else {
+        label.textContent = state.anchorDate.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+      }
+    }
+
+    function renderWeekView() {
+      const host = document.getElementById("calendarHost");
+      host.innerHTML = "";
+
+      const grid = document.createElement("div");
+      grid.className = "week-grid";
+
+      const days = getWeekDays(startOfWeek(state.anchorDate));
+      const aircraft = filteredAircraft();
+
+      grid.appendChild(cell("top-left sticky-left", "Aircraft"));
+      grid.appendChild(cell("blank-top sticky-left-2", ""));
+      days.forEach(day => {
+        const c = document.createElement("div");
+        c.className = "grid-cell day-header";
+        c.innerHTML = `<div class="dow">${day.toLocaleDateString(undefined, { weekday: 'short' })}</div><div class="date">${day.getDate()} ${day.toLocaleDateString(undefined, { month: 'short' })}</div>`;
+        grid.appendChild(c);
+      });
+
+      aircraft.forEach(reg => {
+        const resource = document.createElement("div");
+        resource.className = "grid-cell resource-cell sticky-left";
+        resource.innerHTML = `<div class="resource-reg">${reg}</div><div class="resource-sub">Click any day column to add</div>`;
+        grid.appendChild(resource);
+
+        const timeCol = document.createElement("div");
+        timeCol.className = "grid-cell time-col sticky-left-2";
+        for (let h = DAY_START_HOUR; h < DAY_END_HOUR; h++) {
+          const marker = document.createElement("div");
+          marker.className = "time-marker";
+          marker.style.top = `${(h - DAY_START_HOUR) * 64}px`;
+          marker.textContent = `${String(h).padStart(2, '0')}:00`;
+          timeCol.appendChild(marker);
+        }
+        grid.appendChild(timeCol);
+
+        days.forEach(day => {
+          const dateKey = formatDateInput(day);
+          const col = document.createElement("div");
+          col.className = "grid-cell day-col";
+          col.addEventListener("click", (e) => {
+            if (e.target !== col) return;
+            openReservationModal({ aircraft: reg, date: dateKey, start: "10:00", end: "11:00" });
+          });
+
+          const items = allEvents().filter(x => x.aircraft === reg && x.date === dateKey);
+          items.forEach(item => col.appendChild(buildWeekReservation(item)));
+
+          grid.appendChild(col);
+        });
+      });
+
+      if (!aircraft.length) {
+        host.innerHTML = `<div class="p-4"><div class="empty-state">No aircraft match the current filter.</div></div>`;
+        return;
+      }
+
+      host.appendChild(grid);
+    }
+
+    function buildWeekReservation(item) {
+      const block = document.createElement("div");
+      block.className = `reservation-block ${bookingClass(item.bookingType)}`;
+      const top = timeToMinutes(item.start) - (DAY_START_HOUR * 60);
+      const height = Math.max(timeToMinutes(item.end) - timeToMinutes(item.start), 30);
+      block.style.top = `${top * PX_PER_MIN}px`;
+      block.style.height = `${height * PX_PER_MIN}px`;
+      block.innerHTML = `
+        <div class="res-name">${escapeHtml(item.memberName || 'Reserved')}</div>
+        <div class="res-time">${item.start} – ${item.end}</div>
+        <div class="res-sub">${labelForType(item.bookingType)}${item.instructorName ? ` · ${escapeHtml(item.instructorName)}` : ''}</div>
+      `;
+      block.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openReservationModal(item);
+      });
+      return block;
+    }
+
+    function renderMonthView() {
+      const host = document.getElementById("calendarHost");
+      host.innerHTML = "";
+
+      const grid = document.createElement("div");
+      grid.className = "month-grid";
+
+      ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].forEach(name => {
+        const h = document.createElement("div");
+        h.className = "month-head";
+        h.textContent = name;
+        grid.appendChild(h);
+      });
+
+      const cells = buildMonthCells(state.anchorDate);
+      cells.forEach(info => {
+        const c = document.createElement("div");
+        c.className = `month-cell ${info.inMonth ? '' : 'other-month'}`.trim();
+        c.addEventListener("click", (e) => {
+          if (e.target !== c) return;
+          openReservationModal({ date: info.dateKey, start: "10:00", end: "11:00" });
+        });
+
+        const items = allEvents().filter(x => x.date === info.dateKey && (!state.aircraftFilter || x.aircraft === state.aircraftFilter));
+        c.innerHTML = `<div class="month-date">${info.date.getDate()}</div>`;
+
+        items.slice(0, 4).forEach(item => {
+          const pill = document.createElement("div");
+          pill.className = `month-pill ${bookingClass(item.bookingType)}`;
+          pill.textContent = `${item.aircraft} · ${item.start}`;
+          pill.addEventListener("click", (e) => {
+            e.stopPropagation();
+            openReservationModal(item);
+          });
+          c.appendChild(pill);
+        });
+
+        if (items.length > 4) {
+          const more = document.createElement("div");
+          more.className = "small text-muted";
+          more.textContent = `+${items.length - 4} more`;
+          c.appendChild(more);
+        }
+
+        grid.appendChild(c);
+      });
+
+      host.appendChild(grid);
+    }
+
+    function openReservationModal(item = {}) {
+      clearReservationError();
+      const isEdit = !!item.reservationId;
+      document.getElementById("reservationModalTitle").textContent = isEdit ? "Edit Reservation" : "New Reservation";
+      document.getElementById("deleteReservationBtn").classList.toggle("d-none", !isEdit || String(item.bookingType).toUpperCase() === 'BLOCK');
+
+      document.getElementById("reservationId").value = item.reservationId || "";
+      document.getElementById("resAircraft").value = item.aircraft || AIRCRAFT_LIST[0];
+      document.getElementById("resType").value = item.bookingType && item.bookingType !== 'BLOCK' ? item.bookingType : 'SOLO';
+      document.getElementById("resDate").value = item.date || formatDateInput(state.anchorDate);
+      document.getElementById("resStart").value = item.start || "10:00";
+      document.getElementById("resEnd").value = item.end || "11:00";
+      document.getElementById("resInstructor").value = item.instructorId || "";
+      document.getElementById("resNotes").value = item.notes || "";
+      toggleInstructorField();
+      reservationModal.show();
+    }
+
+    function toggleInstructorField() {
+      const show = ["INSTRUCTION", "CHECKOUT"].includes(document.getElementById("resType").value);
+      document.getElementById("instructorWrap").classList.toggle("d-none", !show);
+    }
+
+    function saveReservation() {
+      const payload = readReservationForm();
+      if (!payload) return;
+      if (timeToMinutes(payload.end) <= timeToMinutes(payload.start)) {
+        showReservationError("End time must be after start time.");
+        return;
+      }
+
+      const reservationId = document.getElementById("reservationId").value;
+      if (hasConflict(payload, reservationId)) {
+        showReservationError("That aircraft already has a reservation in that time range.");
+        return;
+      }
+
+      if (reservationId) {
+        const idx = state.reservations.findIndex(x => x.reservationId === reservationId);
+        if (idx >= 0) state.reservations[idx] = { ...state.reservations[idx], ...payload, reservationId };
+      } else {
+        state.reservations.push({
+          reservationId: `res_${Math.random().toString(36).slice(2, 9)}`,
+          memberName: localStorage.getItem("username") || "You",
+          ...payload
+        });
+      }
+
+      reservationModal.hide();
+      render();
+      window.showToast?.("Reservation saved", { variant: "success" });
+    }
+
+    function deleteReservation() {
+      const reservationId = document.getElementById("reservationId").value;
+      state.reservations = state.reservations.filter(x => x.reservationId !== reservationId);
+      reservationModal.hide();
+      render();
+      window.showToast?.("Reservation deleted", { variant: "warning" });
+    }
+
+    function readReservationForm() {
+      const aircraft = document.getElementById("resAircraft").value;
+      const bookingType = document.getElementById("resType").value;
+      const date = document.getElementById("resDate").value;
+      const start = document.getElementById("resStart").value;
+      const end = document.getElementById("resEnd").value;
+      const instructorId = document.getElementById("resInstructor").value;
+      const notes = document.getElementById("resNotes").value.trim();
+
+      if (!aircraft || !bookingType || !date || !start || !end) {
+        showReservationError("Please complete the required fields.");
+        return null;
+      }
+
+      return {
+        aircraft,
+        bookingType,
+        date,
+        start,
+        end,
+        instructorId: instructorId || "",
+        instructorName: instructorLabel(instructorId),
+        notes
+      };
+    }
+
+    function hasConflict(payload, ignoreId = "") {
+      return allEvents().some(item => {
+        if (ignoreId && item.reservationId === ignoreId) return false;
+        if (item.bookingType === 'BLOCK' && false) return false;
+        if (item.aircraft !== payload.aircraft || item.date !== payload.date) return false;
+        return timeToMinutes(payload.start) < timeToMinutes(item.end) && timeToMinutes(payload.end) > timeToMinutes(item.start);
+      });
+    }
+
+    function filteredAircraft() {
+      return state.aircraftFilter ? AIRCRAFT_LIST.filter(x => x === state.aircraftFilter) : [...AIRCRAFT_LIST];
+    }
+
+    function allEvents() {
+      return [...state.reservations, ...state.blocks].filter(item => !state.aircraftFilter || item.aircraft === state.aircraftFilter);
+    }
+
+    function buildMonthCells(anchor) {
+      const start = startOfWeek(new Date(anchor.getFullYear(), anchor.getMonth(), 1));
+      return Array.from({ length: 42 }, (_, i) => {
+        const date = addDays(start, i);
+        return {
+          date,
+          dateKey: formatDateInput(date),
+          inMonth: date.getMonth() === anchor.getMonth()
+        };
+      });
+    }
+
+    function startOfWeek(d) {
+      const date = new Date(d);
+      const day = date.getDay();
+      const diff = (day === 0 ? -6 : 1) - day;
+      date.setDate(date.getDate() + diff);
+      date.setHours(0, 0, 0, 0);
+      return date;
+    }
+
+    function getWeekDays(start) {
+      return Array.from({ length: 7 }, (_, i) => addDays(start, i));
+    }
+
+    function addDays(date, n) {
+      const d = new Date(date);
+      d.setDate(d.getDate() + n);
+      return d;
+    }
+
+    function formatDateInput(date) {
+      const d = new Date(date);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function parseDateInput(value) {
+      const [y, m, d] = String(value).split('-').map(Number);
+      return new Date(y, (m || 1) - 1, d || 1);
+    }
+
+    function formatPrettyDate(date) {
+      return new Date(date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    function timeToMinutes(v) {
+      const [h, m] = String(v).split(':').map(Number);
+      return (h * 60) + (m || 0);
+    }
+
+    function bookingClass(type) {
+      if (type === 'INSTRUCTION') return 'instruction';
+      if (type === 'CHECKOUT') return 'checkout';
+      if (type === 'BLOCK') return 'block';
+      return 'solo';
+    }
+
+    function labelForType(type) {
+      if (type === 'INSTRUCTION') return 'Instruction';
+      if (type === 'CHECKOUT') return 'Checkout';
+      if (type === 'BLOCK') return 'Unavailable';
+      return 'Solo';
+    }
+
+    function instructorLabel(id) {
+      if (id === 'inst-alex') return 'Alex';
+      if (id === 'inst-james') return 'James';
+      if (id === 'inst-emma') return 'Emma';
+      return '';
+    }
+
+    function cell(className, text) {
+      const d = document.createElement('div');
+      d.className = `grid-cell ${className}`.trim();
+      d.textContent = text;
+      return d;
+    }
+
+    function showReservationError(msg) {
+      const box = document.getElementById('reservationError');
+      box.textContent = msg;
+      box.classList.remove('d-none');
+    }
+
+    function clearReservationError() {
+      const box = document.getElementById('reservationError');
+      box.textContent = '';
+      box.classList.add('d-none');
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function offsetDate(days) {
+      return formatDateInput(addDays(startOfWeek(new Date()), days));
+    }
+  </script>
+</body>
+</html>
