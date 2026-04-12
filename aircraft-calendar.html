@@ -12,12 +12,12 @@
     :root {
       --efm-border: rgba(0,0,0,.08);
       --efm-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+      --resource-col-w: 160px;
       --time-col-w: 78px;
-      --resource-col-w: 150px;
-      --day-col-w: 190px;
+      --day-col-w: 185px;
       --hour-h: 64px;
-      --header-h: 58px;
-      --grid-top: 58px;
+      --header-h: 66px;
+      --lane-label-h: 44px;
     }
 
     body {
@@ -68,57 +68,76 @@
       background: #fff;
     }
 
-    .week-grid {
+    .mini-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+    }
+
+    .legend-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      padding: .35rem .65rem;
+      border-radius: 999px;
+      font-size: .8rem;
+      font-weight: 600;
+      background: #fff;
+      border: 1px solid var(--efm-border);
+    }
+
+    .legend-dot {
+      width: .65rem;
+      height: .65rem;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .empty-state {
+      border: 1px dashed rgba(13,110,253,.22);
+      background: rgba(13,110,253,.03);
+      border-radius: 1rem;
+      padding: 1rem;
+      color: #6c757d;
+    }
+
+    .week-view {
+      min-width: calc(var(--resource-col-w) + var(--time-col-w) + (7 * var(--day-col-w)));
+    }
+
+    .week-header {
       display: grid;
       grid-template-columns: var(--resource-col-w) var(--time-col-w) repeat(7, var(--day-col-w));
-      min-width: calc(var(--resource-col-w) + var(--time-col-w) + (7 * var(--day-col-w)));
       border-top: 1px solid var(--efm-border);
       border-left: 1px solid var(--efm-border);
-      position: relative;
     }
 
-    .grid-cell {
+    .week-header > div {
       border-right: 1px solid var(--efm-border);
       border-bottom: 1px solid var(--efm-border);
-      background: #fff;
-    }
-
-    .sticky-left {
-      position: sticky;
-      left: 0;
-      z-index: 4;
-      background: #fff;
-    }
-
-    .sticky-left-2 {
-      position: sticky;
-      left: var(--resource-col-w);
-      z-index: 4;
-      background: #fff;
-    }
-
-    .top-left {
+      background: linear-gradient(180deg, #fbfcfd, #f3f6f9);
       min-height: var(--header-h);
+    }
+
+    .corner-head,
+    .time-head {
       display: flex;
       align-items: center;
-      padding: .9rem 1rem;
-      background: linear-gradient(135deg, #f8f9fb, #eef2f7);
+      padding: 0 1rem;
       font-weight: 700;
+      color: #212529;
     }
 
-    .blank-top {
-      min-height: var(--header-h);
-      background: linear-gradient(180deg, #fbfcfd, #f3f6f9);
-    }
-
-    .day-header {
-      min-height: var(--header-h);
-      padding: .7rem .75rem;
-      background: linear-gradient(180deg, #fbfcfd, #f3f6f9);
+    .day-head {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .15rem;
       text-align: center;
     }
 
-    .day-header .dow {
+    .day-head .dow {
       font-size: .76rem;
       letter-spacing: .06em;
       text-transform: uppercase;
@@ -126,35 +145,63 @@
       font-weight: 700;
     }
 
-    .day-header .date {
-      font-weight: 700;
+    .day-head .date {
       font-size: 1rem;
+      font-weight: 700;
+      color: #212529;
     }
 
-    .resource-cell {
-      min-height: calc(var(--hour-h) * 10);
-      padding: 1rem .85rem;
+    .week-body {
+      display: grid;
+      grid-template-columns: var(--resource-col-w) var(--time-col-w) calc(7 * var(--day-col-w));
+      align-items: start;
+      border-left: 1px solid var(--efm-border);
+    }
+
+    .resource-col,
+    .time-col,
+    .days-col {
+      position: relative;
+      border-right: 1px solid var(--efm-border);
+    }
+
+    .lane-label {
+      height: calc(var(--lane-label-h) + (10 * var(--hour-h)));
+      border-bottom: 1px solid var(--efm-border);
+      padding: .8rem .85rem;
+      background: #fff;
       display: flex;
-      align-items: flex-start;
-      justify-content: center;
       flex-direction: column;
       gap: .2rem;
+      justify-content: flex-start;
+    }
+
+    .lane-label:nth-child(odd) {
+      background: #fbfcfd;
     }
 
     .resource-reg {
       font-weight: 700;
       letter-spacing: .03em;
+      font-size: .95rem;
+      color: #212529;
     }
 
     .resource-sub {
       color: #6c757d;
-      font-size: .82rem;
+      font-size: .8rem;
     }
 
-    .time-col {
-      min-height: calc(var(--hour-h) * 10);
-      position: relative;
+    .time-block {
+      height: calc(var(--lane-label-h) + (10 * var(--hour-h)));
+      border-bottom: 1px solid var(--efm-border);
       background: linear-gradient(180deg, #fcfcfd, #f9fafb);
+      position: relative;
+    }
+
+    .lane-title-time {
+      height: var(--lane-label-h);
+      border-bottom: 1px solid #edf0f2;
     }
 
     .time-marker {
@@ -162,37 +209,59 @@
       left: 0;
       right: 0;
       height: var(--hour-h);
+      padding: .15rem .5rem;
       border-bottom: 1px solid #edf0f2;
-      padding: .2rem .5rem;
       font-size: .76rem;
       color: #6c757d;
       font-weight: 600;
       background: transparent;
     }
 
-    .day-col {
-      min-height: calc(var(--hour-h) * 10);
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, var(--day-col-w));
       position: relative;
+    }
+
+    .day-lane {
+      position: relative;
+      height: calc(var(--lane-label-h) + (10 * var(--hour-h)));
+      border-bottom: 1px solid var(--efm-border);
+      border-right: 1px solid var(--efm-border);
       background:
+        linear-gradient(180deg, #ffffff 0, #ffffff var(--lane-label-h), #f9fafb var(--lane-label-h), #f9fafb 100%),
         repeating-linear-gradient(
           to bottom,
-          #ffffff 0,
-          #ffffff calc(var(--hour-h) - 1px),
-          #edf0f2 calc(var(--hour-h) - 1px),
-          #edf0f2 var(--hour-h)
+          transparent 0,
+          transparent calc(var(--lane-label-h) + var(--hour-h) - 1px),
+          #edf0f2 calc(var(--lane-label-h) + var(--hour-h) - 1px),
+          #edf0f2 calc(var(--lane-label-h) + var(--hour-h))
+        );
+      background-size: 100% 100%, 100% 100%;
+      background-position: 0 0, 0 0;
+    }
+
+    .day-lane:hover {
+      background:
+        linear-gradient(0deg, rgba(13,110,253,.04), rgba(13,110,253,.04)),
+        linear-gradient(180deg, #ffffff 0, #ffffff var(--lane-label-h), #f9fafb var(--lane-label-h), #f9fafb 100%),
+        repeating-linear-gradient(
+          to bottom,
+          transparent 0,
+          transparent calc(var(--lane-label-h) + var(--hour-h) - 1px),
+          #edf0f2 calc(var(--lane-label-h) + var(--hour-h) - 1px),
+          #edf0f2 calc(var(--lane-label-h) + var(--hour-h))
         );
     }
 
-    .day-col:hover {
-      background:
-        linear-gradient(0deg, rgba(13,110,253,.04), rgba(13,110,253,.04)),
-        repeating-linear-gradient(
-          to bottom,
-          #ffffff 0,
-          #ffffff calc(var(--hour-h) - 1px),
-          #edf0f2 calc(var(--hour-h) - 1px),
-          #edf0f2 var(--hour-h)
-        );
+    .lane-title {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--lane-label-h);
+      border-bottom: 1px solid #edf0f2;
+      background: rgba(255,255,255,.92);
     }
 
     .reservation-block {
@@ -206,6 +275,7 @@
       box-shadow: 0 6px 16px rgba(0,0,0,.08);
       overflow: hidden;
       cursor: pointer;
+      z-index: 5;
     }
 
     .reservation-block.solo {
@@ -304,42 +374,9 @@
     .month-pill.checkout { background: rgba(255,193,7,.18); color: #8a6d00; }
     .month-pill.block { background: rgba(220,53,69,.12); color: #b02a37; }
 
-    .mini-legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: .5rem;
-    }
-
-    .legend-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: .45rem;
-      padding: .35rem .65rem;
-      border-radius: 999px;
-      font-size: .8rem;
-      font-weight: 600;
-      background: #fff;
-      border: 1px solid var(--efm-border);
-    }
-
-    .legend-dot {
-      width: .65rem;
-      height: .65rem;
-      border-radius: 50%;
-      display: inline-block;
-    }
-
-    .empty-state {
-      border: 1px dashed rgba(13,110,253,.22);
-      background: rgba(13,110,253,.03);
-      border-radius: 1rem;
-      padding: 1rem;
-      color: #6c757d;
-    }
-
     @media (max-width: 1200px) {
       :root {
-        --resource-col-w: 132px;
+        --resource-col-w: 140px;
         --time-col-w: 72px;
         --day-col-w: 170px;
       }
@@ -369,7 +406,7 @@
             <div class="text-muted small">Reserve aircraft time slots for solo hire or instruction. Route details stay in the book-out flow.</div>
           </div>
           <div class="d-flex flex-wrap gap-2 align-items-center">
-            <span class="toolbar-chip">Google-style Week View</span>
+            <span class="toolbar-chip">Week + Month View</span>
             <button class="btn btn-primary" id="newReservationBtn">New Reservation</button>
           </div>
         </div>
@@ -504,7 +541,7 @@
     const AIRCRAFT_LIST = ["G-AZWS", "G-BPAF", "G-EDGI", "G-AVYL", "G-BULL"];
     const DAY_START_HOUR = 8;
     const DAY_END_HOUR = 18;
-    const PX_PER_MIN = 64 / 60; // matches --hour-h
+    const PX_PER_MIN = 64 / 60;
 
     const state = {
       viewMode: "week",
@@ -578,6 +615,22 @@
       });
     });
 
+    function populateAircraftSelectors() {
+      const filter = document.getElementById("aircraftFilter");
+      const modal = document.getElementById("resAircraft");
+      AIRCRAFT_LIST.forEach(reg => {
+        const fOpt = document.createElement("option");
+        fOpt.value = reg;
+        fOpt.textContent = reg;
+        filter.appendChild(fOpt);
+
+        const mOpt = document.createElement("option");
+        mOpt.value = reg;
+        mOpt.textContent = reg;
+        modal.appendChild(mOpt);
+      });
+    }
+
     function bindEvents() {
       document.getElementById("viewMode").addEventListener("change", e => {
         state.viewMode = e.target.value;
@@ -622,23 +675,6 @@
       document.getElementById("resType").addEventListener("change", toggleInstructorField);
     }
 
-    function populateAircraftSelectors() {
-      const filter = document.getElementById("aircraftFilter");
-      const modal = document.getElementById("resAircraft");
-
-      AIRCRAFT_LIST.forEach(reg => {
-        const fOpt = document.createElement("option");
-        fOpt.value = reg;
-        fOpt.textContent = reg;
-        filter.appendChild(fOpt);
-
-        const mOpt = document.createElement("option");
-        mOpt.value = reg;
-        mOpt.textContent = reg;
-        modal.appendChild(mOpt);
-      });
-    }
-
     function syncToolbar() {
       document.getElementById("viewMode").value = state.viewMode;
       document.getElementById("anchorDate").value = formatDateInput(state.anchorDate);
@@ -666,66 +702,101 @@
       const host = document.getElementById("calendarHost");
       host.innerHTML = "";
 
-      const grid = document.createElement("div");
-      grid.className = "week-grid";
-
-      const days = getWeekDays(startOfWeek(state.anchorDate));
       const aircraft = filteredAircraft();
-
-      grid.appendChild(cell("top-left sticky-left", "Aircraft"));
-      grid.appendChild(cell("blank-top sticky-left-2", ""));
-      days.forEach(day => {
-        const c = document.createElement("div");
-        c.className = "grid-cell day-header";
-        c.innerHTML = `<div class="dow">${day.toLocaleDateString(undefined, { weekday: 'short' })}</div><div class="date">${day.getDate()} ${day.toLocaleDateString(undefined, { month: 'short' })}</div>`;
-        grid.appendChild(c);
-      });
-
-      aircraft.forEach(reg => {
-        const resource = document.createElement("div");
-        resource.className = "grid-cell resource-cell sticky-left";
-        resource.innerHTML = `<div class="resource-reg">${reg}</div><div class="resource-sub">Click any day column to add</div>`;
-        grid.appendChild(resource);
-
-        const timeCol = document.createElement("div");
-        timeCol.className = "grid-cell time-col sticky-left-2";
-        for (let h = DAY_START_HOUR; h < DAY_END_HOUR; h++) {
-          const marker = document.createElement("div");
-          marker.className = "time-marker";
-          marker.style.top = `${(h - DAY_START_HOUR) * 64}px`;
-          marker.textContent = `${String(h).padStart(2, '0')}:00`;
-          timeCol.appendChild(marker);
-        }
-        grid.appendChild(timeCol);
-
-        days.forEach(day => {
-          const dateKey = formatDateInput(day);
-          const col = document.createElement("div");
-          col.className = "grid-cell day-col";
-          col.addEventListener("click", (e) => {
-            if (e.target !== col) return;
-            openReservationModal({ aircraft: reg, date: dateKey, start: "10:00", end: "11:00" });
-          });
-
-          const items = allEvents().filter(x => x.aircraft === reg && x.date === dateKey);
-          items.forEach(item => col.appendChild(buildWeekReservation(item)));
-
-          grid.appendChild(col);
-        });
-      });
-
       if (!aircraft.length) {
         host.innerHTML = `<div class="p-4"><div class="empty-state">No aircraft match the current filter.</div></div>`;
         return;
       }
 
-      host.appendChild(grid);
+      const weekView = document.createElement("div");
+      weekView.className = "week-view";
+
+      const header = document.createElement("div");
+      header.className = "week-header";
+      header.appendChild(divWithClass("corner-head", "Aircraft"));
+      header.appendChild(divWithClass("time-head", "Time"));
+
+      const days = getWeekDays(startOfWeek(state.anchorDate));
+      days.forEach(day => {
+        const h = document.createElement("div");
+        h.className = "day-head";
+        h.innerHTML = `<div class="dow">${day.toLocaleDateString(undefined, { weekday: 'short' })}</div><div class="date">${day.getDate()} ${day.toLocaleDateString(undefined, { month: 'short' })}</div>`;
+        header.appendChild(h);
+      });
+
+      const body = document.createElement("div");
+      body.className = "week-body";
+
+      const resourceCol = document.createElement("div");
+      resourceCol.className = "resource-col";
+      aircraft.forEach(reg => {
+        const lane = document.createElement("div");
+        lane.className = "lane-label";
+        lane.innerHTML = `<div class="resource-reg">${reg}</div><div class="resource-sub">Click a day lane to add</div>`;
+        resourceCol.appendChild(lane);
+      });
+
+      const timeCol = document.createElement("div");
+      timeCol.className = "time-col";
+      aircraft.forEach(() => {
+        const block = document.createElement("div");
+        block.className = "time-block";
+
+        const laneTitle = document.createElement("div");
+        laneTitle.className = "lane-title-time";
+        block.appendChild(laneTitle);
+
+        for (let h = DAY_START_HOUR; h < DAY_END_HOUR; h++) {
+          const marker = document.createElement("div");
+          marker.className = "time-marker";
+          marker.style.top = `${varLaneTitlePx() + ((h - DAY_START_HOUR) * 64)}px`;
+          marker.textContent = `${String(h).padStart(2, '0')}:00`;
+          block.appendChild(marker);
+        }
+
+        timeCol.appendChild(block);
+      });
+
+      const daysCol = document.createElement("div");
+      daysCol.className = "days-col";
+      const daysGrid = document.createElement("div");
+      daysGrid.className = "days-grid";
+
+      aircraft.forEach(reg => {
+        days.forEach(day => {
+          const dateKey = formatDateInput(day);
+          const lane = document.createElement("div");
+          lane.className = "day-lane";
+          lane.addEventListener("click", (e) => {
+            if (e.target !== lane && !e.target.classList.contains("lane-title")) return;
+            openReservationModal({ aircraft: reg, date: dateKey, start: "10:00", end: "11:00" });
+          });
+
+          const laneTitle = document.createElement("div");
+          laneTitle.className = "lane-title";
+          lane.appendChild(laneTitle);
+
+          const items = allEvents().filter(x => x.aircraft === reg && x.date === dateKey);
+          items.forEach(item => lane.appendChild(buildWeekReservation(item)));
+
+          daysGrid.appendChild(lane);
+        });
+      });
+
+      daysCol.appendChild(daysGrid);
+      body.appendChild(resourceCol);
+      body.appendChild(timeCol);
+      body.appendChild(daysCol);
+
+      weekView.appendChild(header);
+      weekView.appendChild(body);
+      host.appendChild(weekView);
     }
 
     function buildWeekReservation(item) {
       const block = document.createElement("div");
       block.className = `reservation-block ${bookingClass(item.bookingType)}`;
-      const top = timeToMinutes(item.start) - (DAY_START_HOUR * 60);
+      const top = varLaneTitlePx() + (timeToMinutes(item.start) - (DAY_START_HOUR * 60));
       const height = Math.max(timeToMinutes(item.end) - timeToMinutes(item.start), 30);
       block.style.top = `${top * PX_PER_MIN}px`;
       block.style.height = `${height * PX_PER_MIN}px`;
@@ -796,7 +867,6 @@
       const isEdit = !!item.reservationId;
       document.getElementById("reservationModalTitle").textContent = isEdit ? "Edit Reservation" : "New Reservation";
       document.getElementById("deleteReservationBtn").classList.toggle("d-none", !isEdit || String(item.bookingType).toUpperCase() === 'BLOCK');
-
       document.getElementById("reservationId").value = item.reservationId || "";
       document.getElementById("resAircraft").value = item.aircraft || AIRCRAFT_LIST[0];
       document.getElementById("resType").value = item.bookingType && item.bookingType !== 'BLOCK' ? item.bookingType : 'SOLO';
@@ -881,7 +951,6 @@
     function hasConflict(payload, ignoreId = "") {
       return allEvents().some(item => {
         if (ignoreId && item.reservationId === ignoreId) return false;
-        if (item.bookingType === 'BLOCK' && false) return false;
         if (item.aircraft !== payload.aircraft || item.date !== payload.date) return false;
         return timeToMinutes(payload.start) < timeToMinutes(item.end) && timeToMinutes(payload.end) > timeToMinutes(item.start);
       });
@@ -969,9 +1038,13 @@
       return '';
     }
 
-    function cell(className, text) {
+    function varLaneTitlePx() {
+      return 44;
+    }
+
+    function divWithClass(className, text) {
       const d = document.createElement('div');
-      d.className = `grid-cell ${className}`.trim();
+      d.className = className;
       d.textContent = text;
       return d;
     }
