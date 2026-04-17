@@ -653,6 +653,8 @@
         const data = await res.json();
 
         const items = Array.isArray(data?.items) ? data.items : [];
+        console.log("Reservations from API:", items);
+
         state.reservations = items
           .filter(item => item.bookingType !== "BLOCK")
           .map(mapApiReservationToUi);
@@ -660,6 +662,8 @@
         state.blocks = items
           .filter(item => item.bookingType === "BLOCK")
           .map(mapApiReservationToUi);
+
+        console.log("UI reservations:", state.reservations);
       } catch (err) {
         console.error(err);
         state.reservations = [];
@@ -671,9 +675,9 @@
     function mapApiReservationToUi(item) {
       return {
         reservationId: item.reservationId,
-        aircraft: item.PK,
-        date: item.date || String(item.startUtc || item.SK || "").slice(0, 10),
-        start: isoToTime(item.startUtc || item.SK),
+        aircraft: item.aircraft,
+        date: isoToLocalDate(item.startUtc),
+        start: isoToTime(item.startUtc),
         end: isoToTime(item.endUtc),
         bookingType: item.bookingType || "SOLO",
         memberName: item.userName || "Reserved",
@@ -735,7 +739,7 @@
           const marker = document.createElement("div");
           marker.className = "time-marker";
           marker.style.top = `${varLaneTitlePx() + ((h - DAY_START_HOUR) * 64)}px`;
-          marker.textContent = `${String(h).padStart(2, '0')}:00`;
+          marker.textContent = `${String(h).padStart(2, "0")}:00`;
           block.appendChild(marker);
         }
 
@@ -781,19 +785,24 @@
     function buildWeekReservation(item) {
       const block = document.createElement("div");
       block.className = `reservation-block ${bookingClass(item.bookingType)}`;
-      const top = varLaneTitlePx() + (timeToMinutes(item.start) - (DAY_START_HOUR * 60));
-      const height = Math.max(timeToMinutes(item.end) - timeToMinutes(item.start), 30);
-      block.style.top = `${top * PX_PER_MIN}px`;
-      block.style.height = `${height * PX_PER_MIN}px`;
+
+      const minutesFromStart = timeToMinutes(item.start) - (DAY_START_HOUR * 60);
+      const durationMinutes = Math.max(timeToMinutes(item.end) - timeToMinutes(item.start), 30);
+
+      block.style.top = `${varLaneTitlePx() + (minutesFromStart * PX_PER_MIN)}px`;
+      block.style.height = `${durationMinutes * PX_PER_MIN}px`;
+
       block.innerHTML = `
         <div class="res-name">${escapeHtml(item.memberName || "Reserved")}</div>
         <div class="res-time">${item.start} – ${item.end}</div>
         <div class="res-sub">${labelForType(item.bookingType)}${item.instructorName ? ` · ${escapeHtml(item.instructorName)}` : ""}</div>
       `;
+
       block.addEventListener("click", (e) => {
         e.stopPropagation();
         openReservationModal(item);
       });
+
       return block;
     }
 
@@ -1087,8 +1096,14 @@
         .replaceAll("'", "&#039;");
     }
 
-    function offsetDate(days) {
-      return formatDateInput(addDays(startOfWeek(new Date()), days));
+    function isoToLocalDate(iso) {
+      if (!iso) return "";
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return "";
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
     }
 
     function localDateTimeToUtcIso(dateStr, timeStr) {
