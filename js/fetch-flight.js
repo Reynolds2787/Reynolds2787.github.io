@@ -328,7 +328,7 @@ function getEtaStatus(flight) {
 
   if (diffMinutes < 0) {
     return {
-      label: `ETA +${minutesPastEta}m`,
+      label: "Check Landed",
       chipClass: "eta-soon",
       cardClass: "soon"
     };
