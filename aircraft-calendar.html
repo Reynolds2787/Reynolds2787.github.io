@@ -879,52 +879,53 @@
     }
 
     async function saveReservation() {
-      const payload = readReservationForm();
-      if (!payload) return;
+  const payload = readReservationForm();
+  if (!payload) return;
 
-      if (timeToMinutes(payload.end) <= timeToMinutes(payload.start)) {
-        showReservationError("End time must be after start time.");
-        return;
-      }
+  if (timeToMinutes(payload.end) <= timeToMinutes(payload.start)) {
+    showReservationError("End time must be after start time.");
+    return;
+  }
 
-      const saveBtn = document.getElementById("saveReservationBtn");
-      saveBtn.disabled = true;
+  const saveBtn = document.getElementById("saveReservationBtn");
+  saveBtn.disabled = true;
 
-      try {
-        const startUtc = localDateTimeToUtcIso(payload.date, payload.start);
-        const endUtc = localDateTimeToUtcIso(payload.date, payload.end);
+  try {
+    const startUtc = localDateTimeToUtcIso(payload.date, payload.start);
+    const endUtc = localDateTimeToUtcIso(payload.date, payload.end);
 
-        const res = await authFetch(RESERVATIONS_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            aircraft: payload.aircraft,
-            bookingType: payload.bookingType,
-            startUtc,
-            endUtc,
-            instructorId: payload.instructorId,
-            instructorName: payload.instructorName,
-            notes: payload.notes
-          })
-        });
+    const res = await authFetch(RESERVATIONS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        aircraft: payload.aircraft,
+        bookingType: payload.bookingType,
+        startUtc,
+        endUtc,
+        instructorId: payload.instructorId,
+        instructorName: payload.instructorName,
+        notes: payload.notes,
+        userName: localStorage.getItem("username") || ""
+      })
+    });
 
-        const data = await res.json().catch(() => ({}));
+    const data = await res.json().catch(() => ({}));
 
-        if (!res.ok) {
-          showReservationError(data.error || `Save failed (${res.status})`);
-          return;
-        }
-
-        reservationModal.hide();
-        await render();
-        window.showToast?.("Reservation saved", { variant: "success" });
-      } catch (err) {
-        console.error(err);
-        showReservationError("Unable to save reservation.");
-      } finally {
-        saveBtn.disabled = false;
-      }
+    if (!res.ok) {
+      showReservationError(data.error || `Save failed (${res.status})`);
+      return;
     }
+
+    reservationModal.hide();
+    await render();
+    window.showToast?.("Reservation saved", { variant: "success" });
+  } catch (err) {
+    console.error(err);
+    showReservationError("Unable to save reservation.");
+  } finally {
+    saveBtn.disabled = false;
+  }
+}
 
     async function deleteReservation() {
       const reservationId = document.getElementById("reservationId").value;
