@@ -232,7 +232,7 @@ function normaliseFlights(data) {
 function renderFlightCard(flight) {
   const fr24Url = buildFr24Url(flight.aircraft);
   const etaDisplay = formatEtaForDisplay(flight.eta);
-  const etaStatus = getEtaStatus(flight.eta);
+  const etaStatus = getEtaStatus(flight);
 
   return `
     <div class="col-md-6 col-xl-4">
@@ -301,8 +301,8 @@ function renderFlightCard(flight) {
   `;
 }
 
-function getEtaStatus(etaValue) {
-  const etaDate = parseEta(etaValue);
+function getEtaStatus(flight) {
+  const etaDate = parseEta(flight.eta);
   if (!etaDate) {
     return {
       label: "ETA Unknown",
@@ -312,12 +312,25 @@ function getEtaStatus(etaValue) {
   }
 
   const diffMinutes = Math.round((etaDate.getTime() - Date.now()) / 60000);
+  const minutesPastEta = Math.abs(diffMinutes);
+  const destination = String(flight.to || "").trim().toUpperCase();
+  const goingToKemble = destination === "KEMBLE" || destination === "EGBP";
+
+  if (diffMinutes <= -60) {
+    return {
+      label: goingToKemble
+        ? `Overdue ${minutesPastEta}m`
+        : "Check Landed",
+      chipClass: "eta-overdue",
+      cardClass: "overdue"
+    };
+  }
 
   if (diffMinutes < 0) {
     return {
-      label: `Overdue ${Math.abs(diffMinutes)}m`,
-      chipClass: "eta-overdue",
-      cardClass: "overdue"
+      label: `ETA +${minutesPastEta}m`,
+      chipClass: "eta-soon",
+      cardClass: "soon"
     };
   }
 
