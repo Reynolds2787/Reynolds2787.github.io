@@ -62,8 +62,6 @@
       transform: translateX(3px);
     }
 
-
-
     .user-row:hover td {
       background-color: rgba(13, 110, 253, 0.05);
     }
@@ -261,6 +259,61 @@
                   </div>
                 </div>
 
+                <hr class="my-4">
+
+                <div class="section-title mb-3">Instructor Ratings</div>
+
+                <div class="row g-3">
+                  <div class="col-12">
+                    <div class="form-text mb-2">
+                      Tick any instructional or examining privileges held by this user.
+                    </div>
+
+                    <div class="row g-2">
+                      <div class="col-6 col-md-4">
+                        <div class="form-check">
+                          <input class="form-check-input instructor-rating" type="checkbox" id="instr_FI" value="FI">
+                          <label class="form-check-label" for="instr_FI">FI</label>
+                        </div>
+                      </div>
+
+                      <div class="col-6 col-md-4">
+                        <div class="form-check">
+                          <input class="form-check-input instructor-rating" type="checkbox" id="instr_FE" value="FE">
+                          <label class="form-check-label" for="instr_FE">FE</label>
+                        </div>
+                      </div>
+
+                      <div class="col-6 col-md-4">
+                        <div class="form-check">
+                          <input class="form-check-input instructor-rating" type="checkbox" id="instr_CRI" value="CRI">
+                          <label class="form-check-label" for="instr_CRI">CRI</label>
+                        </div>
+                      </div>
+
+                      <div class="col-6 col-md-4">
+                        <div class="form-check">
+                          <input class="form-check-input instructor-rating" type="checkbox" id="instr_CFI" value="CFI">
+                          <label class="form-check-label" for="instr_CFI">CFI</label>
+                        </div>
+                      </div>
+
+                      <div class="col-6 col-md-4">
+                        <div class="form-check">
+                          <input class="form-check-input instructor-rating" type="checkbox" id="instr_FIE" value="FIE">
+                          <label class="form-check-label" for="instr_FIE">FIE</label>
+                        </div>
+                      </div>
+
+                      <div class="col-6 col-md-4">
+                        <div class="form-check">
+                          <input class="form-check-input instructor-rating" type="checkbox" id="instr_IRE" value="IRE">
+                          <label class="form-check-label" for="instr_IRE">IRE</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
               </form>
             </div>
@@ -269,7 +322,6 @@
       </div>
 
     </div>
-  </div>
   </div>
 
   <script src="js/auth.js"></script>
@@ -281,6 +333,8 @@
   <script>
     const API_BASE = "https://iz4r1touxe.execute-api.eu-west-2.amazonaws.com";
     const el = (id) => document.getElementById(id);
+
+    const INSTRUCTOR_RATINGS = ["FI", "FE", "CRI", "CFI", "FIE", "IRE"];
 
     let allUsers = [];
     let selectedUserId = "";
@@ -325,10 +379,17 @@
       return Number.isNaN(d.getTime()) ? value : d.toLocaleString();
     }
 
-    function yesNoPill(value) {
-      return value === "Yes"
-        ? `<span class="pill-yes">Yes</span>`
-        : `<span class="pill-no">No</span>`;
+    function setInstructorRatings(values = []) {
+      const set = new Set(Array.isArray(values) ? values : []);
+      document.querySelectorAll(".instructor-rating").forEach(cb => {
+        cb.checked = set.has(cb.value);
+      });
+    }
+
+    function getInstructorRatings() {
+      return Array.from(document.querySelectorAll(".instructor-rating:checked"))
+        .map(cb => cb.value)
+        .filter(v => INSTRUCTOR_RATINGS.includes(v));
     }
 
     function clearForm() {
@@ -344,6 +405,7 @@
       el("bulldog").value = "No";
       el("complex").value = "No";
       el("aeros").value = "No";
+      setInstructorRatings([]);
     }
 
     function fillForm(data) {
@@ -358,6 +420,7 @@
       el("bulldog").value = data.bulldog || "No";
       el("complex").value = data.complex || "No";
       el("aeros").value = data.aeros || "No";
+      setInstructorRatings(data.instructorRatings || []);
     }
 
     function readForm() {
@@ -369,7 +432,8 @@
         efis: el("efis").value || "No",
         bulldog: el("bulldog").value || "No",
         complex: el("complex").value || "No",
-        aeros: el("aeros").value || "No"
+        aeros: el("aeros").value || "No",
+        instructorRatings: getInstructorRatings()
       };
     }
 
