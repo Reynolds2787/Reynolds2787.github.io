@@ -276,10 +276,7 @@ function renderFlightCard(flight) {
               <div class="meta-label">PIC</div>
               <div class="meta-value">${escapeHtml(flight.picName)}</div>
             </div>
-            <div class="col-6">
-              <div class="meta-label">Flight No</div>
-              <div class="meta-value">${escapeHtml(flight.flightNumber)}</div>
-            </div>
+        
             <div class="col-6">
               <div class="meta-label">Reason</div>
               <div class="meta-value">${escapeHtml(flight.reason)}</div>
