@@ -19,6 +19,7 @@
       --hour-h: 64px;
       --header-h: 66px;
       --lane-label-h: 44px;
+      --visible-hours: 16;
     }
 
     body {
@@ -182,7 +183,7 @@
     }
 
     .time-block {
-      height: calc(var(--lane-label-h) + (10 * var(--hour-h)));
+      height: calc(var(--lane-label-h) + (var(--visible-hours) * var(--hour-h)));
       border-bottom: 1px solid var(--efm-border);
       background: linear-gradient(180deg, #fcfcfd, #f9fafb);
       position: relative;
@@ -538,8 +539,8 @@
 
   <script>
     const AIRCRAFT_LIST = ["G-AZWS", "G-BPAF", "G-EDGI", "G-AVYL", "G-BULL"];
-    const DAY_START_HOUR = 8;
-    const DAY_END_HOUR = 18;
+    const DAY_START_HOUR = 5;
+    const DAY_END_HOUR = 21;
     const PX_PER_MIN = 64 / 60;
 
     const state = {
