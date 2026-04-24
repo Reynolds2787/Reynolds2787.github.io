@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,7 +11,7 @@
 
   <style>
     :root {
-      --efm-border: rgba(0,0,0,.08);
+      --efm-border: rgba(0, 0, 0, .08);
       --efm-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
       --resource-col-w: 160px;
       --time-col-w: 78px;
@@ -82,8 +83,8 @@
     }
 
     .empty-state {
-      border: 1px dashed rgba(13,110,253,.22);
-      background: rgba(13,110,253,.03);
+      border: 1px dashed rgba(13, 110, 253, .22);
+      background: rgba(13, 110, 253, .03);
       border-radius: 1rem;
       padding: 1rem;
       color: #6c757d;
@@ -100,7 +101,7 @@
       border-left: 1px solid var(--efm-border);
     }
 
-    .week-header > div {
+    .week-header>div {
       border-right: 1px solid var(--efm-border);
       border-bottom: 1px solid var(--efm-border);
       background: linear-gradient(180deg, #fbfcfd, #f3f6f9);
@@ -218,28 +219,24 @@
       border-right: 1px solid var(--efm-border);
       background:
         linear-gradient(180deg, #ffffff 0, #ffffff var(--lane-label-h), #f9fafb var(--lane-label-h), #f9fafb 100%),
-        repeating-linear-gradient(
-          to bottom,
+        repeating-linear-gradient(to bottom,
           transparent 0,
           transparent calc(var(--lane-label-h) + var(--hour-h) - 1px),
           #edf0f2 calc(var(--lane-label-h) + var(--hour-h) - 1px),
-          #edf0f2 calc(var(--lane-label-h) + var(--hour-h))
-        );
+          #edf0f2 calc(var(--lane-label-h) + var(--hour-h)));
       background-size: 100% 100%, 100% 100%;
       background-position: 0 0, 0 0;
     }
 
     .day-lane:hover {
       background:
-        linear-gradient(0deg, rgba(13,110,253,.04), rgba(13,110,253,.04)),
+        linear-gradient(0deg, rgba(13, 110, 253, .04), rgba(13, 110, 253, .04)),
         linear-gradient(180deg, #ffffff 0, #ffffff var(--lane-label-h), #f9fafb var(--lane-label-h), #f9fafb 100%),
-        repeating-linear-gradient(
-          to bottom,
+        repeating-linear-gradient(to bottom,
           transparent 0,
           transparent calc(var(--lane-label-h) + var(--hour-h) - 1px),
           #edf0f2 calc(var(--lane-label-h) + var(--hour-h) - 1px),
-          #edf0f2 calc(var(--lane-label-h) + var(--hour-h))
-        );
+          #edf0f2 calc(var(--lane-label-h) + var(--hour-h)));
     }
 
     .lane-title {
@@ -249,7 +246,7 @@
       right: 0;
       height: var(--lane-label-h);
       border-bottom: 1px solid #edf0f2;
-      background: rgba(255,255,255,.92);
+      background: rgba(255, 255, 255, .92);
     }
 
     .reservation-block {
@@ -259,8 +256,8 @@
       border-radius: .9rem;
       padding: .45rem .55rem;
       color: #212529;
-      border: 1px solid rgba(0,0,0,.08);
-      box-shadow: 0 6px 16px rgba(0,0,0,.08);
+      border: 1px solid rgba(0, 0, 0, .08);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, .08);
       overflow: hidden;
       cursor: pointer;
       z-index: 5;
@@ -339,7 +336,7 @@
     }
 
     .month-cell:hover {
-      background: rgba(13,110,253,.04);
+      background: rgba(13, 110, 253, .04);
     }
 
     .month-date {
@@ -357,10 +354,25 @@
       text-overflow: ellipsis;
     }
 
-    .month-pill.solo { background: rgba(13,110,253,.10); color: #0d6efd; }
-    .month-pill.instruction { background: rgba(25,135,84,.10); color: #198754; }
-    .month-pill.checkout { background: rgba(255,193,7,.18); color: #8a6d00; }
-    .month-pill.block { background: rgba(220,53,69,.12); color: #b02a37; }
+    .month-pill.solo {
+      background: rgba(13, 110, 253, .10);
+      color: #0d6efd;
+    }
+
+    .month-pill.instruction {
+      background: rgba(25, 135, 84, .10);
+      color: #198754;
+    }
+
+    .month-pill.checkout {
+      background: rgba(255, 193, 7, .18);
+      color: #8a6d00;
+    }
+
+    .month-pill.block {
+      background: rgba(220, 53, 69, .12);
+      color: #b02a37;
+    }
 
     @media (max-width: 1200px) {
       :root {
@@ -378,6 +390,7 @@
   <script src="js/due-soon-badge.js" defer></script>
   <script src="js/loadNavbar.js" defer></script>
 </head>
+
 <body>
   <div class="container-fluid p-2 bg-primary text-white text-center">
     <h2 class="mb-0">AIRCRAFT CALENDAR</h2>
@@ -436,7 +449,8 @@
 
     <div class="card-shell fade-in" id="calendarCard">
       <div class="card-body p-0">
-        <div class="p-3 border-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+        <div
+          class="p-3 border-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
           <div>
             <div class="section-title mb-1">Schedule</div>
             <div class="fw-semibold" id="rangeLabel">Loading…</div>
@@ -498,15 +512,13 @@
                 <label class="form-label fw-semibold" for="resInstructor">Instructor</label>
                 <select class="form-select" id="resInstructor">
                   <option value="">Select instructor...</option>
-                  <option value="inst-alex">Alex</option>
-                  <option value="inst-james">James</option>
-                  <option value="inst-emma">Emma</option>
                 </select>
               </div>
 
               <div class="col-12">
                 <label class="form-label fw-semibold" for="resNotes">Notes</label>
-                <textarea class="form-control" id="resNotes" rows="3" placeholder="Optional notes, e.g. lesson booking or morning slot"></textarea>
+                <textarea class="form-control" id="resNotes" rows="3"
+                  placeholder="Optional notes, e.g. lesson booking or morning slot"></textarea>
               </div>
             </div>
           </form>
@@ -544,12 +556,17 @@
 
     let reservationModal;
 
-    document.addEventListener("DOMContentLoaded", () => {
+    const INSTRUCTORS_URL =
+      window.INSTRUCTORS_URL ||
+      "https://zq4zmij44a.execute-api.eu-west-2.amazonaws.com/instructors";
+
+    document.addEventListener("DOMContentLoaded", async () => {
       reservationModal = new bootstrap.Modal(document.getElementById("reservationModal"));
       populateAircraftSelectors();
+      await loadInstructorOptions();
       bindEvents();
       syncToolbar();
-      render();
+      await render();
       requestAnimationFrame(() => {
         document.getElementById("toolbarCard")?.classList.add("ready");
         document.getElementById("calendarCard")?.classList.add("ready");
@@ -669,6 +686,38 @@
         state.reservations = [];
         state.blocks = [];
         window.showToast?.("Unable to load reservations", { variant: "danger" });
+      }
+    }
+
+
+
+    async function loadInstructorOptions(selectedValue = "") {
+      const select = document.getElementById("resInstructor");
+      select.innerHTML = `<option value="">Select instructor...</option>`;
+
+      try {
+        const res = await authFetch(INSTRUCTORS_URL, { method: "GET" });
+        if (!res.ok) {
+          throw new Error(`Instructor load failed (${res.status})`);
+        }
+
+        const data = await res.json();
+        const items = Array.isArray(data?.items) ? data.items : [];
+
+        items.forEach(item => {
+          const opt = document.createElement("option");
+          opt.value = item.userId;
+          opt.textContent = item.displayLabel || item.name || item.userId;
+          opt.dataset.name = item.name || "";
+          select.appendChild(opt);
+        });
+
+        if (selectedValue) {
+          select.value = selectedValue;
+        }
+      } catch (err) {
+        console.error(err);
+        window.showToast?.("Unable to load instructors", { variant: "danger" });
       }
     }
 
@@ -856,19 +905,23 @@
       host.appendChild(grid);
     }
 
-    function openReservationModal(item = {}) {
+    async function openReservationModal(item = {}) {
       clearReservationError();
+
       const isEdit = !!item.reservationId;
       document.getElementById("reservationModalTitle").textContent = isEdit ? "Edit Reservation" : "New Reservation";
       document.getElementById("deleteReservationBtn").classList.toggle("d-none", !isEdit || String(item.bookingType).toUpperCase() === "BLOCK");
+
       document.getElementById("reservationId").value = item.reservationId || "";
       document.getElementById("resAircraft").value = item.aircraft || AIRCRAFT_LIST[0];
       document.getElementById("resType").value = item.bookingType && item.bookingType !== "BLOCK" ? item.bookingType : "SOLO";
       document.getElementById("resDate").value = item.date || formatDateInput(state.anchorDate);
       document.getElementById("resStart").value = item.start || "10:00";
       document.getElementById("resEnd").value = item.end || "11:00";
-      document.getElementById("resInstructor").value = item.instructorId || "";
       document.getElementById("resNotes").value = item.notes || "";
+
+      await loadInstructorOptions(item.instructorId || "");
+
       toggleInstructorField();
       reservationModal.show();
     }
@@ -879,53 +932,53 @@
     }
 
     async function saveReservation() {
-  const payload = readReservationForm();
-  if (!payload) return;
+      const payload = readReservationForm();
+      if (!payload) return;
 
-  if (timeToMinutes(payload.end) <= timeToMinutes(payload.start)) {
-    showReservationError("End time must be after start time.");
-    return;
-  }
+      if (timeToMinutes(payload.end) <= timeToMinutes(payload.start)) {
+        showReservationError("End time must be after start time.");
+        return;
+      }
 
-  const saveBtn = document.getElementById("saveReservationBtn");
-  saveBtn.disabled = true;
+      const saveBtn = document.getElementById("saveReservationBtn");
+      saveBtn.disabled = true;
 
-  try {
-    const startUtc = localDateTimeToUtcIso(payload.date, payload.start);
-    const endUtc = localDateTimeToUtcIso(payload.date, payload.end);
+      try {
+        const startUtc = localDateTimeToUtcIso(payload.date, payload.start);
+        const endUtc = localDateTimeToUtcIso(payload.date, payload.end);
 
-    const res = await authFetch(RESERVATIONS_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        aircraft: payload.aircraft,
-        bookingType: payload.bookingType,
-        startUtc,
-        endUtc,
-        instructorId: payload.instructorId,
-        instructorName: payload.instructorName,
-        notes: payload.notes,
-        userName: localStorage.getItem("username") || ""
-      })
-    });
+        const res = await authFetch(RESERVATIONS_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            aircraft: payload.aircraft,
+            bookingType: payload.bookingType,
+            startUtc,
+            endUtc,
+            instructorId: payload.instructorId,
+            instructorName: payload.instructorName,
+            notes: payload.notes,
+            userName: localStorage.getItem("username") || ""
+          })
+        });
 
-    const data = await res.json().catch(() => ({}));
+        const data = await res.json().catch(() => ({}));
 
-    if (!res.ok) {
-      showReservationError(data.error || `Save failed (${res.status})`);
-      return;
+        if (!res.ok) {
+          showReservationError(data.error || `Save failed (${res.status})`);
+          return;
+        }
+
+        reservationModal.hide();
+        await render();
+        window.showToast?.("Reservation saved", { variant: "success" });
+      } catch (err) {
+        console.error(err);
+        showReservationError("Unable to save reservation.");
+      } finally {
+        saveBtn.disabled = false;
+      }
     }
-
-    reservationModal.hide();
-    await render();
-    window.showToast?.("Reservation saved", { variant: "success" });
-  } catch (err) {
-    console.error(err);
-    showReservationError("Unable to save reservation.");
-  } finally {
-    saveBtn.disabled = false;
-  }
-}
 
     async function deleteReservation() {
       const reservationId = document.getElementById("reservationId").value;
@@ -963,11 +1016,22 @@
       const date = document.getElementById("resDate").value;
       const start = document.getElementById("resStart").value;
       const end = document.getElementById("resEnd").value;
-      const instructorId = document.getElementById("resInstructor").value;
+      const instructorSelect = document.getElementById("resInstructor");
+      const instructorId = instructorSelect.value;
+      const selectedOption = instructorSelect.options[instructorSelect.selectedIndex];
       const notes = document.getElementById("resNotes").value.trim();
+
+      const instructorName = instructorId
+        ? (selectedOption?.dataset?.name || selectedOption?.textContent || "").trim()
+        : "";
 
       if (!aircraft || !bookingType || !date || !start || !end) {
         showReservationError("Please complete the required fields.");
+        return null;
+      }
+
+      if ((bookingType === "INSTRUCTION" || bookingType === "CHECKOUT") && !instructorId) {
+        showReservationError("Please select an instructor.");
         return null;
       }
 
@@ -978,7 +1042,7 @@
         start,
         end,
         instructorId: instructorId || "",
-        instructorName: instructorLabel(instructorId),
+        instructorName,
         notes
       };
     }
@@ -1142,4 +1206,5 @@
     }
   </script>
 </body>
+
 </html>
