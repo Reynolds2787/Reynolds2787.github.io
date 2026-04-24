@@ -943,24 +943,32 @@
       const saveBtn = document.getElementById("saveReservationBtn");
       saveBtn.disabled = true;
 
+      const reservationId = document.getElementById("reservationId").value;
+      const isEdit = !!reservationId;
+
       try {
         const startUtc = localDateTimeToUtcIso(payload.date, payload.start);
         const endUtc = localDateTimeToUtcIso(payload.date, payload.end);
 
-        const res = await authFetch(RESERVATIONS_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            aircraft: payload.aircraft,
-            bookingType: payload.bookingType,
-            startUtc,
-            endUtc,
-            instructorId: payload.instructorId,
-            instructorName: payload.instructorName,
-            notes: payload.notes,
-            userName: localStorage.getItem("username") || ""
-          })
-        });
+        const res = await authFetch(
+          isEdit
+            ? `${RESERVATIONS_URL}/${encodeURIComponent(reservationId)}`
+            : RESERVATIONS_URL,
+          {
+            method: isEdit ? "PUT" : "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              aircraft: payload.aircraft,
+              bookingType: payload.bookingType,
+              startUtc,
+              endUtc,
+              instructorId: payload.instructorId,
+              instructorName: payload.instructorName,
+              notes: payload.notes,
+              userName: localStorage.getItem("username") || ""
+            })
+          }
+        );
 
         const data = await res.json().catch(() => ({}));
 
