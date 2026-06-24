@@ -248,7 +248,7 @@
           <div class="col-12">
             <div class="card chart-card shadow-sm">
               <div class="card-body">
-                <div class="section-title mb-2">Oil burn per flight hour</div>
+                <div class="section-title mb-2">Oil consumption per 50 flight hours</div>
                 <div class="chart-wrap">
                   <canvas id="oilBurnChart"></canvas>
                 </div>
@@ -541,14 +541,23 @@
           });
 
 
-          const oilBurn = data.oilBurnMonthlyByAircraft || [];
+          const oilBurn = (data.oilBurnMonthlyByAircraft || []).map(row => {
+            const converted = { month: row.month };
+
+            aircraftList.forEach(reg => {
+              converted[reg] = Number(row[reg] || 0) * 50;
+            });
+
+            return converted;
+          });
+
           makeLineChart(
             "oilBurnChart",
             oilBurn.map(r => r.month),
             aircraftList,
             oilBurn,
-            "Oil burn per flight hour",
-            "Oil per flight hour"
+            "Oil consumption per 50 flight hours",
+            "Litres per 50 flight hours"
           );
 
           const fuelBurn = data.fuelBurnMonthlyByAircraft || [];
