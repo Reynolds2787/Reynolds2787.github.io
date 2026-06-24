@@ -260,10 +260,15 @@
 
       function setBusy(isBusy) {
         document.body.classList.toggle("loading", isBusy);
-        el("refreshBtn").disabled = isBusy;
-        el("thisYearBtn").disabled = isBusy;
-        el("last12Btn").disabled = isBusy;
-        el("statusText").textContent = isBusy ? "Loading stats..." : "";
+
+        if (el("refreshBtn")) el("refreshBtn").disabled = isBusy;
+        if (el("thisYearBtn")) el("thisYearBtn").disabled = isBusy;
+        if (el("last12Btn")) el("last12Btn").disabled = isBusy;
+
+        const status = el("statusText");
+        if (status) {
+          status.textContent = isBusy ? "Loading stats..." : "";
+        }
       }
 
       function showError(message) {
