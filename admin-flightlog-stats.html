@@ -244,6 +244,29 @@
             </div>
           </div>
 
+
+          <div class="col-12">
+            <div class="card chart-card shadow-sm">
+              <div class="card-body">
+                <div class="section-title mb-2">Oil burn per flight hour</div>
+                <div class="chart-wrap">
+                  <canvas id="oilBurnChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="card chart-card shadow-sm">
+              <div class="card-body">
+                <div class="section-title mb-2">Fuel burn per flight hour</div>
+                <div class="chart-wrap">
+                  <canvas id="fuelBurnChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -342,7 +365,7 @@
         }
       }
 
-      function makeLineChart(canvasId, labels, aircraftList, rows, title) {
+      function makeLineChart(canvasId, labels, aircraftList, rows, title, yAxisLabel = "Tacho hours") {
         destroyChart(canvasId);
 
         const datasets = aircraftList.map(reg => ({
@@ -365,7 +388,7 @@
             scales: {
               y: {
                 beginAtZero: true,
-                title: { display: true, text: "Tacho hours" }
+                title: { display: true, text: yAxisLabe }
               }
             }
           }
@@ -516,6 +539,27 @@
             output[reg] = value;
             output.totalHours += value;
           });
+
+
+          const oilBurn = data.oilBurnMonthlyByAircraft || [];
+          makeLineChart(
+            "oilBurnChart",
+            oilBurn.map(r => r.month),
+            aircraftList,
+            oilBurn,
+            "Oil burn per flight hour",
+            "Oil per flight hour"
+          );
+
+          const fuelBurn = data.fuelBurnMonthlyByAircraft || [];
+          makeLineChart(
+            "fuelBurnChart",
+            fuelBurn.map(r => r.month),
+            aircraftList,
+            fuelBurn,
+            "Fuel burn per flight hour",
+            "Litres per flight hour"
+          );
 
           return output;
         });
