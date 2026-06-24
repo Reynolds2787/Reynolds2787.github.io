@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>Admin - Flight Log Stats</title>
@@ -88,422 +89,493 @@
             <h1 class="h4 mb-1">Admin Statistics</h1>
             <div class="text-muted small">Flight log statistics from DynamoDB FlightLogs.</div>
           </div>
-          <div class="text-end">
-            <span class="badge bg-primary">Admin only</span>
-            <div class="status-text small text-muted mt-2" id="statusText"></div>
-          </div>
-        </div>
 
-        <div class="alert alert-danger d-none" id="errorBox"></div>
 
-        <div class="row g-3 align-items-end mb-4">
-          <div class="col-12 col-md-4">
-            <label class="form-label fw-semibold" for="startDate">Start date</label>
-            <input id="startDate" type="date" class="form-control">
-          </div>
+          <div class="alert alert-danger d-none" id="errorBox"></div>
 
-          <div class="col-12 col-md-4">
-            <label class="form-label fw-semibold" for="endDate">End date</label>
-            <input id="endDate" type="date" class="form-control">
-          </div>
+          <div class="row g-3 align-items-end mb-4">
+            <div class="col-12 col-md-4">
+              <label class="form-label fw-semibold" for="startDate">Start date</label>
+              <input id="startDate" type="date" class="form-control">
+            </div>
 
-          <div class="col-12 col-md-4 d-flex flex-wrap gap-2">
-            <button id="refreshBtn" class="btn btn-primary">Refresh</button>
-            <button id="thisYearBtn" class="btn btn-outline-secondary">This year</button>
-            <button id="last12Btn" class="btn btn-outline-secondary">Last 12 months</button>
-          </div>
-        </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label fw-semibold" for="endDate">End date</label>
+              <input id="endDate" type="date" class="form-control">
+            </div>
 
-        <div class="row g-3 mb-4">
-          <div class="col-12 col-md-3">
-            <div class="card stat-card shadow-sm h-100">
-              <div class="card-body">
-                <div class="stat-label">Flights</div>
-                <div class="stat-value" id="totalFlights">—</div>
-              </div>
+            <div class="col-12 col-md-4 d-flex flex-wrap gap-2">
+              <button id="refreshBtn" class="btn btn-primary">Refresh</button>
+              <button id="thisYearBtn" class="btn btn-outline-secondary">This year</button>
+              <button id="last12Btn" class="btn btn-outline-secondary">Last 12 months</button>
             </div>
           </div>
 
-          <div class="col-12 col-md-3">
-            <div class="card stat-card shadow-sm h-100">
-              <div class="card-body">
-                <div class="stat-label">Tacho used</div>
-                <div class="stat-value" id="totalTacho">—</div>
-              </div>
-            </div>
-          </div>
 
-          <div class="col-12 col-md-3">
-            <div class="card stat-card shadow-sm h-100">
-              <div class="card-body">
-                <div class="stat-label">Kemble landings</div>
-                <div class="stat-value" id="totalKembleLandings">—</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-12 col-md-3">
-            <div class="card stat-card shadow-sm h-100">
-              <div class="card-body">
-                <div class="stat-label">Fuel uplift</div>
-                <div class="stat-value" id="totalFuel">—</div>
-                <div class="small text-muted">Litres</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="row g-4">
-          <div class="col-12">
-            <div class="card chart-card shadow-sm">
-              <div class="card-body">
-                <div class="section-title mb-2">Monthly tacho usage</div>
-                <div class="chart-wrap">
-                  <canvas id="monthlyTachoChart"></canvas>
-                </div>
-              </div>
-            </div>
-          </div>
 
           <div class="col-12">
-            <div class="card chart-card shadow-sm">
-              <div class="card-body">
-                <div class="section-title mb-2">Cumulative tacho usage</div>
-                <div class="chart-wrap">
-                  <canvas id="cumulativeTachoChart"></canvas>
+            <label class="form-label fw-semibold mb-2">Aircraft shown on graphs</label>
+
+            <div class="d-flex flex-wrap gap-2">
+              <label class="form-check">
+                <input class="form-check-input aircraft-filter" type="checkbox" value="G-AZWS" checked>
+                <span class="form-check-label">G-AZWS</span>
+              </label>
+
+              <label class="form-check">
+                <input class="form-check-input aircraft-filter" type="checkbox" value="G-BPAF" checked>
+                <span class="form-check-label">G-BPAF</span>
+              </label>
+
+              <label class="form-check">
+                <input class="form-check-input aircraft-filter" type="checkbox" value="G-EDGI" checked>
+                <span class="form-check-label">G-EDGI</span>
+              </label>
+
+              <label class="form-check">
+                <input class="form-check-input aircraft-filter" type="checkbox" value="G-AVYL" checked>
+                <span class="form-check-label">G-AVYL</span>
+              </label>
+
+              <label class="form-check">
+                <input class="form-check-input aircraft-filter" type="checkbox" value="G-BULL" checked>
+                <span class="form-check-label">G-BULL</span>
+              </label>
+            </div>
+          </div>
+
+
+          <div class="row g-3 mb-4">
+            <div class="col-12 col-md-3">
+              <div class="card stat-card shadow-sm h-100">
+                <div class="card-body">
+                  <div class="stat-label">Flights</div>
+                  <div class="stat-value" id="totalFlights">—</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-3">
+              <div class="card stat-card shadow-sm h-100">
+                <div class="card-body">
+                  <div class="stat-label">Tacho used</div>
+                  <div class="stat-value" id="totalTacho">—</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-3">
+              <div class="card stat-card shadow-sm h-100">
+                <div class="card-body">
+                  <div class="stat-label">Kemble landings</div>
+                  <div class="stat-value" id="totalKembleLandings">—</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-3">
+              <div class="card stat-card shadow-sm h-100">
+                <div class="card-body">
+                  <div class="stat-label">Fuel uplift</div>
+                  <div class="stat-value" id="totalFuel">—</div>
+                  <div class="small text-muted">Litres</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="col-12">
-            <div class="card chart-card shadow-sm">
-              <div class="card-body">
-                <div class="section-title mb-2">Warrior fleet yearly hours</div>
-                <div class="chart-wrap">
-                  <canvas id="warriorYearlyChart"></canvas>
+          <div class="row g-4">
+            <div class="col-12">
+              <div class="card chart-card shadow-sm">
+                <div class="card-body">
+                  <div class="section-title mb-2">Monthly tacho usage</div>
+                  <div class="chart-wrap">
+                    <canvas id="monthlyTachoChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="card chart-card shadow-sm">
+                <div class="card-body">
+                  <div class="section-title mb-2">Cumulative tacho usage</div>
+                  <div class="chart-wrap">
+                    <canvas id="cumulativeTachoChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="card chart-card shadow-sm">
+                <div class="card-body">
+                  <div class="section-title mb-2">Warrior fleet yearly hours</div>
+                  <div class="chart-wrap">
+                    <canvas id="warriorYearlyChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-xl-6">
+              <div class="card chart-card shadow-sm h-100">
+                <div class="card-body">
+                  <div class="section-title mb-2">Flights by aircraft</div>
+                  <div class="chart-wrap">
+                    <canvas id="flightsByAircraftChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-xl-6">
+              <div class="card chart-card shadow-sm h-100">
+                <div class="card-body">
+                  <div class="section-title mb-2">Fuel uplift totals</div>
+                  <div class="chart-wrap">
+                    <canvas id="fuelTotalsChart"></canvas>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="col-12 col-xl-6">
-            <div class="card chart-card shadow-sm h-100">
-              <div class="card-body">
-                <div class="section-title mb-2">Flights by aircraft</div>
-                <div class="chart-wrap">
-                  <canvas id="flightsByAircraftChart"></canvas>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-12 col-xl-6">
-            <div class="card chart-card shadow-sm h-100">
-              <div class="card-body">
-                <div class="section-title mb-2">Fuel uplift totals</div>
-                <div class="chart-wrap">
-                  <canvas id="fuelTotalsChart"></canvas>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
-
       </div>
     </div>
-  </div>
 
-  <script src="js/auth.js"></script>
-  <script src="js/logout.js"></script>
-  <script src="js/admin-guard.js" defer></script>
-  <script src="js/due-soon-badge.js" defer></script>
-  <script src="js/loadNavbar.js" defer></script>
+    <script src="js/auth.js"></script>
+    <script src="js/logout.js"></script>
+    <script src="js/admin-guard.js" defer></script>
+    <script src="js/due-soon-badge.js" defer></script>
+    <script src="js/loadNavbar.js" defer></script>
 
-  <script>
-    const STATS_API_URL = "https://y92pnv4fh9.execute-api.eu-west-2.amazonaws.com/admin/flightlog-stats";
+    <script>
+      const STATS_API_URL = "https://y92pnv4fh9.execute-api.eu-west-2.amazonaws.com/admin/flightlog-stats";
 
-    const el = id => document.getElementById(id);
+      const el = id => document.getElementById(id);
 
-    let charts = {};
+      let charts = {};
 
-    function setBusy(isBusy) {
-      document.body.classList.toggle("loading", isBusy);
-      el("refreshBtn").disabled = isBusy;
-      el("thisYearBtn").disabled = isBusy;
-      el("last12Btn").disabled = isBusy;
-      el("statusText").textContent = isBusy ? "Loading stats..." : "";
-    }
-
-    function showError(message) {
-      const box = el("errorBox");
-      box.textContent = message || "Something went wrong.";
-      box.classList.remove("d-none");
-    }
-
-    function clearError() {
-      const box = el("errorBox");
-      box.textContent = "";
-      box.classList.add("d-none");
-    }
-
-    function fmtDate(d) {
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${y}-${m}-${day}`;
-    }
-
-    function setThisYear() {
-      const now = new Date();
-      el("startDate").value = `${now.getFullYear()}-01-01`;
-      el("endDate").value = `${now.getFullYear()}-12-31`;
-    }
-
-    function setLast12Months() {
-      const end = new Date();
-      const start = new Date();
-      start.setMonth(start.getMonth() - 11);
-      start.setDate(1);
-      el("startDate").value = fmtDate(start);
-      el("endDate").value = fmtDate(end);
-    }
-
-    async function waitForAuthFetch(maxMs = 2500) {
-      const start = Date.now();
-      while (Date.now() - start < maxMs) {
-        if (typeof window.authFetch === "function") return true;
-        await new Promise(r => setTimeout(r, 50));
-      }
-      return false;
-    }
-
-    async function fetchStats() {
-      const ok = await waitForAuthFetch();
-      if (!ok) throw new Error("authFetch is not available.");
-
-      const url = new URL(STATS_API_URL);
-      if (el("startDate").value) url.searchParams.set("startDate", el("startDate").value);
-      if (el("endDate").value) url.searchParams.set("endDate", el("endDate").value);
-
-      const res = await window.authFetch(url.toString(), { method: "GET" });
-
-      if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || `Stats request failed (${res.status})`);
+      function setBusy(isBusy) {
+        document.body.classList.toggle("loading", isBusy);
+        el("refreshBtn").disabled = isBusy;
+        el("thisYearBtn").disabled = isBusy;
+        el("last12Btn").disabled = isBusy;
+        el("statusText").textContent = isBusy ? "Loading stats..." : "";
       }
 
-      return await res.json();
-    }
-
-    function destroyChart(id) {
-      if (charts[id]) {
-        charts[id].destroy();
-        delete charts[id];
+      function showError(message) {
+        const box = el("errorBox");
+        box.textContent = message || "Something went wrong.";
+        box.classList.remove("d-none");
       }
-    }
 
-    function makeLineChart(canvasId, labels, aircraftList, rows, title) {
-      destroyChart(canvasId);
+      function clearError() {
+        const box = el("errorBox");
+        box.textContent = "";
+        box.classList.add("d-none");
+      }
 
-      const datasets = aircraftList.map(reg => ({
-        label: reg,
-        data: rows.map(r => Number(r[reg] || 0)),
-        tension: 0.25
-      }));
+      function fmtDate(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${y}-${m}-${day}`;
+      }
 
-      charts[canvasId] = new Chart(el(canvasId), {
-        type: "line",
-        data: { labels, datasets },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { mode: "index", intersect: false },
-          plugins: {
-            legend: { position: "bottom" },
-            title: { display: false, text: title }
+      function setThisYear() {
+        const now = new Date();
+        el("startDate").value = `${now.getFullYear()}-01-01`;
+        el("endDate").value = `${now.getFullYear()}-12-31`;
+      }
+
+      function setLast12Months() {
+        const end = new Date();
+        const start = new Date();
+        start.setMonth(start.getMonth() - 11);
+        start.setDate(1);
+        el("startDate").value = fmtDate(start);
+        el("endDate").value = fmtDate(end);
+      }
+
+      async function waitForAuthFetch(maxMs = 2500) {
+        const start = Date.now();
+        while (Date.now() - start < maxMs) {
+          if (typeof window.authFetch === "function") return true;
+          await new Promise(r => setTimeout(r, 50));
+        }
+        return false;
+      }
+
+      async function fetchStats() {
+        const ok = await waitForAuthFetch();
+        if (!ok) throw new Error("authFetch is not available.");
+
+        const url = new URL(STATS_API_URL);
+        if (el("startDate").value) url.searchParams.set("startDate", el("startDate").value);
+        if (el("endDate").value) url.searchParams.set("endDate", el("endDate").value);
+
+        const res = await window.authFetch(url.toString(), { method: "GET" });
+
+        if (!res.ok) {
+          const text = await res.text().catch(() => "");
+          throw new Error(text || `Stats request failed (${res.status})`);
+        }
+
+        return await res.json();
+      }
+
+      function destroyChart(id) {
+        if (charts[id]) {
+          charts[id].destroy();
+          delete charts[id];
+        }
+      }
+
+      function makeLineChart(canvasId, labels, aircraftList, rows, title) {
+        destroyChart(canvasId);
+
+        const datasets = aircraftList.map(reg => ({
+          label: reg,
+          data: rows.map(r => Number(r[reg] || 0)),
+          tension: 0.25
+        }));
+
+        charts[canvasId] = new Chart(el(canvasId), {
+          type: "line",
+          data: { labels, datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: "index", intersect: false },
+            plugins: {
+              legend: { position: "bottom" },
+              title: { display: false, text: title }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: { display: true, text: "Tacho hours" }
+              }
+            }
+          }
+        });
+      }
+
+      function makeWarriorChart(data) {
+        const canvasId = "warriorYearlyChart";
+        destroyChart(canvasId);
+
+        charts[canvasId] = new Chart(el(canvasId), {
+          type: "bar",
+          data: {
+            labels: data.map(r => r.year),
+            datasets: [
+              {
+                label: "G-BPAF",
+                data: data.map(r => Number(r["G-BPAF"] || 0))
+              },
+              {
+                label: "G-EDGI",
+                data: data.map(r => Number(r["G-EDGI"] || 0))
+              },
+              {
+                label: "G-AZWS",
+                data: data.map(r => Number(r["G-AZWS"] || 0))
+              },
+              {
+                label: "Fleet total",
+                data: data.map(r => Number(r.totalHours || 0)),
+                type: "line",
+                tension: 0.25
+              }
+            ]
           },
-          scales: {
-            y: {
-              beginAtZero: true,
-              title: { display: true, text: "Tacho hours" }
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: "bottom" } },
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: { display: true, text: "Tacho hours" }
+              }
             }
           }
-        }
-      });
-    }
-
-    function makeWarriorChart(data) {
-      const canvasId = "warriorYearlyChart";
-      destroyChart(canvasId);
-
-      charts[canvasId] = new Chart(el(canvasId), {
-        type: "bar",
-        data: {
-          labels: data.map(r => r.year),
-          datasets: [
-            {
-              label: "G-BPAF",
-              data: data.map(r => Number(r["G-BPAF"] || 0))
-            },
-            {
-              label: "G-EDGI",
-              data: data.map(r => Number(r["G-EDGI"] || 0))
-            },
-            {
-              label: "G-AZWS",
-              data: data.map(r => Number(r["G-AZWS"] || 0))
-            },
-            {
-              label: "Fleet total",
-              data: data.map(r => Number(r.totalHours || 0)),
-              type: "line",
-              tension: 0.25
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { position: "bottom" } },
-          scales: {
-            y: {
-              beginAtZero: true,
-              title: { display: true, text: "Tacho hours" }
-            }
-          }
-        }
-      });
-    }
-
-    function makeFlightsByAircraftChart(data) {
-      const canvasId = "flightsByAircraftChart";
-      destroyChart(canvasId);
-
-      charts[canvasId] = new Chart(el(canvasId), {
-        type: "bar",
-        data: {
-          labels: data.map(r => r.aircraft),
-          datasets: [{
-            label: "Flights",
-            data: data.map(r => Number(r.flights || 0))
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: { precision: 0 }
-            }
-          }
-        }
-      });
-    }
-
-    function makeFuelTotalsChart(data) {
-      const canvasId = "fuelTotalsChart";
-      destroyChart(canvasId);
-
-      charts[canvasId] = new Chart(el(canvasId), {
-        type: "bar",
-        data: {
-          labels: data.map(r => r.aircraft),
-          datasets: [
-            {
-              label: "LFC fuel",
-              data: data.map(r => Number(r.lfcFuel || 0))
-            },
-            {
-              label: "Away fuel",
-              data: data.map(r => Number(r.awayFuel || 0))
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { position: "bottom" } },
-          scales: {
-            y: {
-              beginAtZero: true,
-              title: { display: true, text: "Litres" }
-            }
-          }
-        }
-      });
-    }
-
-    function renderSummary(data) {
-      const s = data.summary || {};
-
-      el("totalFlights").textContent = s.totalFlights ?? "0";
-      el("totalTacho").textContent = Number(s.totalTachoUsed || 0).toFixed(1);
-      el("totalKembleLandings").textContent = s.totalKembleLandings ?? "0";
-      el("totalFuel").textContent = Number(s.totalFuelUplift || 0).toFixed(1);
-    }
-
-    function renderCharts(data) {
-      const aircraftList = data.aircraftList || [];
-
-      const monthly = data.tachoMonthlyByAircraft || [];
-      makeLineChart(
-        "monthlyTachoChart",
-        monthly.map(r => r.month),
-        aircraftList,
-        monthly,
-        "Monthly tacho used"
-      );
-
-      const cumulative = data.tachoCumulativeByAircraft || [];
-      makeLineChart(
-        "cumulativeTachoChart",
-        cumulative.map(r => r.month),
-        aircraftList,
-        cumulative,
-        "Cumulative tacho used"
-      );
-
-      makeWarriorChart(data.warriorFleetYearlyHours || []);
-      makeFlightsByAircraftChart(data.flightsByAircraft || []);
-      makeFuelTotalsChart(data.fuelUpliftTotals || []);
-    }
-
-    async function loadStats() {
-      clearError();
-      setBusy(true);
-
-      try {
-        const data = await fetchStats();
-        renderSummary(data);
-        renderCharts(data);
-        el("statusText").textContent = "Loaded.";
-        setTimeout(() => el("statusText").textContent = "", 1500);
-      } catch (err) {
-        console.error(err);
-        showError(err.message || "Unable to load stats.");
-      } finally {
-        setBusy(false);
+        });
       }
-    }
 
-    el("refreshBtn").addEventListener("click", loadStats);
-    el("thisYearBtn").addEventListener("click", () => {
-      setThisYear();
-      loadStats();
-    });
-    el("last12Btn").addEventListener("click", () => {
-      setLast12Months();
-      loadStats();
-    });
+      function makeFlightsByAircraftChart(data) {
+        const canvasId = "flightsByAircraftChart";
+        destroyChart(canvasId);
 
-    document.addEventListener("DOMContentLoaded", () => {
-      requestAnimationFrame(() => el("pageCard")?.classList.add("ready"));
-      setThisYear();
-      loadStats();
-    });
-  </script>
+        charts[canvasId] = new Chart(el(canvasId), {
+          type: "bar",
+          data: {
+            labels: data.map(r => r.aircraft),
+            datasets: [{
+              label: "Flights",
+              data: data.map(r => Number(r.flights || 0))
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { precision: 0 }
+              }
+            }
+          }
+        });
+      }
+
+      function makeFuelTotalsChart(data) {
+        const canvasId = "fuelTotalsChart";
+        destroyChart(canvasId);
+
+        charts[canvasId] = new Chart(el(canvasId), {
+          type: "bar",
+          data: {
+            labels: data.map(r => r.aircraft),
+            datasets: [
+              {
+                label: "LFC fuel",
+                data: data.map(r => Number(r.lfcFuel || 0))
+              },
+              {
+                label: "Away fuel",
+                data: data.map(r => Number(r.awayFuel || 0))
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: "bottom" } },
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: { display: true, text: "Litres" }
+              }
+            }
+          }
+        });
+      }
+
+      function renderSummary(data) {
+        const s = data.summary || {};
+
+        el("totalFlights").textContent = s.totalFlights ?? "0";
+        el("totalTacho").textContent = Number(s.totalTachoUsed || 0).toFixed(1);
+        el("totalKembleLandings").textContent = s.totalKembleLandings ?? "0";
+        el("totalFuel").textContent = Number(s.totalFuelUplift || 0).toFixed(1);
+      }
+
+      function renderCharts(data) {
+        const selected = selectedAircraft();
+
+        const aircraftList = (data.aircraftList || [])
+          .filter(reg => selected.includes(reg));
+
+        const monthly = data.tachoMonthlyByAircraft || [];
+        makeLineChart(
+          "monthlyTachoChart",
+          monthly.map(r => r.month),
+          aircraftList,
+          monthly,
+          "Monthly tacho used"
+        );
+
+        const cumulative = data.tachoCumulativeByAircraft || [];
+        makeLineChart(
+          "cumulativeTachoChart",
+          cumulative.map(r => r.month),
+          aircraftList,
+          cumulative,
+          "Cumulative tacho used"
+        );
+
+        const warriorFiltered = (data.warriorFleetYearlyHours || []).map(row => {
+          const output = { year: row.year, totalHours: 0 };
+
+          ["G-BPAF", "G-EDGI", "G-AZWS"].forEach(reg => {
+            const value = selected.includes(reg) ? Number(row[reg] || 0) : 0;
+            output[reg] = value;
+            output.totalHours += value;
+          });
+
+          return output;
+        });
+
+        makeWarriorChart(warriorFiltered);
+
+        makeFlightsByAircraftChart(
+          (data.flightsByAircraft || []).filter(r => selected.includes(r.aircraft))
+        );
+
+        makeFuelTotalsChart(
+          (data.fuelUpliftTotals || []).filter(r => selected.includes(r.aircraft))
+        );
+      }
+
+
+
+      let latestStatsData = null;
+
+      function selectedAircraft() {
+        return Array.from(document.querySelectorAll(".aircraft-filter:checked"))
+          .map(cb => cb.value);
+      }
+
+      async function loadStats() {
+        clearError();
+        setBusy(true);
+
+        try {
+          const data = await fetchStats();
+          latestStatsData = data;
+          renderSummary(data);
+          renderCharts(data);
+          el("statusText").textContent = "Loaded.";
+          setTimeout(() => el("statusText").textContent = "", 1500);
+        } catch (err) {
+          console.error(err);
+          showError(err.message || "Unable to load stats.");
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      el("refreshBtn").addEventListener("click", loadStats);
+      el("thisYearBtn").addEventListener("click", () => {
+        setThisYear();
+        loadStats();
+      });
+      el("last12Btn").addEventListener("click", () => {
+        setLast12Months();
+        loadStats();
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        requestAnimationFrame(() => el("pageCard")?.classList.add("ready"));
+        setThisYear();
+        loadStats();
+      });
+
+
+      document.querySelectorAll(".aircraft-filter").forEach(cb => {
+        cb.addEventListener("change", () => {
+          if (latestStatsData) {
+            renderCharts(latestStatsData);
+          }
+        });
+      });
+    </script>
 </body>
+
 </html>
