@@ -596,29 +596,6 @@
           });
 
           return output;
-
-          const oilBurn = data.oilBurnMonthlyByAircraft || [];
-          makeLineChart(
-            "oilBurnChart",
-            oilBurn.map(r => r.month),
-            aircraftList,
-            oilBurn,
-            "Oil burn per flight hour",
-            "Oil per flight hour"
-          );
-
-          const fuelBurn = data.fuelBurnMonthlyByAircraft || [];
-          makeLineChart(
-            "fuelBurnChart",
-            fuelBurn.map(r => r.month),
-            aircraftList,
-            fuelBurn,
-            "Fuel burn per flight hour",
-            "Litres per flight hour"
-          );
-
-
-
         });
 
         makeWarriorChart(warriorFiltered);
@@ -629,6 +606,26 @@
 
         makeFuelTotalsChart(
           (data.fuelUpliftTotals || []).filter(r => selected.includes(r.aircraft))
+        );
+
+        const oilBurn = data.oilBurnMonthlyByAircraft || [];
+        makeLineChart(
+          "oilBurnChart",
+          oilBurn.map(r => r.month),
+          aircraftList,
+          oilBurn,
+          "Average Oil Consumption",
+          "Oil per engine hour"
+        );
+
+        const fuelBurn = data.fuelBurnMonthlyByAircraft || [];
+        makeLineChart(
+          "fuelBurnChart",
+          fuelBurn.map(r => r.month),
+          aircraftList,
+          fuelBurn,
+          "Average Fuel Consumption",
+          "Litres per engine hour"
         );
       }
 
