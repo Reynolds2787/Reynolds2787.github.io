@@ -70,34 +70,43 @@
 
 
   <script>
-  async function saveProfile() {
+
+async function saveProfile() {
+  const btn = document.getElementById("saveProfileBtn");
+
   try {
-    const btn = document.getElementById("saveProfileBtn");
-      setButtonLoading(btn, true, { loadingText: "Saving…" });
+    setButtonLoading(btn, true, { loadingText: "Saving…" });
+
     const body = {
+      name: document.getElementById("name").value.trim(),
+      phone: document.getElementById("phone").value.trim()
+    };
 
-        name: document.getElementById("name").value,
-        role: document.getElementById("role").value,
-        phone: document.getElementById("phone").value,
-        member_id: document.getElementById("memberID").value,
+    const res = await authFetch(`${API_BASE}/profile`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
 
-      };
+    if (!res || !res.ok) {
+      const txt = await res.text().catch(() => "");
+      console.error("Profile save failed:", txt);
+      showToast("Failed to save profile", { variant: "danger" });
+      return;
+    }
 
-      const res = await authFetch(`${API_BASE}/profile`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-      });
-    if (res && res.ok) {
-        showToast("Profile updated", { variant: "success" });
-      } else {
-        showToast("Failed to save profile", { variant: "danger" });
-      }
+    showToast("Profile updated", { variant: "success" });
+
+    // Optional: reload latest saved values from DynamoDB
+    await loadExtendedProfile();
+
+  } catch (err) {
+    console.error("saveProfile error:", err);
+    showToast("Failed to save profile", { variant: "danger" });
   } finally {
     setButtonLoading(btn, false);
   }
-
-} 
+}
 
 </script>
 
