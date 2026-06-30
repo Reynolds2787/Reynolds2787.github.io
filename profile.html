@@ -54,6 +54,7 @@
           const profile = await res.json();
 
           document.getElementById("role").value = profile.role || "";
+          document.getElementById("memberID").value = profile.member_id || "";
           document.getElementById("self_auth").value = profile.self_auth || "";
           document.getElementById("phone").value = profile.phone || "";
           document.getElementById("efis").value = profile.efis || "";
@@ -156,6 +157,13 @@
         <label class="form-label">Username</label>
         <div class="skeleton"></div>
         <input id="username" class="form-control real-input" disabled>
+        
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Member ID</label>
+        <div class="skeleton"></div>
+        <input id="MemberID" class="form-control real-input" disabled>
         
       </div>
 
