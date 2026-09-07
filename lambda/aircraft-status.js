@@ -63,19 +63,20 @@ function getStatusFromRows(aircraft, rows) {
   for (const row of newestFirst) {
     if (!lastFlightDate) lastFlightDate = row.flightDate || row.createdAt || "";
 
-    if (currentHours === null) {
-      currentHours = useFlightHours
-        ? firstNumber(row, ["currentHoursAfterFlight", "flightTimeAfter", "flightHoursAfter"])
-        : firstNumber(row, ["endTacho", "tachoEnd"]);
+    const rowCurrentHours = useFlightHours
+      ? firstNumber(row, ["currentHoursAfterFlight", "flightTimeAfter", "flightHoursAfter"])
+      : firstNumber(row, ["endTacho", "tachoEnd"]);
+    const shouldUseRowCurrent = useFlightHours
+      ? currentHours === null
+      : currentHours === null || (rowCurrentHours !== null && rowCurrentHours > currentHours);
+    if (rowCurrentHours !== null && shouldUseRowCurrent) {
+      currentHours = rowCurrentHours;
     }
 
     if (nextServiceDueAt === null) {
-      nextServiceDueAt = useFlightHours
-        ? firstPositiveNumber(row, ["nextServiceDueAt", "serviceAt", "nextServiceDue", "remainingFlightHoursAfterFlight", "remainingFlightHoursBeforeFlight"])
-        : firstPositiveNumber(row, ["nextServiceDueAt", "serviceAt", "nextServiceDue", "remainingTachoTimeAfterFlight", "remainingTachoTimeBeforeFlight"]);
+      nextServiceDueAt = firstPositiveNumber(row, ["nextServiceDueAt"]);
     }
 
-    if (currentHours !== null && nextServiceDueAt !== null) break;
   }
 
   return {
@@ -109,13 +110,7 @@ async function queryFlightLogs(aircraft) {
         "flightHoursAfter",
         "endTacho",
         "tachoEnd",
-        "nextServiceDueAt",
-        "serviceAt",
-        "nextServiceDue",
-        "remainingFlightHoursAfterFlight",
-        "remainingFlightHoursBeforeFlight",
-        "remainingTachoTimeAfterFlight",
-        "remainingTachoTimeBeforeFlight"
+        "nextServiceDueAt"
       ].join(", "),
       ExclusiveStartKey
     }));
