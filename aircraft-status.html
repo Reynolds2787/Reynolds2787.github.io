@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  <title>Aircraft Status</title>
+  <title>Aircraft Hours Status</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -10,136 +10,179 @@
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 
   <style>
+    :root {
+      --status-ink: #172033;
+      --status-muted: #687386;
+      --status-line: #dce2ea;
+      --status-blue: #1457d9;
+      --status-blue-soft: #eaf1ff;
+    }
+
     body {
-      background: linear-gradient(180deg, #ecedef 100%, #f1f2f5 100%);
+      min-height: 100vh;
+      color: var(--status-ink);
+      background:
+        radial-gradient(circle at 85% 0%, rgba(20, 87, 217, .10), transparent 26rem),
+        #f3f5f8;
     }
 
-    .status-hero {
-      background: linear-gradient(135deg, rgba(13, 110, 253, .10), rgba(255, 255, 255, .75));
-      border: 1px solid rgba(13, 110, 253, .10);
-      border-radius: 1rem;
+    .page-intro {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
     }
 
-    .aircraft-status-card {
-      border: 0;
-      border-radius: 1rem;
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform .16s ease, box-shadow .16s ease;
-      background: #fff;
-    }
-
-    .aircraft-status-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 .75rem 1.5rem rgba(0, 0, 0, .12);
-    }
-
-    .aircraft-status-card .card-body {
-      padding: 1rem;
-    }
-
-    .reg-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      font-weight: 700;
-      letter-spacing: .04em;
-      font-size: 1rem;
-    }
-
-    .reg-dot {
-      width: .7rem;
-      height: .7rem;
-      border-radius: 50%;
-      background: var(--bs-success);
-      box-shadow: 0 0 0 .18rem rgba(25, 135, 84, .16);
-      flex: 0 0 auto;
-    }
-
-    .reg-dot.warning {
-      background: var(--bs-warning);
-      box-shadow: 0 0 0 .18rem rgba(255, 193, 7, .16);
-    }
-
-    .reg-dot.danger {
-      background: var(--bs-danger);
-      box-shadow: 0 0 0 .18rem rgba(220, 53, 69, .16);
-    }
-
-    .ops-label {
-      font-size: .74rem;
-      letter-spacing: .05em;
+    .eyebrow {
+      margin-bottom: .35rem;
+      color: var(--status-blue);
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .09em;
       text-transform: uppercase;
-      color: #6c757d;
     }
 
-    .metric-tile {
-      border: 1px solid #e9ecef;
-      border-radius: .9rem;
-      padding: .8rem .9rem;
-      background: #fbfcfd;
+    .page-copy {
+      max-width: 44rem;
+      color: var(--status-muted);
+    }
+
+    .refresh-wrap {
+      display: flex;
+      flex: 0 0 auto;
+      flex-direction: column;
+      align-items: end;
+      gap: .4rem;
+    }
+
+    .aircraft-card {
       height: 100%;
+      overflow: hidden;
+      border: 1px solid var(--status-line);
+      border-radius: 1rem;
+      background: #fff;
+      box-shadow: 0 .35rem 1rem rgba(23, 32, 51, .06);
+    }
+
+    .aircraft-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .75rem;
+      padding: 1rem 1.1rem;
+      border-bottom: 1px solid var(--status-line);
+    }
+
+    .registration {
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: .035em;
+    }
+
+    .metric-badge {
+      padding: .38rem .62rem;
+      border-radius: 999px;
+      color: var(--status-blue);
+      background: var(--status-blue-soft);
+      font-size: .75rem;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .hours-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: .75rem;
+      padding: 1rem 1.1rem .8rem;
+    }
+
+    .hours-block {
+      min-width: 0;
+      padding: .8rem;
+      border-radius: .8rem;
+      background: #f7f8fa;
+    }
+
+    .hours-block.remaining {
+      grid-column: 1 / -1;
+      background: var(--status-blue-soft);
+    }
+
+    .metric-label {
+      color: var(--status-muted);
+      font-size: .76rem;
+      font-weight: 750;
+      letter-spacing: .055em;
+      text-transform: uppercase;
     }
 
     .metric-value {
-      font-size: 1.35rem;
-      font-weight: 700;
-      line-height: 1.1;
+      margin-top: .2rem;
+      font-size: 1.55rem;
+      font-variant-numeric: tabular-nums;
+      font-weight: 800;
+      line-height: 1.15;
     }
 
-    .metric-value.remaining-ok {
-      color: var(--bs-success-text-emphasis);
+    .remaining .metric-value {
+      color: var(--status-blue);
+      font-size: 2rem;
     }
 
-    .metric-value.remaining-low {
-      color: var(--bs-warning-text-emphasis);
+    .remaining.due-soon {
+      background: #fff4d6;
     }
 
-    .metric-value.remaining-overdue {
-      color: var(--bs-danger);
+    .remaining.due-soon .metric-value {
+      color: #8a5600;
     }
 
-    .metric-sub {
-      font-size: .8rem;
-      color: #6c757d;
+    .remaining.overdue {
+      background: #fdebec;
     }
 
-    .card-footer-link {
-      border-top: 1px solid #eef1f4;
-      padding-top: .85rem;
-      margin-top: .9rem;
-      color: #6c757d;
-      font-size: .92rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .remaining.overdue .metric-value {
+      color: #b4232f;
     }
 
-    .overdue-strip {
-      border: 1px solid rgba(220, 53, 69, .18);
-      background: rgba(220, 53, 69, .06);
-      color: #b02a37;
-      border-radius: .8rem;
-      padding: .6rem .75rem;
-      font-size: .88rem;
-      font-weight: 600;
+    .card-meta {
+      padding: 0 1.1rem 1rem;
+      color: var(--status-muted);
+      font-size: .85rem;
     }
 
-    .skeleton {
+    .empty-state {
+      padding: 3rem 1.25rem;
+      border: 1px dashed #b8c1cf;
       border-radius: 1rem;
-      background: linear-gradient(90deg, #e9ecef 25%, #f8f9fa 37%, #e9ecef 63%);
+      color: var(--status-muted);
+      background: rgba(255, 255, 255, .65);
+      text-align: center;
+    }
+
+    .skeleton-card {
+      height: 18rem;
+      border-radius: 1rem;
+      background: linear-gradient(90deg, #e5e9ef 25%, #f7f8fa 38%, #e5e9ef 63%);
       background-size: 400% 100%;
-      animation: shimmer 1.4s ease infinite;
-      min-height: 220px;
+      animation: shimmer 1.35s ease infinite;
     }
 
     @keyframes shimmer {
-      0% {
-        background-position: 100% 0;
+      from { background-position: 100% 0; }
+      to { background-position: 0 0; }
+    }
+
+    @media (max-width: 575.98px) {
+      .page-intro {
+        align-items: stretch;
+        flex-direction: column;
       }
 
-      100% {
-        background-position: 0 0;
+      .refresh-wrap {
+        align-items: stretch;
       }
     }
   </style>
@@ -147,142 +190,45 @@
   <script src="js/auth.js" defer></script>
   <script src="js/logout.js" defer></script>
   <script src="js/admin-guard.js" defer></script>
-  <script src="js/due-soon-badge.js" defer></script>
+  <script src="js/loadNavbar.js" defer></script>
 </head>
 
-<body>
-  <div class="container-fluid p-2 bg-primary text-white text-center">
-    <h2 class="mb-0">AIRCRAFT STATUS</h2>
-  </div>
+<body data-page-title="Aircraft Hours Status">
+  <header class="container-fluid p-2 bg-primary text-white text-center">
+    <h1 class="h2 mb-0">AIRCRAFT HOURS STATUS</h1>
+  </header>
 
   <div id="navbar-placeholder"></div>
 
-  <div class="container py-4">
-    <div class="status-hero p-3 p-md-4 mb-4 shadow-sm">
-      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-        <div>
-          <h3 class="mb-1">Fleet Overview</h3>
-          <div class="text-muted">Current hours, next service point, and time remaining from the latest flight logs.</div>
-        </div>
-        <div class="d-flex flex-column align-items-md-end gap-2">
-          <button id="refreshStatus" class="btn btn-sm btn-outline-primary" type="button">Refresh</button>
-          <div id="lastUpdated" class="text-muted small" aria-live="polite"></div>
-        </div>
+  <main class="container py-4">
+    <section class="page-intro" aria-labelledby="fleetHeading">
+      <div>
+        <div class="eyebrow">FlightLogs</div>
+        <h2 id="fleetHeading" class="h3 mb-2">Fleet service hours</h2>
+        <p class="page-copy mb-0">Latest recorded hours and the next service point for each aircraft.</p>
       </div>
-    </div>
 
-    <div id="statusError" class="alert alert-danger d-none"></div>
+      <div class="refresh-wrap">
+        <button id="refreshStatus" class="btn btn-primary" type="button">Refresh</button>
+        <span id="lastUpdated" class="small text-muted" aria-live="polite"></span>
+      </div>
+    </section>
 
-    <div id="cardsSkeleton" class="row g-3">
-      <div class="col-12 col-md-6 col-xl-4">
-        <div class="skeleton"></div>
-      </div>
-      <div class="col-12 col-md-6 col-xl-4">
-        <div class="skeleton"></div>
-      </div>
-      <div class="col-12 col-md-6 col-xl-4">
-        <div class="skeleton"></div>
-      </div>
+    <div id="statusError" class="alert alert-danger d-none" role="alert"></div>
+
+    <div id="statusSkeleton" class="row g-3" aria-label="Loading aircraft hours">
+      <div class="col-12 col-md-6 col-xl-4"><div class="skeleton-card"></div></div>
+      <div class="col-12 col-md-6 col-xl-4"><div class="skeleton-card"></div></div>
+      <div class="col-12 col-md-6 col-xl-4"><div class="skeleton-card"></div></div>
     </div>
 
     <div id="aircraftCards" class="row g-3 d-none"></div>
-  </div>
+    <div id="emptyStatus" class="empty-state d-none">No aircraft hour records were found in FlightLogs.</div>
+  </main>
 
   <script>
-    const DEFECTS_API_BASE = "https://fm5h9wwozc.execute-api.eu-west-2.amazonaws.com";
-    const MAINT_API_BASE = "https://dssjr33iy8.execute-api.eu-west-2.amazonaws.com";
-    const FLIGHT_LOG_API_BASE = "https://rj7w2wkpgj.execute-api.eu-west-2.amazonaws.com";
-
-    const AIRCRAFT_LIST = ["G-AZWS", "G-BPAF", "G-EDGI", "G-AVYL", "G-BULL"];
-    const USES_FLIGHT_HOURS = new Set(["G-AZWS", "G-BULL"]);
-
-    function normalizeReg(v) {
-      return (v || "").trim().toUpperCase();
-    }
-
-    function daysUntil(dateStr) {
-      if (!dateStr || typeof dateStr !== "string") return null;
-      const d = new Date(dateStr + "T00:00:00Z");
-      if (Number.isNaN(d.getTime())) return null;
-      const now = new Date();
-      return Math.floor((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    }
-
-    async function waitForAuthFetch(maxMs = 2500) {
-      const start = Date.now();
-      while (Date.now() - start < maxMs) {
-        if (typeof window.authFetch === "function") return true;
-        await new Promise(r => setTimeout(r, 50));
-      }
-      return false;
-    }
-
-    function setLoading(isLoading) {
-      document.getElementById("cardsSkeleton")?.classList.toggle("d-none", !isLoading);
-      document.getElementById("aircraftCards")?.classList.toggle("d-none", isLoading);
-      const refresh = document.getElementById("refreshStatus");
-      if (refresh) {
-        refresh.disabled = isLoading;
-        refresh.textContent = isLoading ? "Refreshing…" : "Refresh";
-      }
-    }
-
-    function setError(msg) {
-      const box = document.getElementById("statusError");
-      if (!box) return;
-      if (!msg) {
-        box.classList.add("d-none");
-        box.textContent = "";
-        return;
-      }
-      box.textContent = msg;
-      box.classList.remove("d-none");
-    }
-
-    async function fetchOpenDefectsSummary(aircraft) {
-      const reg = normalizeReg(aircraft);
-      const url = new URL(`${DEFECTS_API_BASE}/defects`);
-      url.searchParams.set("aircraft", reg);
-      url.searchParams.set("status", "open");
-
-      const res = await authFetch(url.toString(), { method: "GET" });
-      if (!res.ok) return { aircraft: reg, openCount: 0, grounded: false };
-
-      const data = await res.json();
-      const items = Array.isArray(data?.items) ? data.items : [];
-      return {
-        aircraft: reg,
-        openCount: items.length,
-        grounded: items.some(d => String(d?.severity || "").toUpperCase() === "GROUNDED" || d?.grounded === true)
-      };
-    }
-
-    async function fetchDueSoonGrouped() {
-      if (!window.DUE_SOON_URL) return new Map();
-
-      const res = await authFetch(window.DUE_SOON_URL, { method: "GET" });
-      if (!res.ok) return new Map();
-
-      const data = await res.json();
-      const byAircraft = new Map();
-
-      for (const it of (data?.items || [])) {
-        const reg = normalizeReg(it?.aircraft);
-        if (!reg) continue;
-        const days = daysUntil(it?.nextDueDate);
-        if (days === null) continue;
-
-        if (!byAircraft.has(reg)) byAircraft.set(reg, []);
-        byAircraft.get(reg).push({
-          nextDueDate: it?.nextDueDate || "",
-          nextDueType: it?.nextDueType || "",
-          days
-        });
-      }
-
-      for (const arr of byAircraft.values()) arr.sort((a, b) => a.days - b.days);
-      return byAircraft;
-    }
+    const FLIGHT_LOG_STATUS_URL = "https://rj7w2wkpgj.execute-api.eu-west-2.amazonaws.com/aircraft_status";
+    const el = id => document.getElementById(id);
 
     function numberOrNull(value) {
       if (value === null || value === undefined || value === "") return null;
@@ -290,304 +236,140 @@
       return Number.isFinite(number) ? number : null;
     }
 
-    function latestServicePoint(items) {
-      const latest = items
-        .filter(item =>
-          String(item?.eventType || "").toUpperCase() === "MAINTENANCE_SERVICE" &&
-          numberOrNull(item?.nextServiceAt) !== null
-        )
-        .sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")))[0];
-
-      return numberOrNull(latest?.nextServiceAt);
-    }
-
-    async function fetchLatestTacho(aircraft) {
-      try {
-        const res = await authFetch(`${FLIGHT_LOG_API_BASE}/aircraft_tacho/${encodeURIComponent(aircraft)}`, {
-          method: "GET"
-        });
-        if (!res?.ok) return null;
-        const data = await res.json();
-        return numberOrNull(data?.lastTacho);
-      } catch (err) {
-        console.warn(`Could not load latest flight-log tacho for ${aircraft}.`, err);
-        return null;
-      }
-    }
-
-    async function fetchServiceHoursSummary(aircraft) {
-      const reg = normalizeReg(aircraft);
-
-      const recordUrl = `${MAINT_API_BASE}/admin/aircraft-maintenance?aircraft=${encodeURIComponent(reg)}`;
-      const logUrl = `${MAINT_API_BASE}/admin/aircraft-maintenance/log?aircraft=${encodeURIComponent(reg)}`;
-
-      const [recordRes, logRes] = await Promise.all([
-        authFetch(recordUrl, { method: "GET" }),
-        authFetch(logUrl, { method: "GET" })
-      ]);
-
-      const useFlightFallback = USES_FLIGHT_HOURS.has(reg);
-
-      if (!recordRes.ok) {
-        const currentHours = useFlightFallback ? null : await fetchLatestTacho(reg);
-        return {
-          metricLabel: useFlightFallback ? "Flight hours" : "Tacho hours",
-          currentHours,
-          nextServiceAt: null,
-          hoursRemaining: null
-        };
-      }
-
-      const record = await recordRes.json();
-      const useFlight = record?.useFlightHours === true ||
-        String(record?.serviceMetric || "").toUpperCase() === "FLIGHT_HOURS" ||
-        (record?.useFlightHours === undefined && !record?.serviceMetric && useFlightFallback);
-      const metricLabel = useFlight ? "Flight hours" : "Tacho hours";
-      // Tacho aircraft can use the last submitted FlightLogs end-tacho directly.
-      // Flight-hour aircraft use the API's FlightLogs-derived currentHours total.
-      const latestTacho = useFlight ? null : await fetchLatestTacho(reg);
-      const currentHours = latestTacho ?? numberOrNull(record?.currentHours);
-      const storedRemaining = numberOrNull(useFlight
-        ? record?.flightHoursToNextService
-        : record?.tachoHoursToNextService);
-
-      if (!logRes.ok) {
-        const nextServiceAt = numberOrNull(record?.serviceAt) ??
-          (currentHours !== null && storedRemaining !== null ? currentHours + storedRemaining : null);
-
-        return {
-          metricLabel,
-          currentHours,
-          nextServiceAt,
-          hoursRemaining: currentHours !== null && nextServiceAt !== null
-            ? nextServiceAt - currentHours
-            : storedRemaining
-        };
-      }
-
-      const logData = await logRes.json();
-      const items = Array.isArray(logData?.items) ? logData.items : [];
-
-      // serviceAt includes any approved extension. Older records fall back to the
-      // most recent service log and then to the stored remaining-hours value.
-      const nextServiceAt = numberOrNull(record?.serviceAt) ?? latestServicePoint(items) ??
-        (currentHours !== null && storedRemaining !== null ? currentHours + storedRemaining : null);
-      const hoursRemaining = currentHours !== null && nextServiceAt !== null
-        ? nextServiceAt - currentHours
-        : storedRemaining;
-
-      return {
-        metricLabel,
-        currentHours,
-        nextServiceAt,
-        hoursRemaining
-      };
-    }
-
-
     function formatHours(value) {
-      if (value === null || value === undefined || Number.isNaN(Number(value))) return "—";
-      return Number(value).toFixed(1);
+      const hours = numberOrNull(value);
+      return hours === null ? "—" : hours.toFixed(1);
     }
 
-    function remainingClass(value) {
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function formatDate(value) {
+      if (!value) return "No flight date recorded";
+      const date = new Date(`${String(value).slice(0, 10)}T00:00:00`);
+      if (Number.isNaN(date.getTime())) return String(value);
+      return `Latest flight ${date.toLocaleDateString([], { day: "2-digit", month: "short", year: "numeric" })}`;
+    }
+
+    function remainingState(value) {
       const hours = numberOrNull(value);
       if (hours === null) return "";
-      if (hours <= 0) return "remaining-overdue";
-      if (hours <= 10) return "remaining-low";
-      return "remaining-ok";
-    }
-
-    function regDotClass({ grounded, openCount, overdueCount, hoursRemaining }) {
-      if (grounded || overdueCount > 0) return "danger";
-      if (openCount > 0 || (numberOrNull(hoursRemaining) !== null && hoursRemaining <= 10)) return "warning";
+      if (hours <= 0) return "overdue";
+      if (hours <= 10) return "due-soon";
       return "";
     }
 
-    function overallStatusText({ grounded, openCount, overdueCount, hoursRemaining }) {
-      if (grounded) return { text: "Grounded", badge: "bg-danger" };
-      if (overdueCount > 0) return { text: "Maintenance overdue", badge: "bg-danger" };
-      if (openCount > 0) return { text: "Open defects", badge: "bg-warning text-dark" };
-      if (numberOrNull(hoursRemaining) !== null && hoursRemaining <= 10) {
-        return { text: "Service due soon", badge: "bg-warning text-dark" };
-      }
-      return { text: "Serviceable", badge: "bg-success" };
+    function normalizeResponse(data) {
+      const rows = Array.isArray(data)
+        ? data
+        : data?.aircraftStatus || data?.items || data?.Items || [];
+      return Array.isArray(rows) ? rows : [];
     }
 
-    function makeCard({ aircraft, openCount, grounded, overdueItems, metricLabel, currentHours, nextServiceAt, hoursRemaining }) {
-      const overdueCount = overdueItems.length + (numberOrNull(hoursRemaining) !== null && hoursRemaining <= 0 ? 1 : 0);
-      const status = overallStatusText({ grounded, openCount, overdueCount, hoursRemaining });
-      const col = document.createElement("div");
-      col.className = "col-12 col-md-6 col-xl-4";
+    function renderCard(item) {
+      const aircraft = escapeHtml(item?.aircraft || "Unknown");
+      const isFlightHours = String(item?.metric || "").toUpperCase() === "FLIGHT_HOURS";
+      const metric = isFlightHours ? "Flight hours" : "Tacho hours";
+      const remaining = numberOrNull(item?.remainingHours);
+      const state = remainingState(remaining);
 
-      const overdueHtml = overdueCount > 0
-        ? `
-          <div class="overdue-strip mt-3">
-            OVERDUE${overdueCount > 1 ? ` (${overdueCount})` : ""}
-            <div class="small fw-normal mt-1">${overdueItems.map(x => x.nextDueType || "Maintenance").join(" • ")}</div>
-          </div>
-        `
-        : "";
+      return `
+        <div class="col-12 col-md-6 col-xl-4">
+          <article class="aircraft-card">
+            <div class="aircraft-card-head">
+              <div class="registration">${aircraft}</div>
+              <span class="metric-badge">${metric}</span>
+            </div>
 
-      col.innerHTML = `
-        <div class="card shadow-sm aircraft-status-card" role="button" tabindex="0">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start gap-3">
-              <div>
-                <div class="reg-chip">
-                  <span class="reg-dot ${regDotClass({ grounded, openCount, overdueCount, hoursRemaining })}"></span>
-                  <span>${aircraft}</span>
-                </div>
-                <div class="mt-2">
-                  <span class="badge ${status.badge}">${status.text.toUpperCase()}</span>
-                </div>
+            <div class="hours-grid">
+              <div class="hours-block">
+                <div class="metric-label">Current ${metric}</div>
+                <div class="metric-value">${formatHours(item?.currentHours)}</div>
               </div>
 
-              <div class="text-end">
-                <div class="ops-label">Tech Log</div>
-                <div class="small text-muted">Open</div>
+              <div class="hours-block">
+                <div class="metric-label">Next service due</div>
+                <div class="metric-value">${formatHours(item?.nextServiceDueAt)}</div>
+              </div>
+
+              <div class="hours-block remaining ${state}">
+                <div class="metric-label">Hours remaining</div>
+                <div class="metric-value">${formatHours(remaining)}</div>
               </div>
             </div>
 
-            <div class="row g-2 mt-2">
-              <div class="col-12">
-                <div class="metric-tile">
-                  <div class="ops-label">${metricLabel} remaining</div>
-                  <div class="metric-value ${remainingClass(hoursRemaining)}">${formatHours(hoursRemaining)}</div>
-                  <div class="metric-sub">Until scheduled service</div>
-                </div>
-              </div>
-              <div class="col-6">
-                <div class="metric-tile">
-                  <div class="ops-label">Current</div>
-                  <div class="metric-value">${formatHours(currentHours)}</div>
-                  <div class="metric-sub">${metricLabel}</div>
-                </div>
-              </div>
-              <div class="col-6">
-                <div class="metric-tile">
-                  <div class="ops-label">Next service</div>
-                  <div class="metric-value">${formatHours(nextServiceAt)}</div>
-                  <div class="metric-sub">${metricLabel}</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="d-flex justify-content-between align-items-center mt-3 small text-muted">
-              <span>Open defects</span>
-              <span class="badge ${openCount > 0 ? "bg-warning text-dark" : "bg-secondary"}">${openCount}</span>
-            </div>
-
-            ${overdueHtml}
-
-            <div class="card-footer-link">
-              <span>Open aircraft tech log</span>
-              <span>&rarr;</span>
-            </div>
-          </div>
+            <div class="card-meta">${escapeHtml(formatDate(item?.lastFlightDate))}</div>
+          </article>
         </div>
       `;
+    }
 
-      const card = col.querySelector(".aircraft-status-card");
-      const href = `aircraft-tech-log.html?aircraft=${encodeURIComponent(aircraft)}&tab=defects`;
-      card.addEventListener("click", () => { window.location.href = href; });
-      card.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          window.location.href = href;
-        }
-      });
+    function setLoading(isLoading) {
+      el("statusSkeleton").classList.toggle("d-none", !isLoading);
+      const refresh = el("refreshStatus");
+      refresh.disabled = isLoading;
+      refresh.textContent = isLoading ? "Refreshing…" : "Refresh";
+    }
 
-      return col;
+    function showError(message) {
+      const box = el("statusError");
+      box.textContent = message || "";
+      box.classList.toggle("d-none", !message);
+    }
+
+    async function waitForAuthFetch(maxMs = 2500) {
+      const started = Date.now();
+      while (Date.now() - started < maxMs) {
+        if (typeof window.authFetch === "function") return;
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+      throw new Error("Authentication is not ready.");
     }
 
     async function loadAircraftStatus() {
-      const host = document.getElementById("aircraftCards");
-      if (!host) return;
-
-      setError("");
       setLoading(true);
-      host.innerHTML = "";
+      showError("");
+      el("aircraftCards").classList.add("d-none");
+      el("emptyStatus").classList.add("d-none");
 
       try {
-        const ok = await waitForAuthFetch();
-        if (!ok) throw new Error("Authentication helpers not ready.");
+        await waitForAuthFetch();
+        const response = await window.authFetch(FLIGHT_LOG_STATUS_URL, {
+          method: "GET",
+          cache: "no-store"
+        });
 
-        const dueMap = await fetchDueSoonGrouped();
+        if (!response?.ok) {
+          const message = await response?.text().catch(() => "");
+          throw new Error(message || `FlightLogs request failed (${response?.status || "no response"}).`);
+        }
 
-        const results = await Promise.all(
-          AIRCRAFT_LIST.map(async (reg) => {
-            const [defects, maint] = await Promise.all([
-              fetchOpenDefectsSummary(reg),
-              fetchServiceHoursSummary(reg)
-            ]);
-
-            const overdueItems = (dueMap.get(reg) || []).filter(x => x.days <= 0);
-
-            return {
-              aircraft: reg,
-              openCount: defects.openCount,
-              grounded: defects.grounded,
-              overdueItems,
-              metricLabel: maint.metricLabel,
-              currentHours: maint.currentHours,
-              nextServiceAt: maint.nextServiceAt,
-              hoursRemaining: maint.hoursRemaining
-            };
-          })
-        );
-
-        for (const item of results) host.appendChild(makeCard(item));
-        const updated = document.getElementById("lastUpdated");
-        if (updated) updated.textContent = `Updated ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load aircraft status.");
+        const items = normalizeResponse(await response.json());
+        el("aircraftCards").innerHTML = items.map(renderCard).join("");
+        el("aircraftCards").classList.toggle("d-none", items.length === 0);
+        el("emptyStatus").classList.toggle("d-none", items.length !== 0);
+        el("lastUpdated").textContent = `Updated ${new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit"
+        })}`;
+      } catch (error) {
+        console.error(error);
+        showError("Unable to load aircraft hours from FlightLogs.");
       } finally {
         setLoading(false);
       }
     }
 
     document.addEventListener("DOMContentLoaded", () => {
+      el("refreshStatus").addEventListener("click", loadAircraftStatus);
       loadAircraftStatus();
-      document.getElementById("refreshStatus")?.addEventListener("click", loadAircraftStatus);
-      setInterval(loadAircraftStatus, 60000);
     });
-  </script>
-
-  <script>
-    fetch("/partials/navbar.html")
-      .then(r => {
-        if (!r.ok) throw new Error("Failed to load navbar.html");
-        return r.text();
-      })
-      .then(async html => {
-        const mount = document.getElementById("navbar-placeholder");
-        if (!mount) return;
-
-        mount.innerHTML = html;
-
-        const userEl = document.getElementById("loggedInUser");
-        if (userEl) userEl.textContent = localStorage.getItem("username") || "User";
-
-        const currentPath = window.location.pathname.replace(/\/$/, "");
-        document.querySelectorAll(".nav-link").forEach(link => {
-          const linkPath = new URL(link.href).pathname.replace(/\/$/, "");
-          if (linkPath === currentPath) {
-            link.classList.add("active");
-            link.setAttribute("aria-current", "page");
-          }
-        });
-
-        if (window.setupAdminMenu) await window.setupAdminMenu();
-
-        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
-          new bootstrap.Tooltip(el);
-        });
-
-        window.dispatchEvent(new Event("navbar:loaded"));
-      })
-      .catch(console.error);
   </script>
 </body>
 
