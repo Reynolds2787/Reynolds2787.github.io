@@ -9,8 +9,24 @@
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 
   <style>
+    :root {
+      --lfc-ink: #14213d;
+      --lfc-muted: #64748b;
+      --lfc-sky: #0d6efd;
+      --lfc-sky-soft: #e8f2ff;
+      --lfc-mint: #d9f4ea;
+      --lfc-amber: #ffe8b6;
+      --lfc-card: rgba(255, 255, 255, .88);
+      --lfc-border: rgba(72, 115, 170, .18);
+    }
+
     body {
-      background: linear-gradient(180deg, #ecedef 100%, #f1f2f5 100%);
+      min-height: 100vh;
+      color: var(--lfc-ink);
+      background:
+        radial-gradient(circle at top left, rgba(13, 110, 253, .18), transparent 34rem),
+        radial-gradient(circle at 85% 7rem, rgba(32, 201, 151, .16), transparent 25rem),
+        linear-gradient(180deg, #f6fbff 0%, #edf7f4 48%, #f7f9fc 100%);
     }
 
     body.loading {
@@ -28,27 +44,125 @@
       transform: none;
     }
 
-    .page-card,
+    .flight-topbar {
+      background:
+        linear-gradient(135deg, rgba(13, 110, 253, .96), rgba(14, 165, 233, .88)),
+        #0d6efd;
+      box-shadow: 0 .5rem 1.5rem rgba(13, 110, 253, .2);
+    }
+
+    .flight-topbar h2 {
+      letter-spacing: .08em;
+      font-size: clamp(1.1rem, 2vw, 1.45rem);
+    }
+
+    .page-shell {
+      max-width: 1320px;
+    }
+
+    .page-card {
+      border: 1px solid rgba(255, 255, 255, .75);
+      border-radius: 1.25rem;
+      background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.82));
+      box-shadow: 0 1rem 2.6rem rgba(21, 44, 76, 0.12);
+      overflow: hidden;
+    }
+
+    .page-card::before {
+      content: "";
+      display: block;
+      height: .45rem;
+      background: linear-gradient(90deg, #0d6efd, #20c997, #ffc107);
+    }
+
+    .page-eyebrow {
+      color: #0b63ce;
+      font-size: .76rem;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .page-heading {
+      color: #102a43;
+      font-weight: 800;
+    }
+
+    .page-copy {
+      max-width: 44rem;
+      color: var(--lfc-muted);
+    }
+
+    .filters-panel {
+      border: 1px solid var(--lfc-border);
+      border-radius: 1rem;
+      padding: 1rem;
+      background: linear-gradient(135deg, rgba(232,242,255,.86), rgba(255,255,255,.78));
+    }
+
+    .form-label {
+      color: #24435f;
+    }
+
+    .form-select,
+    .form-control {
+      border-color: rgba(72, 115, 170, .24);
+      box-shadow: 0 .35rem 1rem rgba(21, 44, 76, .05);
+    }
+
+    .form-select:focus,
+    .form-control:focus {
+      border-color: rgba(13, 110, 253, .55);
+      box-shadow: 0 0 0 .25rem rgba(13, 110, 253, .12);
+    }
+
+    .btn {
+      border-radius: 999px;
+      font-weight: 700;
+      padding-inline: 1rem;
+    }
+
+    .btn-outline-primary {
+      background: #fff;
+    }
+
     .summary-card,
     .flight-card {
-      border: 0;
+      border: 1px solid var(--lfc-border);
       border-radius: 1rem;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+      background: var(--lfc-card);
+      box-shadow: 0 .75rem 1.8rem rgba(21, 44, 76, 0.08);
+    }
+
+    .summary-card {
+      overflow: hidden;
+    }
+
+    .overall-card {
+      background:
+        linear-gradient(145deg, rgba(13,110,253,.12), rgba(32,201,151,.13)),
+        rgba(255,255,255,.9);
+    }
+
+    .aircraft-summary-card {
+      background:
+        linear-gradient(145deg, rgba(255,193,7,.16), rgba(255,255,255,.72) 38%),
+        rgba(255,255,255,.9);
     }
 
     .section-title {
       letter-spacing: .04em;
       font-size: .78rem;
       text-transform: uppercase;
-      color: #6c757d;
-      font-weight: 700;
+      color: #0b63ce;
+      font-weight: 800;
     }
 
     .metric-tile {
-      border: 1px solid rgba(0,0,0,.08);
+      border: 1px solid var(--lfc-border);
       border-radius: 1rem;
       padding: 1rem;
-      background: rgba(255,255,255,.65);
+      background: rgba(255,255,255,.7);
       height: 100%;
     }
 
@@ -56,11 +170,34 @@
       font-size: 1.7rem;
       font-weight: 700;
       line-height: 1.1;
+      color: #0b63ce;
     }
 
     .metric-subtext {
-      color: #6c757d;
+      color: var(--lfc-muted);
       font-size: .9rem;
+    }
+
+    .summary-card hr {
+      border-color: rgba(72, 115, 170, .22);
+      opacity: 1;
+    }
+
+    .flight-table {
+      --bs-table-bg: rgba(255,255,255,.76);
+      --bs-table-striped-bg: rgba(232, 242, 255, .6);
+      --bs-table-hover-bg: rgba(217, 244, 234, .62);
+      border-color: rgba(72, 115, 170, .16);
+      overflow: hidden;
+      border-radius: .9rem;
+      box-shadow: 0 .75rem 1.8rem rgba(21, 44, 76, .08);
+    }
+
+    .flight-table thead th,
+    .summary-table thead th {
+      color: #17324d;
+      background: linear-gradient(180deg, #dcecff, #eef7ff);
+      border-bottom: 1px solid rgba(72, 115, 170, .22);
     }
 
     .table thead th {
@@ -86,7 +223,7 @@
       font-size: .75rem;
       letter-spacing: .04em;
       text-transform: uppercase;
-      color: #6c757d;
+      color: var(--lfc-muted);
       margin-bottom: .2rem;
     }
 
@@ -94,15 +231,45 @@
       font-weight: 600;
     }
 
+    .flight-card {
+      overflow: hidden;
+    }
+
+    .flight-card-head {
+      padding: 1rem;
+      background: linear-gradient(135deg, var(--lfc-sky-soft), rgba(217, 244, 234, .78));
+      border-bottom: 1px solid rgba(72, 115, 170, .16);
+    }
+
+    .aircraft-chip {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: .35rem .7rem;
+      color: #084298;
+      background: #dcecff;
+      font-size: .82rem;
+      font-weight: 800;
+    }
+
+    .total-chip {
+      display: inline-flex;
+      border-radius: 999px;
+      padding: .4rem .75rem;
+      color: #614700;
+      background: var(--lfc-amber);
+      font-weight: 800;
+    }
+
     .empty-state {
-      border: 2px dashed rgba(0,0,0,.08);
+      border: 2px dashed rgba(13,110,253,.2);
       border-radius: 1rem;
-      background: rgba(255,255,255,.55);
+      background: linear-gradient(135deg, rgba(232,242,255,.8), rgba(255,255,255,.7));
     }
 
     .skeleton {
       border-radius: .75rem;
-      background: linear-gradient(90deg,#e9ecef 25%,#f8f9fa 37%,#e9ecef 63%);
+      background: linear-gradient(90deg,#dbeafe 25%,#f8f9fa 37%,#d9f4ea 63%);
       background-size: 400% 100%;
       animation: shimmer 1.4s ease infinite;
     }
@@ -114,6 +281,16 @@
 
     @media (max-width: 991.98px) {
       .desktop-only { display: none !important; }
+    }
+
+    @media (max-width: 575.98px) {
+      .card-body {
+        padding: 1.1rem !important;
+      }
+
+      .filters-panel {
+        padding: .85rem;
+      }
     }
 
     @media (min-width: 992px) {
@@ -129,19 +306,20 @@
   <script src="js/loadNavbar.js" defer></script>
 </head>
 <body>
-  <div class="container-fluid p-2 bg-primary text-white text-center">
+  <div class="container-fluid p-2 text-white text-center flight-topbar">
     <h2 class="mb-0">MY FLIGHTS</h2>
   </div>
 
   <div id="navbar-placeholder"></div>
 
-  <div class="container py-4">
+  <div class="container page-shell py-4">
     <div class="card page-card fade-in" id="pageCard">
       <div class="card-body p-4">
         <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
           <div>
-            <h1 class="h4 mb-1">My Flight History</h1>
-          
+            <div class="page-eyebrow mb-1">Logbook overview</div>
+            <h1 class="h3 page-heading mb-2">My Flight History</h1>
+            <p class="page-copy mb-0">A clearer view of your recent flying, aircraft totals and club charges.</p>
           </div>
           <div class="d-flex flex-wrap gap-2">
             <button id="refreshBtn" class="btn btn-outline-primary">Refresh</button>
@@ -149,25 +327,27 @@
           </div>
         </div>
 
-        <div class="row g-3 mb-4">
-          <div class="col-12 col-md-4">
-            <label class="form-label fw-semibold" for="aircraftFilter">Aircraft</label>
-            <select id="aircraftFilter" class="form-select">
-              <option value="">All aircraft</option>
-              <option>G-AZWS</option>
-              <option>G-BPAF</option>
-              <option>G-EDGI</option>
-              <option>G-AVYL</option>
-              <option>G-BULL</option>
-            </select>
-          </div>
-          <div class="col-12 col-md-4">
-            <label class="form-label fw-semibold" for="fromDate">From date</label>
-            <input id="fromDate" type="date" class="form-control">
-          </div>
-          <div class="col-12 col-md-4">
-            <label class="form-label fw-semibold" for="toDate">To date</label>
-            <input id="toDate" type="date" class="form-control">
+        <div class="filters-panel mb-4">
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              <label class="form-label fw-semibold" for="aircraftFilter">Aircraft</label>
+              <select id="aircraftFilter" class="form-select">
+                <option value="">All aircraft</option>
+                <option>G-AZWS</option>
+                <option>G-BPAF</option>
+                <option>G-EDGI</option>
+                <option>G-AVYL</option>
+                <option>G-BULL</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label fw-semibold" for="fromDate">From date</label>
+              <input id="fromDate" type="date" class="form-control">
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label fw-semibold" for="toDate">To date</label>
+              <input id="toDate" type="date" class="form-control">
+            </div>
           </div>
         </div>
 
@@ -187,7 +367,7 @@
         <div id="contentWrap" class="d-none">
           <div class="row g-3 mb-4">
             <div class="col-12 col-md-4">
-              <div class="card summary-card h-100">
+              <div class="card summary-card overall-card h-100">
                 <div class="card-body">
                   <div class="section-title">Overall</div>
                   <div class="metric-value" id="totalFlights">0</div>
@@ -206,7 +386,7 @@
             </div>
 
             <div class="col-12 col-md-8">
-              <div class="card summary-card h-100">
+              <div class="card summary-card aircraft-summary-card h-100">
                 <div class="card-body">
                   <div class="d-flex justify-content-between align-items-center mb-3">
                     <div class="section-title mb-0">Per Aircraft Summary</div>
@@ -214,7 +394,7 @@
                   </div>
                   <div class="table-responsive">
                     <table class="table table-sm summary-table align-middle mb-0">
-                      <thead class="table-light">
+                      <thead>
                         <tr>
                           <th>Aircraft</th>
                           <th class="text-end">Flights</th>
@@ -237,8 +417,8 @@
 
           <div id="resultsWrap">
             <div class="desktop-only table-responsive">
-              <table class="table table-striped table-hover align-middle">
-                <thead class="table-dark">
+              <table class="table table-striped table-hover align-middle flight-table">
+                <thead>
                   <tr>
                     <th>Flight Date</th>
                     <th>Aircraft</th>
@@ -457,30 +637,31 @@
       const host = el("flightCards");
       host.innerHTML = flights.map(f => `
         <div class="card flight-card mb-3">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+          <div class="flight-card-head">
+            <div class="d-flex justify-content-between align-items-start gap-3">
               <div>
-                <div class="h5 mb-1">${safeText(f.aircraft)}</div>
+                <div class="aircraft-chip mb-2">${safeText(f.aircraft)}</div>
                 <div class="text-muted">${formatDate(getFlightDate(f))}</div>
               </div>
               <div class="text-end">
                 <div class="meta-label">LFC Total</div>
-                <div class="fw-bold">${formatMoney(f.lfcTotal)}</div>
+                <div class="total-chip">${formatMoney(f.lfcTotal)}</div>
               </div>
             </div>
+          </div>
 
+          <div class="card-body">
             <div class="row g-3">
               <div class="col-6"><div class="meta-label">P2</div><div class="meta-value">${safeText(f.p2)}</div></div>
               <div class="col-6"><div class="meta-label">P3</div><div class="meta-value">${safeText(f.p3)}</div></div>
               <div class="col-6"><div class="meta-label">P4</div><div class="meta-value">${safeText(f.p4)}</div></div>
-              <div class="col-6"><div class="meta-label">Aircraft</div><div class="meta-value">${safeText(f.aircraft)}</div></div>
+              <div class="col-6"><div class="meta-label">Block Time</div><div class="meta-value mono">${safeText(f.blockTime)}</div></div>
 
               <div class="col-6"><div class="meta-label">Off Chocks</div><div class="meta-value mono">${safeText(f.offChocks)}</div></div>
               <div class="col-6"><div class="meta-label">Takeoff</div><div class="meta-value mono">${safeText(f.takeoff)}</div></div>
               <div class="col-6"><div class="meta-label">Land</div><div class="meta-value mono">${safeText(f.land)}</div></div>
               <div class="col-6"><div class="meta-label">On Chocks</div><div class="meta-value mono">${safeText(f.onChocks)}</div></div>
 
-              <div class="col-6"><div class="meta-label">Block Time</div><div class="meta-value mono">${safeText(f.blockTime)}</div></div>
               <div class="col-6"><div class="meta-label">Airborne Time</div><div class="meta-value mono">${safeText(f.airTime || f.airbornTime || f.airborneTime)}</div></div>
               <div class="col-6"><div class="meta-label">Landings Kemble</div><div class="meta-value">${safeText(f.landingsKemble)}</div></div>
               <div class="col-6"><div class="meta-label">Landings Elsewhere</div><div class="meta-value">${safeText(f.landingsOther)}</div></div>
