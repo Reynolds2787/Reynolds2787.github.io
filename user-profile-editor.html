@@ -33,6 +33,14 @@
       min-height: 1.25rem;
     }
 
+    .profile-editor-shell {
+      max-width: 1320px;
+    }
+
+    .page-header {
+      min-width: 0;
+    }
+
     .section-title {
       letter-spacing: .04em;
       font-size: .78rem;
@@ -41,11 +49,14 @@
       font-weight: 700;
     }
 
-    .hint-card,
     .editor-card,
     .list-card {
       border: 0;
-      border-radius: 1rem;
+      border-radius: .5rem;
+    }
+
+    .user-row {
+      cursor: pointer;
     }
 
     .user-row td {
@@ -92,21 +103,141 @@
     .read-only {
       background-color: #f8f9fa;
     }
+
+    @media (max-width: 767.98px) {
+      .profile-title-bar h2 {
+        font-size: 1.25rem;
+      }
+
+      .profile-editor-shell {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+      }
+
+      .page-header {
+        align-items: flex-start !important;
+      }
+
+      .status-text {
+        width: 100%;
+      }
+
+      .list-card .card-body,
+      .editor-card .card-body {
+        padding: 1rem;
+      }
+
+      .user-filters .form-control,
+      .user-filters .form-select,
+      .list-card .btn,
+      .editor-card .form-control,
+      .editor-card .form-select,
+      .editor-actions .btn {
+        min-height: 44px;
+      }
+
+      .table-wrap {
+        max-height: none;
+        overflow: visible;
+        border: 0 !important;
+      }
+
+      .users-table {
+        display: block;
+      }
+
+      .users-table thead {
+        display: none;
+      }
+
+      .users-table tbody,
+      .users-table tr,
+      .users-table td {
+        display: block;
+      }
+
+      .users-table tr.user-row {
+        border: 1px solid #dee2e6;
+        border-radius: .5rem;
+        margin-bottom: .75rem;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 .25rem .75rem rgba(31, 35, 40, .05);
+      }
+
+      .users-table tr.user-row.table-active {
+        border-color: rgba(13, 110, 253, .5);
+        box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .12);
+        transform: none;
+      }
+
+      .users-table tr.user-row td {
+        border: 0;
+        padding: .35rem .85rem;
+        text-align: right;
+        background: transparent;
+        overflow-wrap: anywhere;
+      }
+
+      .users-table tr.user-row td:first-child {
+        padding-top: .85rem;
+        padding-bottom: .5rem;
+        text-align: left;
+      }
+
+      .users-table tr.user-row td:not(:first-child) {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .users-table tr.user-row td:not(:first-child)::before {
+        content: attr(data-label);
+        flex: 0 0 auto;
+        color: #6c757d;
+        font-weight: 600;
+        text-align: left;
+      }
+
+      .users-table tr.user-row td:last-child {
+        padding-bottom: .85rem;
+      }
+
+      .users-table .user-empty-row td {
+        padding: .85rem;
+        text-align: left;
+      }
+
+      .editor-toolbar {
+        align-items: stretch !important;
+        flex-direction: column;
+      }
+
+      .editor-actions {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        width: 100%;
+      }
+
+      .editor-actions .btn {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 
 <body>
-  <div class="container-fluid p-2 bg-primary text-white text-center">
+  <div class="container-fluid p-2 bg-primary text-white text-center profile-title-bar">
     <h2 class="mb-0">USER PROFILES</h2>
   </div>
 
   <div id="navbar-placeholder"></div>
 
-  <div class="container py-4">
-    <div class="card shadow-sm fade-in" id="pageCard">
-      <div class="card-body">
+  <div class="container profile-editor-shell py-4">
+    <div class="fade-in" id="pageCard">
 
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3 page-header">
           <div>
             <h1 class="h4 mb-1">User Profile Editor</h1>
             <div class="small text-muted">Admin-only editor for EFM user permissions and details.</div>
@@ -126,9 +257,9 @@
                   <button id="refreshBtn" type="button" class="btn btn-sm btn-outline-primary">Refresh</button>
                 </div>
 
-                <div class="row g-2 mb-3">
+                <div class="row g-2 mb-3 user-filters">
                   <div class="col-12 col-md-8">
-                    <input id="searchInput" class="form-control" placeholder="Search name, member ID, phone, role...">
+                    <input id="searchInput" class="form-control" type="search" placeholder="Search name, member ID, phone, role...">
                   </div>
                   <div class="col-12 col-md-4">
                     <select id="roleFilter" class="form-select">
@@ -140,7 +271,7 @@
                 </div>
 
                 <div class="table-wrap border rounded">
-                  <table class="table table-hover align-middle mb-0">
+                  <table class="table table-hover align-middle mb-0 users-table">
                     <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
                       <tr>
                         <th>Name</th>
@@ -150,7 +281,7 @@
                       </tr>
                     </thead>
                     <tbody id="usersTableBody">
-                      <tr>
+                      <tr class="user-empty-row">
                         <td colspan="4" class="text-muted">Loading users...</td>
                       </tr>
                     </tbody>
@@ -168,9 +299,9 @@
           <div class="col-12 col-xl-7">
             <div class="card shadow-sm editor-card h-100">
               <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+                <div class="d-flex justify-content-between align-items-center gap-2 mb-3 editor-toolbar">
                   <div class="section-title mb-0">Selected user</div>
-                  <div class="d-flex gap-2">
+                  <div class="d-flex gap-2 editor-actions">
                     <button id="loadBtn" type="button" class="btn btn-outline-primary" disabled>Reload</button>
                     <button id="saveBtn" type="button" class="btn btn-primary" disabled>Save Changes</button>
                   </div>
@@ -190,12 +321,12 @@
 
                     <div class="col-12 col-md-6">
                       <label class="form-label fw-semibold" for="name">Name</label>
-                      <input id="name" class="form-control" placeholder="Full name">
+                      <input id="name" class="form-control" autocomplete="name" placeholder="Full name">
                     </div>
 
                     <div class="col-12 col-md-6">
                       <label class="form-label fw-semibold" for="phone">Phone</label>
-                      <input id="phone" class="form-control" placeholder="07...">
+                      <input id="phone" class="form-control" type="tel" autocomplete="tel" placeholder="07...">
                     </div>
 
                     <div class="col-12 col-md-6">
@@ -326,7 +457,6 @@
         </div>
 
       </div>
-    </div>
   </div>
 
   <script src="js/auth.js"></script>
@@ -469,7 +599,7 @@
       const tbody = el("usersTableBody");
 
       if (!items.length) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-muted">No users found.</td></tr>`;
+        tbody.innerHTML = `<tr class="user-empty-row"><td colspan="4" class="text-muted">No users found.</td></tr>`;
         el("userCount").textContent = "0";
         return;
       }
@@ -482,9 +612,9 @@
             <td>
               <div class="fw-semibold">${escapeHtml(u.name || "Unnamed user")}</div>
             </td>
-            <td>${escapeHtml(memberId)}</td>
-            <td>${escapeHtml(u.role || "EFM User")}</td>
-            <td>${escapeHtml(u.phone || "-")}</td>
+            <td data-label="Member ID">${escapeHtml(memberId)}</td>
+            <td data-label="Role">${escapeHtml(u.role || "EFM User")}</td>
+            <td data-label="Phone">${escapeHtml(u.phone || "-")}</td>
           </tr>
         `;
       }).join("");
