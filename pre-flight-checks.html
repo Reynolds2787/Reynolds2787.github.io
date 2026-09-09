@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>EFM Web App</title>
+  <title>SkyOpsAero</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -33,7 +33,7 @@
       letter-spacing: 0.02em;
     }
 
-    .efm-modal .modal-content {
+    .skyops-modal .modal-content {
       border: 0;
       border-radius: 1.25rem;
       overflow: hidden;
@@ -45,13 +45,13 @@
         0 0.25rem 1rem rgba(13, 110, 253, 0.08);
     }
 
-    .efm-modal .modal-header {
+    .skyops-modal .modal-header {
       border-bottom: 1px solid rgba(0, 0, 0, 0.06);
       padding: 1rem 1.1rem;
       background: rgba(255, 255, 255, 0.86);
     }
 
-    .efm-modal .modal-title {
+    .skyops-modal .modal-title {
       display: flex;
       align-items: center;
       gap: 0.7rem;
@@ -59,17 +59,17 @@
       letter-spacing: 0.02em;
     }
 
-    .efm-modal .modal-body {
+    .skyops-modal .modal-body {
       padding: 1.1rem;
     }
 
-    .efm-modal .modal-footer {
+    .skyops-modal .modal-footer {
       border-top: 1px solid rgba(0, 0, 0, 0.06);
       padding: 1rem 1.1rem;
       background: rgba(255, 255, 255, 0.78);
     }
 
-    .efm-modal-note {
+    .skyops-modal-note {
       border-radius: 0.9rem;
       padding: 0.9rem 1rem;
       background: rgba(13, 110, 253, 0.06);
@@ -78,14 +78,14 @@
       font-size: 0.95rem;
     }
 
-    .efm-modal-summary {
+    .skyops-modal-summary {
       border: 1px solid rgba(0, 0, 0, 0.07);
       border-radius: 1rem;
       padding: 1rem;
       background: rgba(248, 249, 250, 0.92);
     }
 
-    .efm-modal-label {
+    .skyops-modal-label {
       font-size: 0.76rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
@@ -93,7 +93,7 @@
       margin-bottom: 0.25rem;
     }
 
-    .efm-modal-value {
+    .skyops-modal-value {
       font-size: 1.05rem;
       font-weight: 700;
       color: #212529;
@@ -101,7 +101,7 @@
       word-break: break-word;
     }
 
-    .efm-aircraft-chip {
+    .skyops-aircraft-chip {
       display: inline-flex;
       align-items: center;
       gap: 0.55rem;
@@ -112,7 +112,7 @@
       font-weight: 700;
     }
 
-    .efm-aircraft-dot {
+    .skyops-aircraft-dot {
       width: 0.75rem;
       height: 0.75rem;
       border-radius: 50%;
@@ -251,7 +251,7 @@
     </div>
   </div>
 
-  <div class="modal fade efm-modal" id="completeModal" tabindex="-1" aria-hidden="true">
+  <div class="modal fade skyops-modal" id="completeModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
@@ -263,25 +263,25 @@
         </div>
 
         <div class="modal-body">
-          <div class="efm-modal-note mb-3">
+          <div class="skyops-modal-note mb-3">
             Remember to update your ETA if you encounter any delays.<br>
             Have a good flight! 
           </div>
 
-          <div class="efm-modal-summary">
+          <div class="skyops-modal-summary">
             <div class="row g-3">
               <div class="col-6">
-                <div class="efm-modal-label">Aircraft</div>
-                <div class="efm-modal-value">
-                  <span class="efm-aircraft-chip">
-                    <span class="efm-aircraft-dot"></span>
+                <div class="skyops-modal-label">Aircraft</div>
+                <div class="skyops-modal-value">
+                  <span class="skyops-aircraft-chip">
+                    <span class="skyops-aircraft-dot"></span>
                     <span id="completeModalAircraft">—</span>
                   </span>
                 </div>
               </div>
               <div class="col-6">
-                <div class="efm-modal-label">Status</div>
-                <div class="efm-modal-value">Booking Complete</div>
+                <div class="skyops-modal-label">Status</div>
+                <div class="skyops-modal-value">Booking Complete</div>
               </div>
             </div>
           </div>

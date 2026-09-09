@@ -4,15 +4,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Aircraft Calendar</title>
+  <title>Aircraft Calendar - SkyOpsAero</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 
   <style>
     :root {
-      --efm-border: rgba(0, 0, 0, .08);
-      --efm-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+      --skyops-border: rgba(0, 0, 0, .08);
+      --skyops-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
       --resource-col-w: 160px;
       --time-col-w: 78px;
       --day-col-w: 185px;
@@ -40,7 +40,7 @@
     .card-shell {
       border: 0;
       border-radius: 1rem;
-      box-shadow: var(--efm-shadow);
+      box-shadow: var(--skyops-shadow);
       overflow: hidden;
       background: #fff;
     }
@@ -73,7 +73,7 @@
       font-size: .8rem;
       font-weight: 600;
       background: #fff;
-      border: 1px solid var(--efm-border);
+      border: 1px solid var(--skyops-border);
     }
 
     .legend-dot {
@@ -98,13 +98,13 @@
     .week-header {
       display: grid;
       grid-template-columns: var(--resource-col-w) var(--time-col-w) repeat(7, var(--day-col-w));
-      border-top: 1px solid var(--efm-border);
-      border-left: 1px solid var(--efm-border);
+      border-top: 1px solid var(--skyops-border);
+      border-left: 1px solid var(--skyops-border);
     }
 
     .week-header>div {
-      border-right: 1px solid var(--efm-border);
-      border-bottom: 1px solid var(--efm-border);
+      border-right: 1px solid var(--skyops-border);
+      border-bottom: 1px solid var(--skyops-border);
       background: linear-gradient(180deg, #fbfcfd, #f3f6f9);
       min-height: var(--header-h);
     }
@@ -145,19 +145,19 @@
       display: grid;
       grid-template-columns: var(--resource-col-w) var(--time-col-w) calc(7 * var(--day-col-w));
       align-items: start;
-      border-left: 1px solid var(--efm-border);
+      border-left: 1px solid var(--skyops-border);
     }
 
     .resource-col,
     .time-col,
     .days-col {
       position: relative;
-      border-right: 1px solid var(--efm-border);
+      border-right: 1px solid var(--skyops-border);
     }
 
     .lane-label {
       height: calc(var(--lane-label-h) + (10 * var(--hour-h)));
-      border-bottom: 1px solid var(--efm-border);
+      border-bottom: 1px solid var(--skyops-border);
       padding: .8rem .85rem;
       background: #fff;
       display: flex;
@@ -184,7 +184,7 @@
 
     .time-block {
       height: calc(var(--lane-label-h) + (var(--visible-hours) * var(--hour-h)));
-      border-bottom: 1px solid var(--efm-border);
+      border-bottom: 1px solid var(--skyops-border);
       background: linear-gradient(180deg, #fcfcfd, #f9fafb);
       position: relative;
     }
@@ -216,8 +216,8 @@
     .day-lane {
       position: relative;
       height: calc(var(--lane-label-h) + (10 * var(--hour-h)));
-      border-bottom: 1px solid var(--efm-border);
-      border-right: 1px solid var(--efm-border);
+      border-bottom: 1px solid var(--skyops-border);
+      border-right: 1px solid var(--skyops-border);
       background:
         linear-gradient(180deg, #ffffff 0, #ffffff var(--lane-label-h), #f9fafb var(--lane-label-h), #f9fafb 100%),
         repeating-linear-gradient(to bottom,
@@ -301,14 +301,14 @@
     .month-grid {
       display: grid;
       grid-template-columns: repeat(7, minmax(0, 1fr));
-      border-top: 1px solid var(--efm-border);
-      border-left: 1px solid var(--efm-border);
+      border-top: 1px solid var(--skyops-border);
+      border-left: 1px solid var(--skyops-border);
     }
 
     .month-head,
     .month-cell {
-      border-right: 1px solid var(--efm-border);
-      border-bottom: 1px solid var(--efm-border);
+      border-right: 1px solid var(--skyops-border);
+      border-bottom: 1px solid var(--skyops-border);
       background: #fff;
     }
 
