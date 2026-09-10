@@ -299,7 +299,8 @@
   <script src="js/due-soon-badge.js" defer></script>
   <script src="js/loadNavbar.js?v=20260910" defer></script>
   <link rel="stylesheet" href="/css/styles.css?v=20260910-polish">
-  <link rel="stylesheet" href="/css/stats-loading.css?v=2">
+  <link rel="stylesheet" href="/css/stats-loading.css?v=3">
+  <script src="/js/flight-loader.js?v=1" defer></script>
 </head>
 <body class="skyops-app">
   <div class="site-heading container-fluid p-2 text-white text-center flight-topbar">
@@ -320,6 +321,7 @@
         <h2 class="stats-loader-title">Loading your flights</h2>
         <p>Gathering your logbook and flight history.</p>
         <div class="stats-loader-signal" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div class="flight-loading-bar" aria-hidden="true"><span class="flight-loading-bar-fill"></span></div>
       </div>
     </div>
     <div id="flightLoadStatus" class="visually-hidden" role="status" aria-live="polite"></div>
@@ -479,6 +481,7 @@
       if (isLoading) el("flightLoadStatus").textContent = "";
       document.body.classList.toggle("loading", isLoading);
       el("loadingState").hidden = !isLoading;
+      window.updateFlightLoader?.(el("loadingState"), isLoading);
       el("contentWrap").classList.toggle("d-none", isLoading);
       el("refreshBtn").disabled = isLoading;
       el("clearBtn").disabled = isLoading;

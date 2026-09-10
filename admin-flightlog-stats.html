@@ -125,7 +125,8 @@
     }
   </style>
   <link rel="stylesheet" href="/css/styles.css?v=20260910-polish">
-  <link rel="stylesheet" href="/css/stats-loading.css?v=2">
+  <link rel="stylesheet" href="/css/stats-loading.css?v=3">
+  <script src="/js/flight-loader.js?v=1" defer></script>
 </head>
 
 <body class="skyops-app">
@@ -150,6 +151,7 @@
         <h2 class="stats-loader-title">Loading your flight stats</h2>
         <p>Gathering flight logs and preparing your charts.</p>
         <div class="stats-loader-signal" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div class="flight-loading-bar" aria-hidden="true"><span class="flight-loading-bar-fill"></span></div>
       </div>
     </div>
     <div class="card shadow-sm filter-card fade-in" id="pageCard" aria-busy="true">
@@ -346,6 +348,7 @@
         statsLoading = isBusy;
         document.body.classList.toggle("loading", isBusy);
         el("statsLoader").hidden = !isBusy;
+        window.updateFlightLoader?.(el("statsLoader"), isBusy);
         el("pageCard").setAttribute("aria-busy", String(isBusy));
         document.querySelectorAll("#refreshBtn, #thisYearBtn, #last12Btn, #startDate, #endDate, .aircraft-filter")
           .forEach(control => { control.disabled = isBusy; });

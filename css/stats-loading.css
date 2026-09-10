@@ -80,3 +80,27 @@
   0%, 100% { opacity: .45; }
   50% { opacity: 1; }
 }
+
+/* Phone fallback: JavaScript moves this bar, independently of CSS animations. */
+.flight-loading-bar { display: none; }
+.stats-loader--bar .stats-radar,
+.stats-loader--bar .stats-loader-signal { display: none; }
+.stats-loader--bar .stats-loader-copy { width: 100%; }
+.stats-loader--bar .flight-loading-bar {
+  display: block;
+  position: relative;
+  height: 7px;
+  margin-top: 1.15rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #dce7f8;
+}
+.flight-loading-bar-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 32%;
+  border-radius: inherit;
+  background: #245dcc;
+}
