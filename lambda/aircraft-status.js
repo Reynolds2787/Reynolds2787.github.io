@@ -82,7 +82,12 @@ function getStatusFromRows(aircraft, rows) {
     }
 
     if (nextServiceDueAt === null) {
-      nextServiceDueAt = firstPositiveNumber(row, ["nextServiceDueAt"]);
+      // Preserve the legacy service fields supported by the deployed endpoint.
+      nextServiceDueAt = firstPositiveNumber(row, [
+        "nextServiceDueAt", "serviceAt", "nextServiceDue",
+        "remainingFlightHoursAfterFlight", "remainingFlightHoursBeforeFlight",
+        ...(useFlightHours ? [] : ["remainingTachoTimeAfterFlight", "remainingTachoTimeBeforeFlight"])
+      ]);
     }
 
   }
@@ -97,7 +102,7 @@ function getStatusFromRows(aircraft, rows) {
       : null,
     lastFlightDate: firstText(latestRow, ["flightDate", "createdAt"]),
     lastFlightPic: firstText(latestRow, ["picName", "pic", "PIC"]),
-    lastFlightTime: firstText(latestRow, ["airTime", "flightTime", "blockTime", "loggedTime"])
+    lastFlightLoggedAt: firstText(latestRow, ["createdAt"])
   };
 }
 
@@ -121,13 +126,15 @@ async function queryFlightLogs(aircraft) {
         "endTacho",
         "tachoEnd",
         "nextServiceDueAt",
+        "serviceAt",
+        "nextServiceDue",
+        "remainingFlightHoursAfterFlight",
+        "remainingFlightHoursBeforeFlight",
+        "remainingTachoTimeAfterFlight",
+        "remainingTachoTimeBeforeFlight",
         "picName",
         "pic",
-        "PIC",
-        "airTime",
-        "flightTime",
-        "blockTime",
-        "loggedTime"
+        "PIC"
       ].join(", "),
       ExclusiveStartKey
     }));

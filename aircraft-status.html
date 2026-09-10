@@ -273,6 +273,22 @@
       return "";
     }
 
+    function formatLoggedAt(value) {
+      if (!value) return "Not recorded";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "Not recorded";
+      return new Intl.DateTimeFormat("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+        timeZone: "Europe/London",
+        timeZoneName: "short"
+      }).format(date);
+    }
+
     function normalizeResponse(data) {
       const rows = Array.isArray(data)
         ? data
@@ -316,8 +332,8 @@
 
             <div class="card-meta">
               <span>${escapeHtml(formatDate(item?.lastFlightDate))}</span>
-              <span><span class="card-meta-label">PIC</span> ${escapeHtml(item?.lastFlightPic || "—")}</span>
-              <span><span class="card-meta-label">Flight time</span> ${escapeHtml(item?.lastFlightTime || "—")}</span>
+              <span><span class="card-meta-label">PIC</span> ${escapeHtml(item?.lastFlightPic || "Not recorded")}</span>
+              <span><span class="card-meta-label">Logged</span> ${escapeHtml(formatLoggedAt(item?.lastFlightLoggedAt))}</span>
             </div>
           </article>
         </div>
