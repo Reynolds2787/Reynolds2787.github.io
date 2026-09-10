@@ -1,19 +1,270 @@
+/* Shared SkyOpsAero theme. Load after each page's component styles. */
+:root {
+  --skyops-ink: #17263c;
+  --skyops-muted: #5f6f82;
+  --skyops-blue: #245dcc;
+  --skyops-blue-soft: #edf3ff;
+  --skyops-border: #dce4ee;
+  --skyops-canvas: #f3f6fa;
+  --skyops-radius: 1rem;
+  --skyops-shadow: 0 4px 18px rgba(23, 38, 60, .045);
+  --bs-body-color: var(--skyops-ink);
+  --bs-body-bg: var(--skyops-canvas);
+  --bs-primary: var(--skyops-blue);
+  --bs-primary-rgb: 36, 93, 204;
+  --bs-link-color: var(--skyops-blue);
+  --bs-link-color-rgb: 36, 93, 204;
+  --bs-link-hover-color: #19489f;
+  --bs-link-hover-color-rgb: 25, 72, 159;
+  --bs-border-color: var(--skyops-border);
+  --bs-secondary-color: var(--skyops-muted);
+}
+
+body.skyops-app {
+  min-height: 100vh;
+  background: var(--skyops-canvas);
+  color: var(--skyops-ink);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+body.skyops-app.bg-light { background-color: var(--skyops-canvas) !important; }
+.skyops-app :is(h1, h2, h3, h4, .h1, .h2, .h3, .h4) {
+  font-weight: 700;
+  letter-spacing: -.025em;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+.skyops-app .site-heading {
+  padding: .6rem 1rem !important;
+  background: #e9eff8 !important;
+  color: #344a68 !important;
+  border-bottom: 1px solid #dce5f1;
+}
+.skyops-app .site-heading :is(h1, h2) {
+  margin: 0;
+  color: inherit;
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+/* The mount, rather than its short child, owns the sticky navigation. */
+#navbar-placeholder { position: sticky; top: 0; z-index: 1020; }
 .skyops-navbar {
-  background: linear-gradient(90deg, #1f2328 0%, #2c3137 100%);
+  --bs-navbar-color: #c4d0e2;
+  --bs-navbar-hover-color: #fff;
+  --bs-navbar-active-color: #fff;
+  padding: .65rem 0 !important;
+  background: #17283f !important;
+  box-shadow: 0 3px 12px rgba(23, 40, 63, .1) !important;
 }
-
-.skyops-navbar .navbar-brand {
-  letter-spacing: 0.03em;
+.skyops-navbar > .container-fluid { max-width: 1320px; padding-inline: 1.5rem; gap: .75rem; }
+.skyops-navbar .navbar-brand { margin-right: 1rem; font-size: 1.15rem; letter-spacing: -.035em; }
+.skyops-navbar .nav-link {
+  padding: .5rem .8rem !important;
+  border-radius: .5rem;
+  font-size: .9rem;
+  font-weight: 500;
+  transition: background-color .15s ease, color .15s ease;
 }
+.skyops-navbar .nav-link:is(:hover, .active) { background: rgba(255, 255, 255, .1); }
+.skyops-navbar .navbar-toggler { min-height: 44px; border-color: #617188; border-radius: .6rem; }
+.skyops-navbar .dropdown-menu { margin-top: .6rem; }
+.skyops-navbar .account-icon { width: 1.1rem; height: 1.1rem; filter: invert(1); opacity: .8; }
+.skyops-navbar #loggedInUser { max-width: 15rem; overflow: hidden; text-overflow: ellipsis; }
+#pageTitle { color: #c4d0e2 !important; letter-spacing: .02em; }
+.skyops-app > :is(.container, main.container) { padding-bottom: 2.5rem !important; }
+.skyops-app > .container.mt-3 { margin-top: 1.5rem !important; }
+.skyops-app .text-muted { color: var(--skyops-muted) !important; }
 
-#pageTitle {
-  opacity: 0.9;
-  letter-spacing: 0.03em;
-  white-space: nowrap;
+/* Consistent surfaces; keep specialised warning and aircraft colours intact. */
+.skyops-app .card {
+  --bs-card-border-color: var(--skyops-border);
+  --bs-card-border-radius: var(--skyops-radius);
+  --bs-card-inner-border-radius: calc(var(--skyops-radius) - 1px);
+  --bs-card-spacer-x: 1.5rem;
+  --bs-card-spacer-y: 1.5rem;
+  border-radius: var(--skyops-radius);
 }
+.skyops-app :is(.page-card, .section-card, .card-shell, .export-card, .filter-card, .editor-card, .list-card) {
+  border: 1px solid var(--skyops-border);
+  border-radius: var(--skyops-radius);
+  background: #fff;
+  box-shadow: var(--skyops-shadow);
+}
+.skyops-app .shadow-sm { box-shadow: var(--skyops-shadow) !important; }
+.skyops-app .card-header { padding: 1rem 1.5rem; font-weight: 600; }
+.skyops-app .page-hero { border: 1px solid var(--skyops-border); border-radius: var(--skyops-radius); background: #fff; box-shadow: var(--skyops-shadow); }
+.skyops-app :is(.section-title, .stat-label, .meta-label) { color: var(--skyops-muted); letter-spacing: .065em; font-weight: 700; }
+.skyops-app :is(.metric-value, .stat-value, .status-value, .registration) { font-variant-numeric: tabular-nums; }
+.skyops-app .dropdown-menu {
+  --bs-dropdown-link-active-bg: var(--skyops-blue);
+  --bs-dropdown-link-hover-bg: var(--skyops-blue-soft);
+  padding: .4rem;
+  border: 1px solid var(--skyops-border);
+  border-radius: .75rem;
+  box-shadow: 0 12px 32px rgba(23, 38, 60, .14);
+}
+.skyops-app .dropdown-item { padding: .6rem .8rem; border-radius: .4rem; font-size: .9rem; }
 
-@media (max-width: 575.98px) {
-  #pageTitle {
-    display: none !important;
+/* Form dimensions and focus states shared across flight and admin tools. */
+.skyops-app .form-label { margin-bottom: .45rem; font-size: .875rem; font-weight: 600; color: #34445c; }
+.skyops-app :is(.form-control, .form-select) {
+  min-height: 44px;
+  padding-top: .6rem;
+  padding-bottom: .6rem;
+  border-color: #cbd6e3;
+  border-radius: .6rem;
+  background-color: #fff;
+  color: var(--skyops-ink);
+  line-height: 1.4;
+}
+.skyops-app .form-control::placeholder { color: #6d7a8c; opacity: 1; }
+.skyops-app :is(.form-control, .form-select):focus { border-color: var(--skyops-blue); box-shadow: 0 0 0 .2rem rgba(36, 93, 204, .14); }
+/* Keep Bootstrap's validation colours above the shared control styling. */
+.skyops-app :is(.form-control, .form-select).is-invalid,
+.skyops-app .was-validated :is(.form-control, .form-select):invalid { border-color: var(--bs-form-invalid-border-color); }
+.skyops-app :is(.form-control, .form-select).is-valid,
+.skyops-app .was-validated :is(.form-control, .form-select):valid { border-color: var(--bs-form-valid-border-color); }
+.skyops-app :is(.form-control, .form-select):disabled,
+.skyops-app .form-control[readonly] { background-color: #edf1f6; color: #627087; }
+.skyops-app .form-check-input { border-color: #a5b4c7; cursor: pointer; }
+.skyops-app .form-check-input:checked { background-color: var(--skyops-blue); border-color: var(--skyops-blue); }
+.skyops-app .form-check-input:disabled { cursor: default; }
+.skyops-app .form-check-label { cursor: pointer; }
+.skyops-app .form-check-input:focus { border-color: var(--skyops-blue); box-shadow: 0 0 0 .2rem rgba(36, 93, 204, .14); }
+.skyops-app .btn {
+  --bs-btn-border-radius: .6rem;
+  --bs-btn-font-weight: 600;
+  --bs-btn-font-size: .9rem;
+  --bs-btn-padding-x: 1rem;
+  --bs-btn-padding-y: .6rem;
+  min-height: 44px;
+  border-radius: var(--bs-btn-border-radius);
+}
+.skyops-app .btn-sm { --bs-btn-font-size: .8rem; --bs-btn-padding-x: .7rem; --bs-btn-padding-y: .4rem; min-height: 36px; }
+.skyops-app .btn-primary {
+  --bs-btn-bg: var(--skyops-blue);
+  --bs-btn-border-color: var(--skyops-blue);
+  --bs-btn-hover-bg: #194ba9;
+  --bs-btn-hover-border-color: #194ba9;
+  --bs-btn-active-bg: #153f91;
+  --bs-btn-active-border-color: #153f91;
+  --bs-btn-disabled-bg: var(--skyops-blue);
+  --bs-btn-disabled-border-color: var(--skyops-blue);
+}
+.skyops-app .btn-outline-primary {
+  --bs-btn-color: var(--skyops-blue);
+  --bs-btn-border-color: #b5c8e8;
+  --bs-btn-hover-bg: var(--skyops-blue);
+  --bs-btn-hover-border-color: var(--skyops-blue);
+  --bs-btn-active-bg: var(--skyops-blue);
+  --bs-btn-active-border-color: var(--skyops-blue);
+}
+.skyops-app .btn-outline-secondary { --bs-btn-color: #52637a; --bs-btn-border-color: #c7d2e0; }
+.skyops-app :is(a, button, input, select, textarea, [tabindex]):focus-visible { outline: 3px solid #5084e4; outline-offset: 3px; }
+.skyops-app .alert { border-radius: .75rem; }
+.skyops-app > .alert { border-radius: 0; }
+.skyops-app .modal-content { border: 1px solid var(--skyops-border); border-radius: 1rem; box-shadow: 0 24px 64px rgba(23, 38, 60, .2); }
+.skyops-app .modal-header, .skyops-app .modal-footer { padding: 1rem 1.5rem; border-color: var(--skyops-border); }
+.skyops-app .modal-body { padding: 1.5rem; }
+
+/* Data tables retain their status variants and responsive containers. */
+.skyops-app .table {
+  --bs-table-color: var(--skyops-ink);
+  --bs-table-border-color: var(--skyops-border);
+  --bs-table-striped-bg: #f6f8fc;
+  --bs-table-hover-bg: #edf3ff;
+  font-size: .9rem;
+  font-variant-numeric: tabular-nums;
+}
+.skyops-app .table > :not(caption) > * > * { padding: .8rem .9rem; }
+.skyops-app .table thead { vertical-align: middle; font-size: .75rem; letter-spacing: .035em; }
+.skyops-app .table thead.table-dark { --bs-table-bg: #eaf0f7; --bs-table-color: #344a68; --bs-table-border-color: #d7e1ed; }
+.skyops-app .table th { font-weight: 700; }
+.skyops-app .flight-table td:nth-child(2) { white-space: nowrap; }
+.skyops-app .table-responsive { border-radius: .75rem; }
+.skyops-app .table td[colspan] { padding: 1.5rem; }
+
+/* Dashboard */
+.skyops-app .weather-strip { background: #fff; border-bottom: 1px solid var(--skyops-border); }
+.skyops-app .weather-strip > .container { padding-block: .7rem !important; }
+.skyops-app .dashboard-shell { padding-top: .75rem; }
+.skyops-app .dashboard-header { margin-bottom: 1.65rem; }
+.skyops-app .dashboard-title { margin-bottom: .4rem; font-size: clamp(1.65rem, 3vw, 2.1rem); }
+.skyops-app .dashboard-subtitle { margin: 0; color: var(--skyops-muted); font-size: .95rem; }
+.skyops-app .dashboard-eyebrow { margin: 0 0 .5rem; color: var(--skyops-blue); font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.skyops-app .dashboard-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1rem; }
+.skyops-app .dashboard-grid > div { min-width: 0; grid-column: span 2; }
+.skyops-app .dashboard-grid > .dashboard-primary { grid-column: span 3; }
+.skyops-app .quick-action-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 182px;
+  height: 100%;
+  padding: 1.5rem;
+  border: 1px solid var(--skyops-border);
+  border-radius: var(--skyops-radius);
+  background: #fff;
+  box-shadow: var(--skyops-shadow);
+  text-decoration: none;
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.skyops-app .quick-action-tile:hover { border-color: #9eb8e6; box-shadow: 0 8px 24px rgba(23, 38, 60, .08); transform: translateY(-2px); }
+.skyops-app .quick-action-icon { display: inline-flex; align-items: center; justify-content: center; width: 2.6rem; height: 2.6rem; margin-bottom: 1rem; border-radius: .7rem; background: var(--skyops-blue-soft); }
+.skyops-app .quick-action-icon img { width: 1.25rem; height: 1.25rem; opacity: .75; }
+.skyops-app .icon-status { background: #fff2db; }
+.skyops-app .icon-stats { background: #e9f3ef; }
+.skyops-app .icon-export { background: #f0edfa; }
+.skyops-app .quick-action-title { margin-bottom: .3rem; color: var(--skyops-ink); font-weight: 700; font-size: 1rem; }
+.skyops-app .quick-action-subtitle { margin: 0; color: var(--skyops-muted); font-size: .875rem; line-height: 1.5; }
+
+/* Checklist rows stay readable and present a clear selected state. */
+.skyops-app.checklist-page > .container { max-width: 860px; }
+.skyops-app .check-row { min-height: 64px; padding: .8rem .75rem; border-color: var(--skyops-border); border-radius: .5rem; transition: background-color .15s ease; }
+.skyops-app .check-row:has(input:checked) { background: #edf5ff; }
+.skyops-app .check-row .form-check-label { padding-block: .3rem; }
+.skyops-app .check-row .form-switch { flex-shrink: 0; min-width: 3rem; }
+.skyops-app .check-row .form-check-input { width: 2.6rem; height: 1.4rem; }
+.skyops-app .form-check.tile:has(input:checked) { border-color: #b6cbed; background: #f2f6ff; }
+
+@media (max-width: 767.98px) {
+  .skyops-navbar > .container-fluid { padding-inline: 1rem; }
+  .skyops-navbar .navbar-collapse { padding-top: .5rem; }
+  .skyops-navbar .dropdown-menu { box-shadow: none; }
+  #pageTitle { display: none !important; }
+  .skyops-app > .container { padding-inline: 1rem; }
+  .skyops-app .card { --bs-card-spacer-x: 1rem; --bs-card-spacer-y: 1rem; }
+  .skyops-app .card-body.p-4 { padding: 1.25rem !important; }
+  .skyops-app .btn-sm { min-height: 44px; }
+  .skyops-app .form-control, .skyops-app .form-select { font-size: 1rem; }
+  .skyops-app .dashboard-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .skyops-app .dashboard-grid > div, .skyops-app .dashboard-grid > .dashboard-primary { grid-column: span 1; }
+  .skyops-app .quick-action-tile { padding: 1.1rem; }
+  .skyops-app .modal-header, .skyops-app .modal-body, .skyops-app .modal-footer { padding: 1rem; }
+}
+@media (max-width: 479.98px) {
+  .skyops-app .dashboard-grid { grid-template-columns: minmax(0, 1fr); gap: .75rem; }
+  .skyops-app .quick-action-tile { display: grid; grid-template-columns: 2.6rem minmax(0, 1fr); column-gap: 1rem; min-height: 108px; align-content: center; }
+  .skyops-app .quick-action-icon { grid-row: span 2; margin: 0; align-self: center; }
+  .skyops-app .quick-action-title, .skyops-app .quick-action-subtitle { grid-column: 2; }
+  .skyops-app .dashboard-header { margin-bottom: 1.25rem; }
+  .skyops-app .check-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skyops-app *, .skyops-app *::before, .skyops-app *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
   }
+  .skyops-app .quick-action-tile:hover { transform: none; }
+}
+@media print {
+  .skyops-app { background: #fff !important; }
+  #navbar-placeholder { display: none; }
+  .skyops-app .card { box-shadow: none !important; }
 }

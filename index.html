@@ -9,191 +9,13 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 
-  <link rel="stylesheet" href="/css/styles.css">
-
-  <style>
-    body {
-      background: linear-gradient(180deg, #ecedef 100%, #f1f2f5 100%);
-    }
-
-    .quick-actions-card {
-      border: 0;
-      border-radius: 1.25rem;
-      background: rgba(255, 255, 255, 0.9);
-      box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.08);
-      backdrop-filter: blur(6px);
-    }
-
-    .dashboard-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-      margin-bottom: 1rem;
-    }
-
-    .dashboard-title {
-      margin-bottom: 0.15rem;
-    }
-
-    .dashboard-subtitle {
-      margin-bottom: 0;
-      color: #6c757d;
-    }
-
-    .dashboard-badge {
-      background: rgba(13, 110, 253, 0.08);
-      color: #0d6efd;
-      border: 1px solid rgba(13, 110, 253, 0.12);
-      border-radius: 999px;
-      padding: 0.45rem 0.8rem;
-      font-size: 0.85rem;
-      font-weight: 600;
-    }
-
-    .quick-action-tile {
-      display: block;
-      text-decoration: none;
-      border-radius: 1rem;
-      padding: 1rem;
-      height: 100%;
-      transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease;
-      box-shadow: 0 0.35rem 0.9rem rgba(0, 0, 0, 0.06);
-      border: 1px solid rgba(0, 0, 0, 0.05);
-    }
-
-    .quick-action-tile:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 0.65rem 1.25rem rgba(0, 0, 0, 0.12);
-      text-decoration: none;
-    }
-
-    .quick-action-icon {
-      width: 2.7rem;
-      height: 2.7rem;
-      border-radius: 0.9rem;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      margin-bottom: 0.75rem;
-      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04);
-    }
-
-    .quick-action-title {
-      font-weight: 700;
-      color: #212529;
-      margin-bottom: 0.2rem;
-    }
-
-    .quick-action-subtitle {
-      font-size: 0.9rem;
-      color: #6c757d;
-      margin-bottom: 0;
-      line-height: 1.3;
-    }
-
-
-    .tile-calendar {
-      background: linear-gradient(180deg, #f6f7e8 0%, #f6f7e8 100%);
-    }
-
-    .tile-bookout {
-      background: linear-gradient(180deg, #e8f7ec 0%, #f4fbf6 100%);
-    }
-
-    .tile-bookings {
-      background: linear-gradient(180deg, #f6f7e8 0%, #f6f7e8  100%);
-    }
-
-    .tile-myflights {
-      background: linear-gradient(180deg, #edf5ff 0%, #f8fbff 100%);
-    }
-
-    .tile-postlog {
-      background: linear-gradient(180deg, #eaf7f8 0%, #f4fbfc 100%);
-    }
-
-    .tile-active {
-      background: linear-gradient(180deg, #eef5ff 0%, #f8fbff 100%);
-    }
-
-    .tile-status {
-      background: linear-gradient(180deg, #fff7e8 0%, #fffaf2 100%);
-    }
-
-    .tile-techlog {
-      background: linear-gradient(180deg, #f2edff 0%, #f8f6ff 100%);
-    }
-
-    .tile-defects {
-      background: linear-gradient(180deg, #fff0f0 0%, #fff7f7 100%);
-    }
-
-
-    .icon-calendar {
-      background: #d4d4c8;
-    }
-
-    .icon-bookout {
-      background: #d1f0d8;
-    }
-
-    .icon-bookings {
-      background: #d9e8ff;
-    }
-
-    .icon-myflights {
-      background: #dde9ff;
-    }
-
-    .icon-postlog {
-      background: #d8f0f2;
-    }
-
-    .icon-active {
-      background: #dde9ff;
-    }
-
-    .icon-status {
-      background: #ffe7b8;
-    }
-
-    .icon-techlog {
-      background: #e2d8ff;
-    }
-
-    .icon-defects {
-      background: #ffd8d8;
-    }
-
-    @media (max-width: 576px) {
-      .quick-action-tile {
-        padding: 0.9rem;
-      }
-
-      .quick-action-title {
-        font-size: 0.95rem;
-      }
-
-      .quick-action-subtitle {
-        font-size: 0.82rem;
-      }
-
-      .dashboard-badge {
-        width: 100%;
-        text-align: center;
-      }
-    }
-  </style>
 
   <script src="js/auth.js" defer></script>
   <script src="js/logout.js" defer></script>
   <script src="js/admin-guard.js" defer></script>
   <script src="js/due-soon-badge.js" defer></script>
   <script src="js/fetch-qnh.js" defer></script>
-  <script src="js/loadNavbar.js" defer></script>
+  <script src="js/loadNavbar.js?v=20260910" defer></script>
 
   <script>
     document.addEventListener("navbar:loaded", () => {
@@ -203,18 +25,19 @@
     });
   </script>
 
+  <link rel="stylesheet" href="/css/styles.css?v=20260910-polish">
 </head>
 
 
-<body>
+<body class="skyops-app">
 
-  <div class="container-fluid p-2 bg-primary text-white text-center">
-    <h2>SkyOpsAero - Home Page</h2>
+  <div class="site-heading container-fluid p-2 bg-primary text-white text-center">
+    <h2>Flight operations</h2>
   </div>
 
   <div id="navbar-placeholder"></div>
 
-  <div class="container-fluid bg-light border-bottom">
+  <div class="container-fluid weather-strip">
     <div class="container py-2">
       <div class="d-flex justify-content-center align-items-center gap-2" id="qnhDisplay" data-bs-toggle="tooltip"
         data-bs-placement="bottom" title="Loading METAR…" style="cursor: default;">
@@ -231,81 +54,65 @@
     </div>
   </div>
 
-  <div class="container mt-3 pb-3">
-    <div class="quick-actions-card p-3 p-md-4">
-      <div class="dashboard-header">
-        <div>
-          <h2 class="h4 dashboard-title">Operations Dashboard</h2>
+  <main class="container dashboard-shell mt-3 pb-3">
+    <header class="dashboard-header">
+      <p class="dashboard-eyebrow">SkyOpsAero</p>
+      <h1 class="dashboard-title">Operations Dashboard</h1>
+      <p class="dashboard-subtitle">Your flights, fleet and records, all in one place.</p>
+    </header>
 
-        </div>
-
+    <div class="dashboard-grid">
+      <div class="d-none">
+        <a href="aircraft-calendar.html" class="quick-action-tile tile-calendar">
+          <span class="quick-action-icon icon-calendar"><img src="/images/icons/calendar3.svg" alt="" width="20" height="20"></span>
+          <div class="quick-action-title">Aircraft Calendar</div>
+          <p class="quick-action-subtitle">Make an aircraft reservation</p>
+        </a>
       </div>
-
-      <div class="row g-3">
-        <div class="col-6 col-lg-3 d-none">
-          <a href="aircraft-calendar.html" class="quick-action-tile tile-calendar">
-            <div class="quick-action-icon icon-calendar">🗓️</div>
-            <div class="quick-action-title">Aircraft Calendar</div>
-            <p class="quick-action-subtitle">Make an aircraft reservation</p>
-          </a>
-        </div>
-
-        <div class="row g-3">
-          <div class="col-6 col-lg-3 d-none">
-            <a href="booking-out-form.html" class="quick-action-tile tile-bookout">
-              <div class="quick-action-icon icon-bookout">✈️</div>
-              <div class="quick-action-title">Book Out</div>
-              <p class="quick-action-subtitle">Start a new flight booking</p>
-            </a>
-          </div>
-
-        
-
-          <div class="col-6 col-lg-3">
-            <a href="active-flights.html" class="quick-action-tile tile-active">
-              <div class="quick-action-icon icon-active">🛫</div>
-              <div class="quick-action-title">Active Flights</div>
-              <p class="quick-action-subtitle">See aircraft currently airborne</p>
-            </a>
-          </div>
-
-
-           <div class="col-6 col-lg-3">
-            <a href="my-flights.html" class="quick-action-tile tile-myflights">
-              <div class="quick-action-icon icon-myflights">🛩️</div>
-              <div class="quick-action-title">My Flights</div>
-              <p class="quick-action-subtitle">Review your completed flight history</p>
-            </a>
-          </div>
-
-          <div class="col-6 col-lg-3">
-            <a href="aircraft-status.html" class="quick-action-tile tile-status">
-              <div class="quick-action-icon icon-status">🛠️</div>
-              <div class="quick-action-title">Aircraft Status</div>
-              <p class="quick-action-subtitle">View current hours and next service due</p>
-            </a>
-          </div>
-
-          <div class="col-6 col-lg-3">
-            <a href="admin-flightlog-stats.html" class="quick-action-tile tile-status">
-              <div class="quick-action-icon icon-status">📋</div>
-              <div class="quick-action-title">Aircraft Statistics</div>
-              <p class="quick-action-subtitle">See aircraft Statistics over a period of time</p>
-            </a>
-          </div>
-
-            <div class="col-6 col-lg-3">
-            <a href="admin-flight-logs-export.html" class="quick-action-tile tile-bookings">
-              <div class="quick-action-icon icon-bookings">📋</div>
-              <div class="quick-action-title">Flight Log Export</div>
-              <p class="quick-action-subtitle">Export FLight Logs to a downloadable spreadsheet</p>
-            </a>
-          </div>
-
-        </div>
+      <div class="d-none">
+        <a href="booking-out-form.html" class="quick-action-tile tile-bookout">
+          <span class="quick-action-icon icon-bookout"><img src="/images/icons/airplane.svg" alt="" width="20" height="20"></span>
+          <div class="quick-action-title">Book Out</div>
+          <p class="quick-action-subtitle">Start a new flight booking</p>
+        </a>
+      </div>
+      <div class="dashboard-primary">
+        <a href="active-flights.html" class="quick-action-tile tile-active">
+          <span class="quick-action-icon icon-active"><img src="/images/icons/airplane.svg" alt="" width="20" height="20"></span>
+          <div class="quick-action-title">Active Flights</div>
+          <p class="quick-action-subtitle">See aircraft currently airborne</p>
+        </a>
+      </div>
+      <div class="dashboard-primary">
+        <a href="my-flights.html" class="quick-action-tile tile-myflights">
+          <span class="quick-action-icon icon-myflights"><img src="/images/icons/airplane-engines.svg" alt="" width="20" height="20"></span>
+          <div class="quick-action-title">My Flights</div>
+          <p class="quick-action-subtitle">Review your completed flight history</p>
+        </a>
+      </div>
+      <div>
+        <a href="aircraft-status.html" class="quick-action-tile tile-status">
+          <span class="quick-action-icon icon-status"><img src="/images/icons/clipboard2-pulse.svg" alt="" width="20" height="20"></span>
+          <div class="quick-action-title">Aircraft Status</div>
+          <p class="quick-action-subtitle">View current hours and next service due</p>
+        </a>
+      </div>
+      <div>
+        <a href="admin-flightlog-stats.html" class="quick-action-tile tile-stats">
+          <span class="quick-action-icon icon-stats"><img src="/images/icons/bar-chart-line.svg" alt="" width="20" height="20"></span>
+          <div class="quick-action-title">Aircraft Statistics</div>
+          <p class="quick-action-subtitle">Explore aircraft activity over time</p>
+        </a>
+      </div>
+      <div>
+        <a href="admin-flight-logs-export.html" class="quick-action-tile tile-export">
+          <span class="quick-action-icon icon-export"><img src="/images/icons/file-earmark-spreadsheet.svg" alt="" width="20" height="20"></span>
+          <div class="quick-action-title">Flight Log Export</div>
+          <p class="quick-action-subtitle">Download flight logs as a spreadsheet</p>
+        </a>
       </div>
     </div>
-  </div>
+  </main>
 
 </body>
 

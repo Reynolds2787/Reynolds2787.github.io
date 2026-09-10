@@ -17,7 +17,8 @@ async function loadNavbar() {
       userEl.textContent = localStorage.getItem("username") || "User";
     }
 
-    const currentPath = window.location.pathname.replace(/\/$/, "");
+    const normalizePath = path => path.replace(/\/index\.html$/, "/").replace(/\/$/, "");
+    const currentPath = normalizePath(window.location.pathname);
 
     // Only process actual anchor nav links
     document.querySelectorAll("a.nav-link[href]").forEach(link => {
@@ -28,7 +29,7 @@ async function loadNavbar() {
       }
 
       try {
-        const linkPath = new URL(rawHref, window.location.href).pathname.replace(/\/$/, "");
+        const linkPath = normalizePath(new URL(rawHref, window.location.href).pathname);
         if (linkPath === currentPath) {
           link.classList.add("active");
           link.setAttribute("aria-current", "page");
@@ -47,7 +48,7 @@ async function loadNavbar() {
       }
 
       try {
-        const itemPath = new URL(rawHref, window.location.href).pathname.replace(/\/$/, "");
+        const itemPath = normalizePath(new URL(rawHref, window.location.href).pathname);
 
         if (itemPath === currentPath) {
           item.classList.add("active");
