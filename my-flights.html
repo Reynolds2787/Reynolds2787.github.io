@@ -299,6 +299,7 @@
   <script src="js/due-soon-badge.js" defer></script>
   <script src="js/loadNavbar.js?v=20260910" defer></script>
   <link rel="stylesheet" href="/css/styles.css?v=20260910-polish">
+  <link rel="stylesheet" href="/css/stats-loading.css?v=1">
 </head>
 <body class="skyops-app">
   <div class="site-heading container-fluid p-2 text-white text-center flight-topbar">
@@ -308,7 +309,21 @@
   <div id="navbar-placeholder"></div>
 
   <div class="container page-shell py-4">
-    <div class="card page-card fade-in" id="pageCard">
+    <div id="loadingState" class="stats-loader" role="status" aria-live="polite" aria-atomic="true">
+      <div class="stats-radar" aria-hidden="true">
+        <div class="stats-radar-orbit">
+          <span class="stats-radar-plane"><img src="/images/icons/airplane.svg" alt="" width="18" height="18"></span>
+        </div>
+      </div>
+      <div class="stats-loader-copy">
+        <span class="stats-loader-kicker" aria-hidden="true">Flight data in motion</span>
+        <h2 class="stats-loader-title">Loading your flights</h2>
+        <p>Gathering your logbook and flight history.</p>
+        <div class="stats-loader-signal" aria-hidden="true"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+    <div id="flightLoadStatus" class="visually-hidden" role="status" aria-live="polite"></div>
+    <div class="card page-card fade-in" id="pageCard" aria-busy="true">
       <div class="card-body p-4">
         <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
           <div>
@@ -346,17 +361,6 @@
         </div>
 
         <div id="errorBox" class="alert alert-danger d-none mb-4"></div>
-
-        <div id="loadingState">
-          <div class="row g-3 mb-4">
-            <div class="col-12 col-md-4"><div class="skeleton" style="height:110px;"></div></div>
-            <div class="col-12 col-md-4"><div class="skeleton" style="height:110px;"></div></div>
-            <div class="col-12 col-md-4"><div class="skeleton" style="height:110px;"></div></div>
-          </div>
-          <div class="skeleton mb-3" style="height:280px;"></div>
-          <div class="skeleton mobile-only mb-3" style="height:180px;"></div>
-          <div class="skeleton mobile-only mb-3" style="height:180px;"></div>
-        </div>
 
         <div id="contentWrap" class="d-none">
           <div class="row g-3 mb-4">
@@ -467,9 +471,14 @@
       el("errorBox").classList.add("d-none");
     }
 
+    let flightsLoading = false;
+
     function setLoading(isLoading) {
+      flightsLoading = isLoading;
+      el("pageCard").setAttribute("aria-busy", String(isLoading));
+      if (isLoading) el("flightLoadStatus").textContent = "";
       document.body.classList.toggle("loading", isLoading);
-      el("loadingState").classList.toggle("d-none", !isLoading);
+      el("loadingState").hidden = !isLoading;
       el("contentWrap").classList.toggle("d-none", isLoading);
       el("refreshBtn").disabled = isLoading;
       el("clearBtn").disabled = isLoading;
@@ -707,6 +716,7 @@
     }
 
     async function loadFlights() {
+      if (flightsLoading) return;
       clearError();
       setLoading(true);
 
@@ -723,6 +733,7 @@
         allFlights = Array.isArray(data?.items) ? data.items : (Array.isArray(data) ? data : []);
         serverSummary = data?.summary || null;
         renderFlights();
+        el("flightLoadStatus").textContent = "Flight history loaded.";
       } catch (err) {
         console.error(err);
         allFlights = [];

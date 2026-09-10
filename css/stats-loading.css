@@ -1,0 +1,71 @@
+/* Shared by Flight Log Stats and My Flights: an indeterminate radar sweep, tied to the request lifecycle. */
+.stats-loader[hidden] { display: none; }
+.stats-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.75rem;
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  overflow: hidden;
+  border: 1px solid #cbdcf5;
+  border-radius: 1rem;
+  background: linear-gradient(115deg, #edf4ff, #fff);
+  box-shadow: 0 8px 28px rgba(36, 93, 204, .07);
+}
+.stats-radar {
+  position: relative;
+  flex: 0 0 112px;
+  width: 112px;
+  height: 112px;
+  border: 1px solid #bbcfed;
+  border-radius: 50%;
+  background:
+    linear-gradient(transparent calc(50% - .5px), #cbdcf3 50%, transparent calc(50% + .5px)),
+    linear-gradient(90deg, transparent calc(50% - .5px), #cbdcf3 50%, transparent calc(50% + .5px)),
+    repeating-radial-gradient(circle, transparent 0 17px, #d1dff3 18px 19px, transparent 20px 35px);
+}
+.stats-radar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: conic-gradient(from 0deg, transparent 0deg 240deg, rgba(36, 93, 204, .02) 260deg, rgba(36, 93, 204, .28) 358deg, #245dcc 360deg);
+  animation: stats-radar-sweep 2.8s linear infinite;
+}
+.stats-radar-orbit { position: absolute; inset: 12px; animation: stats-radar-sweep 5.6s linear infinite; }
+.stats-radar-plane {
+  position: absolute;
+  left: calc(50% - 15px);
+  top: -8px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #cbdcf5;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 3px 8px rgba(36, 93, 204, .15);
+  transform: rotate(90deg);
+}
+.stats-radar-plane img { width: 18px; height: 18px; }
+.skyops-app .stats-loader-title { margin: 0 0 .35rem; font-size: 1.1rem; }
+.stats-loader-copy p { margin: 0; color: var(--skyops-muted); font-size: .875rem; }
+.stats-loader-kicker { display: block; margin-bottom: .5rem; color: var(--skyops-blue); font-size: .65rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.stats-loader-signal { display: flex; gap: 5px; margin-top: .85rem; }
+.stats-loader-signal span { width: 20px; height: 3px; border-radius: 2px; background: #245dcc; animation: stats-signal 1.4s ease-in-out infinite; }
+.stats-loader-signal span:nth-child(2) { animation-delay: .18s; }
+.stats-loader-signal span:nth-child(3) { animation-delay: .36s; }
+#pageCard[aria-busy="true"] .chart-wrap { opacity: .35; }
+@keyframes stats-radar-sweep { to { transform: rotate(360deg); } }
+@keyframes stats-signal { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
+@media (max-width: 479.98px) {
+  .stats-loader { gap: 1rem; padding: 1.25rem 1rem; }
+  .stats-radar { flex-basis: 88px; width: 88px; height: 88px; }
+  .skyops-app .stats-loader-title { font-size: 1rem; }
+  .stats-loader-copy p { font-size: .8rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stats-loader *, .stats-loader *::before { animation: none !important; }
+  .stats-loader-signal span { opacity: .65; }
+}
