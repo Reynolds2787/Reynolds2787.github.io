@@ -299,8 +299,9 @@
   <script src="js/due-soon-badge.js" defer></script>
   <script src="js/loadNavbar.js?v=20260910" defer></script>
   <link rel="stylesheet" href="/css/styles.css?v=20260910-polish">
-  <link rel="stylesheet" href="/css/stats-loading.css?v=3">
-  <script src="/js/flight-loader.js?v=1" defer></script>
+  <link rel="stylesheet" href="/css/stats-loading.css?v=4">
+  <script src="/js/vendor/lottie-light-5.13.0.min.js" defer></script>
+  <script src="/js/flight-loader.js?v=2" defer></script>
 </head>
 <body class="skyops-app">
   <div class="site-heading container-fluid p-2 text-white text-center flight-topbar">
@@ -311,17 +312,15 @@
 
   <div class="container page-shell py-4">
     <div id="loadingState" class="stats-loader" role="status" aria-live="polite" aria-atomic="true">
-      <div class="stats-radar" aria-hidden="true">
-        <div class="stats-radar-orbit">
-          <span class="stats-radar-plane"><img src="/images/icons/airplane.svg" alt="" width="18" height="18"></span>
-        </div>
+      <div class="flight-loader-art" aria-hidden="true">
+        <img class="flight-loader-fallback" src="/images/icons/airplane.svg" alt="" width="40" height="40">
+        <div class="flight-loader-lottie"></div>
       </div>
       <div class="stats-loader-copy">
         <span class="stats-loader-kicker" aria-hidden="true">Flight data in motion</span>
         <h2 class="stats-loader-title">Loading your flights</h2>
         <p>Gathering your logbook and flight history.</p>
-        <div class="stats-loader-signal" aria-hidden="true"><span></span><span></span><span></span></div>
-        <div class="flight-loading-bar" aria-hidden="true"><span class="flight-loading-bar-fill"></span></div>
+        <button type="button" class="btn btn-sm btn-link flight-loader-motion-toggle" aria-pressed="false" hidden>Play animation</button>
       </div>
     </div>
     <div id="flightLoadStatus" class="visually-hidden" role="status" aria-live="polite"></div>

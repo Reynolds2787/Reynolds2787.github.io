@@ -1,49 +1,70 @@
-// Use a timer-driven, indeterminate bar on phones. It does not depend on CSS
-// keyframe playback and never presents a made-up completion percentage.
+// Shared Lottie lifecycle for Flight Log Stats and My Flights.
 (() => {
   "use strict";
-  const phoneWidth = window.matchMedia("(max-width: 767.98px)");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const isIPhone = /iPhone|iPod/i.test(navigator.userAgent);
   const controllers = new Map();
+  let suspended = false;
 
   function createController(loader) {
-    const fill = loader.querySelector(".flight-loading-bar-fill");
-    if (!fill) return null;
+    const artwork = loader.querySelector(".flight-loader-art");
+    const container = loader.querySelector(".flight-loader-lottie");
+    const motionButton = loader.querySelector(".flight-loader-motion-toggle");
+    if (!container || !artwork) return null;
     let busy = false;
-    let timer = null;
-    let startedAt = 0;
-
-    function paint() {
-      const phase = (Date.now() - startedAt) / 2400 * Math.PI * 2;
-      const wave = (1 - Math.cos(phase)) / 2;
-      // Reduced motion uses only a soft fade, with no movement across the bar.
-      fill.style.left = reducedMotion.matches ? "0%" : `${wave * 68}%`;
-      fill.style.width = reducedMotion.matches ? "100%" : "32%";
-      fill.style.opacity = reducedMotion.matches ? String(.45 + wave * .35) : "1";
-    }
+    let ready = false;
+    let motionAllowed = false;
+    let animation = null;
 
     function sync() {
-      if (timer !== null) window.clearInterval(timer);
-      timer = null;
-      const useBar = isIPhone || phoneWidth.matches;
-      loader.classList.toggle("stats-loader--bar", useBar);
-      if (!busy || !useBar) return;
-      startedAt = Date.now();
-      paint();
-      if (!document.hidden) timer = window.setInterval(paint, 50);
+      motionButton.hidden = !reducedMotion.matches || !ready;
+      motionButton.textContent = motionAllowed ? "Pause animation" : "Play animation";
+      motionButton.setAttribute("aria-pressed", String(motionAllowed));
+      if (!ready || !animation) return;
+      if (reducedMotion.matches && !motionAllowed) {
+        animation.goToAndStop(0, true);
+      } else if (busy && !document.hidden && !suspended) {
+        animation.play();
+      } else {
+        animation.pause();
+      }
     }
 
-    const controller = {
-      setBusy(value) { busy = Boolean(value); sync(); },
-      sync,
-      stop() {
-        if (timer !== null) window.clearInterval(timer);
-        timer = null;
-      }
-    };
+    motionButton.addEventListener("click", () => {
+      motionAllowed = !motionAllowed;
+      sync();
+    });
+    const controller = { setBusy(value) { busy = Boolean(value); sync(); }, sync };
     controllers.set(loader, controller);
     sync();
+
+    // The existing icon and loading text remain if the player or JSON fails.
+    if (!window.lottie) return controller;
+    try {
+      animation = window.lottie.loadAnimation({
+        container,
+        renderer: "svg",
+        loop: true,
+        autoplay: false,
+        path: "/images/animations/airplane.json?v=1",
+        rendererSettings: { preserveAspectRatio: "xMidYMid meet", progressiveLoad: false }
+      });
+      animation.addEventListener("DOMLoaded", () => {
+        ready = true;
+        artwork.classList.add("is-ready");
+        sync();
+      });
+      const showFallback = () => {
+        ready = false;
+        artwork.classList.remove("is-ready");
+        motionButton.hidden = true;
+        animation?.pause();
+      };
+      animation.addEventListener("data_failed", showFallback);
+      animation.addEventListener("error", showFallback);
+    } catch (error) {
+      console.warn("Loading animation unavailable:", error);
+      motionButton.hidden = true;
+    }
     return controller;
   }
 
@@ -52,15 +73,11 @@
     const controller = controllers.get(loader) || createController(loader);
     controller?.setBusy(isBusy);
   };
-
   document.querySelectorAll(".stats-loader").forEach(createController);
   const syncAll = () => controllers.forEach(controller => controller.sync());
-  // Older iOS versions expose addListener rather than addEventListener here.
-  [phoneWidth, reducedMotion].forEach(query => {
-    if (query.addEventListener) query.addEventListener("change", syncAll);
-    else query.addListener(syncAll);
-  });
+  if (reducedMotion.addEventListener) reducedMotion.addEventListener("change", syncAll);
+  else reducedMotion.addListener(syncAll);
   document.addEventListener("visibilitychange", syncAll);
-  window.addEventListener("pagehide", () => controllers.forEach(controller => controller.stop()));
-  window.addEventListener("pageshow", syncAll);
+  window.addEventListener("pagehide", () => { suspended = true; syncAll(); });
+  window.addEventListener("pageshow", () => { suspended = false; syncAll(); });
 })();
