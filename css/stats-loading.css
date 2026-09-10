@@ -57,7 +57,10 @@
 .stats-loader-signal span:nth-child(2) { animation-delay: .18s; }
 .stats-loader-signal span:nth-child(3) { animation-delay: .36s; }
 #pageCard[aria-busy="true"] .chart-wrap { opacity: .35; }
-@keyframes stats-radar-sweep { to { transform: rotate(360deg); } }
+@keyframes stats-radar-sweep {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 @keyframes stats-signal { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
 @media (max-width: 479.98px) {
   .stats-loader { gap: 1rem; padding: 1.25rem 1rem; }
@@ -67,5 +70,13 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .stats-loader *, .stats-loader *::before { animation: none !important; }
-  .stats-loader-signal span { opacity: .65; }
+  /* Retain non-spatial loading feedback. Override the site's blanket .01ms
+     animation rule as well as the radar's reduced-motion rule above. */
+  .skyops-app .stats-loader .stats-loader-signal span {
+    animation: stats-reduced-signal 2s ease-in-out infinite !important;
+  }
+}
+@keyframes stats-reduced-signal {
+  0%, 100% { opacity: .45; }
+  50% { opacity: 1; }
 }
