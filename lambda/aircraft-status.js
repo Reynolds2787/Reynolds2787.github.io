@@ -5,7 +5,7 @@ const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
 const FLIGHTLOGS_TABLE = process.env.FLIGHTLOGS_TABLE || "FlightLogs";
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || "https://efmapp.co.uk";
-const AIRCRAFT = ["G-AZWS", "G-BPAF", "G-EDGI", "G-AVYL", "G-BULL"];
+const AIRCRAFT = ["G-AZWS", "G-BPAF", "G-EDGI", "G-BULL"];
 const USES_FLIGHT_HOURS = new Set(["G-AZWS", "G-BULL"]);
 
 const CORS_HEADERS = {
@@ -46,6 +46,16 @@ function firstPositiveNumber(item, keys) {
   return null;
 }
 
+function firstText(item, keys) {
+  for (const key of keys) {
+    const value = item?.[key];
+    if (value !== null && value !== undefined && String(value).trim()) {
+      return String(value).trim();
+    }
+  }
+  return "";
+}
+
 function rowTimestamp(item) {
   return [item?.flightDate, item?.createdAt, item?.sk]
     .map(value => String(value || ""))
@@ -55,14 +65,12 @@ function rowTimestamp(item) {
 function getStatusFromRows(aircraft, rows) {
   const useFlightHours = USES_FLIGHT_HOURS.has(aircraft);
   const newestFirst = rows.slice().sort((a, b) => rowTimestamp(b).localeCompare(rowTimestamp(a)));
+  const latestRow = newestFirst[0] || {};
 
   let currentHours = null;
   let nextServiceDueAt = null;
-  let lastFlightDate = "";
 
   for (const row of newestFirst) {
-    if (!lastFlightDate) lastFlightDate = row.flightDate || row.createdAt || "";
-
     const rowCurrentHours = useFlightHours
       ? firstNumber(row, ["currentHoursAfterFlight", "flightTimeAfter", "flightHoursAfter"])
       : firstNumber(row, ["endTacho", "tachoEnd"]);
@@ -87,7 +95,9 @@ function getStatusFromRows(aircraft, rows) {
     remainingHours: currentHours !== null && nextServiceDueAt !== null
       ? Number((nextServiceDueAt - currentHours).toFixed(1))
       : null,
-    lastFlightDate
+    lastFlightDate: firstText(latestRow, ["flightDate", "createdAt"]),
+    lastFlightPic: firstText(latestRow, ["picName", "pic", "PIC"]),
+    lastFlightTime: firstText(latestRow, ["airTime", "flightTime", "blockTime", "loggedTime"])
   };
 }
 
@@ -110,7 +120,14 @@ async function queryFlightLogs(aircraft) {
         "flightHoursAfter",
         "endTacho",
         "tachoEnd",
-        "nextServiceDueAt"
+        "nextServiceDueAt",
+        "picName",
+        "pic",
+        "PIC",
+        "airTime",
+        "flightTime",
+        "blockTime",
+        "loggedTime"
       ].join(", "),
       ExclusiveStartKey
     }));
