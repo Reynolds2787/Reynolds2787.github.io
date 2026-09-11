@@ -209,7 +209,7 @@
 
       <div class="refresh-wrap">
         <button id="refreshStatus" class="btn btn-primary" type="button">Refresh</button>
-        <span id="lastUpdated" class="small text-muted" aria-live="polite"></span>
+        <span id="lastUpdated" class="small text-muted" aria-live="polite">Last synced —</span>
       </div>
     </section>
 
@@ -270,11 +270,11 @@
       return "";
     }
 
-    function formatLoggedAt(value) {
-      if (!value) return "Not recorded";
+    function formatSyncedAt(value) {
+      if (!value) return "Last synced unavailable";
       const date = new Date(value);
-      if (Number.isNaN(date.getTime())) return "Not recorded";
-      return new Intl.DateTimeFormat("en-GB", {
+      if (Number.isNaN(date.getTime())) return "Last synced unavailable";
+      const formatted = new Intl.DateTimeFormat("en-GB", {
         day: "2-digit",
         month: "short",
         year: "numeric",
@@ -284,6 +284,14 @@
         timeZone: "Europe/London",
         timeZoneName: "short"
       }).format(date);
+      return `Last synced ${formatted}`;
+    }
+
+    function latestSyncTime(items) {
+      const timestamps = items
+        .map(item => new Date(item?.lastFlightLoggedAt).getTime())
+        .filter(Number.isFinite);
+      return timestamps.length ? new Date(Math.max(...timestamps)).toISOString() : null;
     }
 
     function normalizeResponse(data) {
@@ -330,7 +338,6 @@
             <div class="card-meta">
               <span>${escapeHtml(formatDate(item?.lastFlightDate))}</span>
               <span><span class="card-meta-label">PIC</span> ${escapeHtml(item?.lastFlightPic || "Not recorded")}</span>
-              <span><span class="card-meta-label">Logged</span> ${escapeHtml(formatLoggedAt(item?.lastFlightLoggedAt))}</span>
             </div>
           </article>
         </div>
@@ -384,10 +391,7 @@
         el("aircraftCards").innerHTML = items.map(renderCard).join("");
         el("aircraftCards").classList.toggle("d-none", items.length === 0);
         el("emptyStatus").classList.toggle("d-none", items.length !== 0);
-        el("lastUpdated").textContent = `Updated ${new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit"
-        })}`;
+        el("lastUpdated").textContent = formatSyncedAt(latestSyncTime(items));
       } catch (error) {
         console.error(error);
         showError("Unable to load aircraft hours from FlightLogs.");
