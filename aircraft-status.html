@@ -170,19 +170,6 @@
       text-align: center;
     }
 
-    .skeleton-card {
-      height: 18rem;
-      border-radius: 1rem;
-      background: linear-gradient(90deg, #e5e9ef 25%, #f7f8fa 38%, #e5e9ef 63%);
-      background-size: 400% 100%;
-      animation: shimmer 1.35s ease infinite;
-    }
-
-    @keyframes shimmer {
-      from { background-position: 100% 0; }
-      to { background-position: 0 0; }
-    }
-
     @media (max-width: 575.98px) {
       .page-intro {
         align-items: stretch;
@@ -200,6 +187,9 @@
   <script src="js/admin-guard.js" defer></script>
   <script src="js/loadNavbar.js?v=20260910" defer></script>
   <link rel="stylesheet" href="/css/styles.css?v=20260910-polish">
+  <link rel="stylesheet" href="/css/stats-loading.css?v=4">
+  <script src="/js/vendor/lottie-light-5.13.0.min.js" defer></script>
+  <script src="/js/flight-loader.js?v=3" defer></script>
 </head>
 
 <body class="skyops-app" data-page-title="Aircraft Hours Status">
@@ -209,7 +199,7 @@
 
   <div id="navbar-placeholder"></div>
 
-  <main class="container py-4">
+  <main id="statusContent" class="container py-4" aria-busy="true">
     <section class="page-intro" aria-labelledby="fleetHeading">
       <div>
         <div class="eyebrow">FlightLogs</div>
@@ -225,10 +215,16 @@
 
     <div id="statusError" class="alert alert-danger d-none" role="alert"></div>
 
-    <div id="statusSkeleton" class="row g-3" aria-label="Loading aircraft hours">
-      <div class="col-12 col-md-6 col-xl-4"><div class="skeleton-card"></div></div>
-      <div class="col-12 col-md-6 col-xl-4"><div class="skeleton-card"></div></div>
-      <div class="col-12 col-md-6 col-xl-4"><div class="skeleton-card"></div></div>
+    <div id="statusLoader" class="stats-loader" role="status" aria-live="polite" aria-atomic="true">
+      <div class="flight-loader-art" aria-hidden="true">
+        <img class="flight-loader-fallback" src="/images/icons/airplane.svg" alt="" width="40" height="40">
+        <div class="flight-loader-lottie"></div>
+      </div>
+      <div class="stats-loader-copy">
+        <span class="stats-loader-kicker" aria-hidden="true">Fleet data in motion</span>
+        <h2 class="stats-loader-title">Loading aircraft status</h2>
+        <p>Gathering the latest service hours for the fleet.</p>
+      </div>
     </div>
 
     <div id="aircraftCards" class="row g-3 d-none"></div>
@@ -342,7 +338,10 @@
     }
 
     function setLoading(isLoading) {
-      el("statusSkeleton").classList.toggle("d-none", !isLoading);
+      const loader = el("statusLoader");
+      loader.hidden = !isLoading;
+      window.updateFlightLoader?.(loader, isLoading);
+      el("statusContent").setAttribute("aria-busy", String(isLoading));
       const refresh = el("refreshStatus");
       refresh.disabled = isLoading;
       refresh.textContent = isLoading ? "Refreshing…" : "Refresh";
