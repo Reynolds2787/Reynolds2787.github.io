@@ -255,11 +255,14 @@
         .replace(/'/g, "&#039;");
     }
 
-    function formatDate(value) {
+    function formatDate(value, onChocks) {
       if (!value) return "No flight date recorded";
       const date = new Date(`${String(value).slice(0, 10)}T00:00:00`);
       if (Number.isNaN(date.getTime())) return String(value);
-      return `Latest flight ${date.toLocaleDateString([], { day: "2-digit", month: "short", year: "numeric" })}`;
+      const flightDate = date.toLocaleDateString([], { day: "2-digit", month: "short", year: "numeric" });
+      const timeMatch = String(onChocks || "").match(/^([01]\d|2[0-3]):([0-5]\d)/);
+      const onChocksTime = timeMatch ? ` at ${timeMatch[1]}:${timeMatch[2]}` : "";
+      return `Latest flight ${flightDate}${onChocksTime}`;
     }
 
     function remainingState(value) {
@@ -336,7 +339,7 @@
             </div>
 
             <div class="card-meta">
-              <span>${escapeHtml(formatDate(item?.lastFlightDate))}</span>
+              <span>${escapeHtml(formatDate(item?.lastFlightDate, item?.lastFlightOnChocks))}</span>
               <span><span class="card-meta-label">PIC</span> ${escapeHtml(item?.lastFlightPic || "Not recorded")}</span>
             </div>
           </article>

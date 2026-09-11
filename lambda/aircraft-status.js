@@ -101,6 +101,7 @@ function getStatusFromRows(aircraft, rows) {
       ? Number((nextServiceDueAt - currentHours).toFixed(1))
       : null,
     lastFlightDate: firstText(latestRow, ["flightDate", "createdAt"]),
+    lastFlightOnChocks: firstText(latestRow, ["onChocks"]),
     lastFlightPic: firstText(latestRow, ["picName", "pic", "PIC"]),
     lastFlightLoggedAt: firstText(latestRow, ["createdAt"])
   };
@@ -120,6 +121,7 @@ async function queryFlightLogs(aircraft) {
         "sk",
         "flightDate",
         "createdAt",
+        "onChocks",
         "currentHoursAfterFlight",
         "flightTimeAfter",
         "flightHoursAfter",
