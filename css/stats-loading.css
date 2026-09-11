@@ -22,8 +22,6 @@
 .skyops-app .stats-loader-title { margin: 0 0 .35rem; font-size: 1.1rem; }
 .stats-loader-copy p { margin: 0; color: var(--skyops-muted); font-size: .875rem; }
 .stats-loader-kicker { display: block; margin-bottom: .5rem; color: var(--skyops-blue); font-size: .65rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
-.flight-loader-motion-toggle[hidden] { display: none; }
-.skyops-app .flight-loader-motion-toggle { margin-top: .5rem; padding-left: 0; }
 #pageCard[aria-busy="true"] .chart-wrap { opacity: .35; }
 @media (max-width: 479.98px) {
   .stats-loader { gap: .75rem; padding: 1rem; }
