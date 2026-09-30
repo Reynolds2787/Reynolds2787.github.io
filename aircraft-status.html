@@ -228,7 +228,7 @@
     </div>
 
     <div id="aircraftCards" class="row g-3 d-none"></div>
-    <div id="emptyStatus" class="empty-state d-none">No aircraft hour records were found in FlightLogs.</div>
+    <div id="emptyStatus" class="empty-state d-none">No aircraft hour records were found in EFM flight logs.</div>
   </main>
 
   <script>
@@ -387,7 +387,7 @@
 
         if (!response?.ok) {
           const message = await response?.text().catch(() => "");
-          throw new Error(message || `FlightLogs request failed (${response?.status || "no response"}).`);
+          throw new Error(message || `Flight-log request failed (${response?.status || "no response"}).`);
         }
 
         const items = normalizeResponse(await response.json());
@@ -397,7 +397,7 @@
         el("lastUpdated").textContent = formatSyncedAt(latestSyncTime(items));
       } catch (error) {
         console.error(error);
-        showError("Unable to load aircraft hours from FlightLogs.");
+        showError("Unable to load aircraft hours from EFM flight logs.");
       } finally {
         setLoading(false);
       }

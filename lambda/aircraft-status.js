@@ -1,9 +1,9 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, ScanCommand } from "@aws-sdk/lib-dynamodb";
 
 const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
-const FLIGHTLOGS_TABLE = process.env.FLIGHTLOGS_TABLE || "FlightLogs";
+const FLIGHTLOGS_TABLE = process.env.FLIGHTLOGS_TABLE || "EFM_FlightLogs";
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || "https://efmapp.co.uk";
 const AIRCRAFT = ["G-AZWS", "G-BPAF", "G-EDGI", "G-BULL"];
 const USES_FLIGHT_HOURS = new Set(["G-AZWS", "G-BULL"]);
@@ -46,6 +46,14 @@ function firstPositiveNumber(item, keys) {
   return null;
 }
 
+function firstNonNegativeNumber(item, keys) {
+  for (const key of keys) {
+    const value = numberOrNull(item?.[key]);
+    if (value !== null && value >= 0) return value;
+  }
+  return null;
+}
+
 function firstText(item, keys) {
   for (const key of keys) {
     const value = item?.[key];
@@ -57,9 +65,26 @@ function firstText(item, keys) {
 }
 
 function rowTimestamp(item) {
-  return [item?.flightDate, item?.createdAt, item?.sk]
+  return [
+    item?.flightDate,
+    item?.date,
+    item?.createdAt,
+    item?.updatedAt,
+    item?.sk,
+    item?.SK
+  ]
     .map(value => String(value || ""))
     .join("|");
+}
+
+function aircraftRegistration(item) {
+  return firstText(item, [
+    "aircraft",
+    "Aircraft",
+    "registration",
+    "Registration",
+    "aircraftRegistration"
+  ]).toUpperCase();
 }
 
 function getStatusFromRows(aircraft, rows) {
@@ -69,11 +94,22 @@ function getStatusFromRows(aircraft, rows) {
 
   let currentHours = null;
   let nextServiceDueAt = null;
+  let remainingHours = null;
 
   for (const row of newestFirst) {
     const rowCurrentHours = useFlightHours
-      ? firstNumber(row, ["currentHoursAfterFlight", "flightTimeAfter", "flightHoursAfter"])
-      : firstNumber(row, ["endTacho", "tachoEnd"]);
+      ? firstNumber(row, [
+          "currentHoursAfterFlight",
+          "currentHoursAfter",
+          "flightTimeAfter",
+          "flightHoursAfter"
+        ])
+      : firstNumber(row, [
+          "endTacho",
+          "tachoEnd",
+          "currentTachoAfterFlight",
+          "currentTachoAfter"
+        ]);
     const shouldUseRowCurrent = useFlightHours
       ? currentHours === null
       : currentHours === null || (rowCurrentHours !== null && rowCurrentHours > currentHours);
@@ -82,14 +118,33 @@ function getStatusFromRows(aircraft, rows) {
     }
 
     if (nextServiceDueAt === null) {
-      // Preserve the legacy service fields supported by the deployed endpoint.
       nextServiceDueAt = firstPositiveNumber(row, [
         "nextServiceDueAt", "serviceAt", "nextServiceDue",
-        "remainingFlightHoursAfterFlight", "remainingFlightHoursBeforeFlight",
-        ...(useFlightHours ? [] : ["remainingTachoTimeAfterFlight", "remainingTachoTimeBeforeFlight"])
+        "nextMaintenanceDueAt", "maintenanceDueAt"
       ]);
     }
 
+    if (remainingHours === null) {
+      remainingHours = useFlightHours
+        ? firstNonNegativeNumber(row, [
+            "remainingFlightHoursAfterFlight",
+            "remainingFlightHoursAfter",
+            "flightHoursRemaining"
+          ])
+        : firstNonNegativeNumber(row, [
+            "remainingTachoTimeAfterFlight",
+            "remainingTachoTimeAfter",
+            "tachoHoursRemaining"
+          ]);
+    }
+  }
+
+  if (nextServiceDueAt === null && currentHours !== null && remainingHours !== null) {
+    nextServiceDueAt = Number((currentHours + remainingHours).toFixed(2));
+  }
+
+  if (remainingHours === null && currentHours !== null && nextServiceDueAt !== null) {
+    remainingHours = Number((nextServiceDueAt - currentHours).toFixed(1));
   }
 
   return {
@@ -97,47 +152,21 @@ function getStatusFromRows(aircraft, rows) {
     metric: useFlightHours ? "FLIGHT_HOURS" : "TACHO_HOURS",
     currentHours,
     nextServiceDueAt,
-    remainingHours: currentHours !== null && nextServiceDueAt !== null
-      ? Number((nextServiceDueAt - currentHours).toFixed(1))
-      : null,
-    lastFlightDate: firstText(latestRow, ["flightDate", "createdAt"]),
+    remainingHours,
+    lastFlightDate: firstText(latestRow, ["flightDate", "date", "createdAt"]),
     lastFlightOnChocks: firstText(latestRow, ["onChocks"]),
-    lastFlightPic: firstText(latestRow, ["picName", "pic", "PIC"]),
-    lastFlightLoggedAt: firstText(latestRow, ["createdAt"])
+    lastFlightPic: firstText(latestRow, ["picName", "pic", "PIC", "pilotName"]),
+    lastFlightLoggedAt: firstText(latestRow, ["createdAt", "updatedAt", "flightDate", "date"])
   };
 }
 
-async function queryFlightLogs(aircraft) {
+async function scanFlightLogs() {
   const rows = [];
   let ExclusiveStartKey;
 
   do {
-    const result = await ddb.send(new QueryCommand({
+    const result = await ddb.send(new ScanCommand({
       TableName: FLIGHTLOGS_TABLE,
-      KeyConditionExpression: "aircraft = :aircraft",
-      ExpressionAttributeValues: { ":aircraft": aircraft },
-      ProjectionExpression: [
-        "aircraft",
-        "sk",
-        "flightDate",
-        "createdAt",
-        "onChocks",
-        "currentHoursAfterFlight",
-        "flightTimeAfter",
-        "flightHoursAfter",
-        "endTacho",
-        "tachoEnd",
-        "nextServiceDueAt",
-        "serviceAt",
-        "nextServiceDue",
-        "remainingFlightHoursAfterFlight",
-        "remainingFlightHoursBeforeFlight",
-        "remainingTachoTimeAfterFlight",
-        "remainingTachoTimeBeforeFlight",
-        "picName",
-        "pic",
-        "PIC"
-      ].join(", "),
       ExclusiveStartKey
     }));
 
@@ -157,9 +186,18 @@ export const handler = async event => {
     const userId = event.requestContext?.authorizer?.jwt?.claims?.sub;
     if (!userId) return response(401, { message: "Unauthenticated" });
 
-    const rowsByAircraft = await Promise.all(AIRCRAFT.map(queryFlightLogs));
-    const aircraftStatus = AIRCRAFT.map((aircraft, index) =>
-      getStatusFromRows(aircraft, rowsByAircraft[index])
+    // EFM_FlightLogs is keyed by the member/flight record rather than aircraft,
+    // so group the scan results by registration before calculating fleet status.
+    const rows = await scanFlightLogs();
+    const rowsByAircraft = new Map(AIRCRAFT.map(aircraft => [aircraft, []]));
+
+    for (const row of rows) {
+      const registration = aircraftRegistration(row);
+      rowsByAircraft.get(registration)?.push(row);
+    }
+
+    const aircraftStatus = AIRCRAFT.map(aircraft =>
+      getStatusFromRows(aircraft, rowsByAircraft.get(aircraft))
     );
 
     return response(200, { aircraftStatus });

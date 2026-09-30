@@ -588,6 +588,10 @@
       return flight.p2 || flight.P2 || "";
     }
 
+    function getInstructorCost(flight) {
+      return flight.instrucCost ?? flight.instructorCost ?? flight.instructionCost ?? 0;
+    }
+
     function filteredFlights() {
       const reg = normalizeReg(el("aircraftFilter").value);
       const fromDate = el("fromDate").value || "";
@@ -706,7 +710,7 @@
             <div class="data-stack">
               <div class="data-line"><span class="label">Hire</span><span class="value">${formatMoney(f.aircraftHireCost)}</span></div>
               <div class="data-line"><span class="label">Landing</span><span class="value">${formatMoney(f.landingFees)}</span></div>
-              <div class="data-line"><span class="label">Instructor</span><span class="value">${formatMoney(f.instrucCost || f.instructorCost)}</span></div>
+              <div class="data-line"><span class="label">Instructor</span><span class="value">${formatMoney(getInstructorCost(f))}</span></div>
             </div>
           </td>
           <td class="text-end fw-bold text-nowrap">${formatMoney(f.lfcTotal)}</td>
@@ -765,7 +769,7 @@
                 <div class="row g-3">
                   <div class="col-4"><div class="meta-label">Hire</div><div class="meta-value">${formatMoney(f.aircraftHireCost)}</div></div>
                   <div class="col-4"><div class="meta-label">Landing</div><div class="meta-value">${formatMoney(f.landingFees)}</div></div>
-                  <div class="col-4"><div class="meta-label">Instructor</div><div class="meta-value">${formatMoney(f.instrucCost || f.instructorCost)}</div></div>
+                  <div class="col-4"><div class="meta-label">Instructor</div><div class="meta-value">${formatMoney(getInstructorCost(f))}</div></div>
                 </div>
               </div>
             </div>
