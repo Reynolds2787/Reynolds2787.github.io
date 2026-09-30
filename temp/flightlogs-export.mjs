@@ -8,7 +8,9 @@ import ExcelJS from "exceljs";
 
 const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
-const FLIGHTLOGS_TABLE = process.env.FLIGHTLOGS_TABLE || "FlightLogs";
+const FLIGHTLOGS_TABLE = process.env.FLIGHTLOGS_TABLE || "EFM_FlightLogs";
+const FLIGHTLOGS_INDEX =
+  process.env.FLIGHTLOGS_INDEX || "aircraft-createdAt-index";
 const USER_TABLE = process.env.USER_TABLE || "UserProfiles";
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || "https://efmapp.co.uk";
 
@@ -39,6 +41,7 @@ const EXPORT_COLUMNS = [
   { header: "To", key: "to", width: 14 },
   { header: "# Move", key: "numberOfMovements", width: 10, format: "integer" },
   { header: "Home Landings", key: "homeLandings", width: 15, format: "integer" },
+  { header: "Extra Ccts", key: "extraCircuits", width: 12, format: "integer" },
   { header: "Landings Elsewhere", key: "landingsElsewhere", width: 18, format: "integer" },
 
   { header: "Off Chocks", key: "offChocks", width: 12 },
@@ -49,13 +52,13 @@ const EXPORT_COLUMNS = [
   { header: "Flight Time", key: "flightTime", width: 12 },
   { header: "Logged Time", key: "loggedTime", width: 12 },
 
-  { header: "Flight Time Before", key: "flightTimeBefore", width: 18, format: "decimal2" },
-  { header: "Flight Time After", key: "flightTimeAfter", width: 18, format: "decimal2" },
+  { header: "Flight Time Before (h:mm)", key: "flightTimeBefore", width: 23, format: "hourMeter" },
+  { header: "Flight Time After (h:mm)", key: "flightTimeAfter", width: 22, format: "hourMeter" },
 
   { header: "Tacho Start", key: "tachoStart", width: 13, format: "decimal" },
   { header: "Tacho End", key: "tachoEnd", width: 13, format: "decimal" },
   { header: "Tacho Difference", key: "tachoDifference", width: 16, format: "decimal" },
-  { header: "Next Service Due At", key: "nextServiceDueAt", width: 20 },
+  { header: "Next Service Due At", key: "nextServiceDueAt", width: 20, format: "decimal2" },
 
   { header: "Maintenance Trip", key: "maintenanceTrip", width: 16 },
 
@@ -70,12 +73,18 @@ const EXPORT_COLUMNS = [
   { header: "Surcharge Cost", key: "surchargeCost", width: 16, format: "currency" },
   { header: "Fuel Cost Away", key: "fuelCostAway", width: 16, format: "currency" },
   { header: "Total Cost", key: "totalCost", width: 14, format: "currency" },
+  { header: "Instructor Cost", key: "instructorCost", width: 15, format: "currency" },
+  { header: "Maintenance Flight Subsidy", key: "maintenanceFlightSubsidy", width: 24, format: "currency" },
+  { header: "Rescue Flight Subsidy", key: "rescueFlightSubsidy", width: 21, format: "currency" },
 
   { header: "Payer", key: "payer", width: 14 },
   { header: "Payment Method", key: "paymentMethod", width: 16 },
   { header: "Aircraft", key: "aircraft", width: 12 },
+  { header: "Logging Source", key: "loggingSource", width: 18 },
   { header: "PIC Member ID", key: "picMemberId", width: 16 },
-  { header: "P2 Member ID", key: "p2MemberId", width: 16 }
+  { header: "P2 Member ID", key: "p2MemberId", width: 16 },
+  { header: "Flight ID", key: "flightId", width: 38 },
+  { header: "Created At", key: "createdAt", width: 25 }
 ];
 
 function response(statusCode, bodyObj) {
@@ -138,11 +147,14 @@ function toMoney(value) {
 }
 
 function yesNo(value) {
-  const v = String(value || "").trim().toLowerCase();
+  if (value === true || value === 1) return "Yes";
+  if (value === false || value === 0) return "No";
+
+  const v = String(value ?? "").trim().toLowerCase();
   if (!v) return "";
-  if (v === "yes") return "Yes";
-  if (v === "no") return "No";
-  return String(value);
+  if (["yes", "y", "true", "1"].includes(v)) return "Yes";
+  if (["no", "n", "false", "0"].includes(v)) return "No";
+  return String(value ?? "");
 }
 
 function safeSheetName(name) {
@@ -189,8 +201,8 @@ function sortRows(rows) {
     const bDate = String(b.date || "");
     if (aDate !== bDate) return aDate.localeCompare(bDate);
 
-    const aSk = String(a.sk || "");
-    const bSk = String(b.sk || "");
+    const aSk = String(a.createdAt || a.sk || "");
+    const bSk = String(b.createdAt || b.sk || "");
     return aSk.localeCompare(bSk);
   });
 }
@@ -226,6 +238,7 @@ async function queryAllForAircraft(aircraft) {
     const res = await ddb.send(
       new QueryCommand({
         TableName: FLIGHTLOGS_TABLE,
+        IndexName: FLIGHTLOGS_INDEX,
         KeyConditionExpression: "aircraft = :aircraft",
         ExpressionAttributeValues: {
           ":aircraft": aircraft
@@ -281,6 +294,7 @@ function mapFlightLogRow(item) {
     to: coerceText(firstNonEmpty(item, ["to", "To"])),
     numberOfMovements: calcMovements(item, homeLandings),
     homeLandings,
+    extraCircuits: coerceNumber(firstNonEmpty(item, ["extraCircuits"]), 0),
     landingsElsewhere,
 
     offChocks: coerceText(firstNonEmpty(item, ["offChocks"])),
@@ -318,7 +332,7 @@ function mapFlightLogRow(item) {
       "tachoDifference"
     ])),
 
-    nextServiceDueAt: coerceText(firstNonEmpty(item, [
+    nextServiceDueAt: coerceNumber(firstNonEmpty(item, [
       "nextServiceDueAt",
       "serviceAt",
       "nextServiceDue"
@@ -345,10 +359,18 @@ function mapFlightLogRow(item) {
     surchargeCost: toMoney(firstNonEmpty(item, ["surcharge", "surchargeCost"])),
     fuelCostAway: toMoney(firstNonEmpty(item, ["fuelCost", "fuelCostAway"])),
     totalCost: toMoney(firstNonEmpty(item, ["lfcTotal", "totalCost"])),
+    instructorCost: toMoney(firstNonEmpty(item, ["instructorCost"])),
+    maintenanceFlightSubsidy: toMoney(firstNonEmpty(item, [
+      "maintenanceFlightSubsidy"
+    ])),
+    rescueFlightSubsidy: toMoney(firstNonEmpty(item, [
+      "rescueFlightSubsidy"
+    ])),
 
     payer: coerceText(firstNonEmpty(item, ["payer"])),
     paymentMethod: coerceText(firstNonEmpty(item, ["paymentMethod"])),
     aircraft,
+    loggingSource: coerceText(firstNonEmpty(item, ["loggingSource"])),
 
     picMemberId: coerceText(firstNonEmpty(item, [
       "picMemberId",
@@ -362,6 +384,7 @@ function mapFlightLogRow(item) {
       "p2_member_id"
     ])),
 
+    flightId: coerceText(item.flightId),
     sk: coerceText(item.sk),
     createdAt: coerceText(item.createdAt),
     userId: coerceText(item.userId)
@@ -420,18 +443,59 @@ function round2(n) {
   return Number.isFinite(n) ? Number(n.toFixed(2)) : 0;
 }
 
-// Hours flown for a single mapped row: prefer the flight-hours meter delta,
-// fall back to the tacho difference. Guarded against bad/rolled-over readings.
-function rowHoursFlown(row) {
+// Parse a stored duration such as "00:35" into whole minutes. Keeping the
+// calculation in minutes avoids decimal-hour rounding errors.
+function parseDurationMinutes(value) {
+  const match = String(value ?? "").trim().match(/^(\d+):([0-5]\d)$/);
+  if (!match) return null;
+
+  return Number(match[1]) * 60 + Number(match[2]);
+}
+
+function formatDuration(minutes) {
+  const totalMinutes = Math.max(0, Math.round(Number(minutes) || 0));
+  const hours = Math.floor(totalMinutes / 60);
+  const mins = totalMinutes % 60;
+  return `${hours}:${String(mins).padStart(2, "0")}`;
+}
+
+// Rows are sorted oldest-to-newest before the summary is built. Work backwards
+// to find the most recent flight that has a recorded value for this meter.
+function getLastMeterReading(rows, key) {
+  for (let i = rows.length - 1; i >= 0; i--) {
+    const value = coerceNumber(rows[i][key], null);
+    if (value !== null) return round2(value);
+  }
+
+  return "";
+}
+
+// Flight-hours aircraft use the explicitly logged airborne duration. Meter and
+// tacho values remain fallbacks for legacy records and tacho-hours aircraft.
+function rowMinutesFlown(row, usesFlightHours) {
+  if (usesFlightHours) {
+    const loggedMinutes = parseDurationMinutes(row.flightTime);
+    if (loggedMinutes !== null) return loggedMinutes;
+  }
+
+  if (!usesFlightHours) {
+    const tacho = coerceNumber(row.tachoDifference, null);
+    if (tacho !== null && tacho > 0 && tacho < 100) {
+      return Math.round(tacho * 60);
+    }
+  }
+
   const before = coerceNumber(row.flightTimeBefore, null);
   const after = coerceNumber(row.flightTimeAfter, null);
   if (before !== null && after !== null) {
     const diff = after - before;
-    if (diff > 0 && diff < 100) return diff;
+    if (diff > 0 && diff < 100) return Math.round(diff * 60);
   }
 
   const tacho = coerceNumber(row.tachoDifference, null);
-  if (tacho !== null && tacho > 0 && tacho < 100) return tacho;
+  if (tacho !== null && tacho > 0 && tacho < 100) {
+    return Math.round(tacho * 60);
+  }
 
   return 0;
 }
@@ -443,12 +507,12 @@ function getAircraftOpsSummary(aircraft, rows) {
   const pilots = new Set();
   const pilotStats = new Map();
 
-  let hoursFlown = 0;
+  let minutesFlown = 0;
   let instructional = 0;
 
   for (const r of rows) {
-    const rowHours = rowHoursFlown(r);
-    hoursFlown += rowHours;
+    const rowMinutes = rowMinutesFlown(r, usesHours);
+    minutesFlown += rowMinutes;
 
     const isInstructional = String(r.instructional).toLowerCase() === "yes";
     if (isInstructional) instructional += 1;
@@ -460,36 +524,38 @@ function getAircraftOpsSummary(aircraft, rows) {
     const ps = pilotStats.get(key) || {
       pilot: pic,
       flights: 0,
-      hoursFlown: 0,
+      minutesFlown: 0,
       instructional: 0,
       movements: 0
     };
     ps.flights += 1;
-    ps.hoursFlown += rowHours;
+    ps.minutesFlown += rowMinutes;
     ps.instructional += isInstructional ? 1 : 0;
     ps.movements += coerceNumber(r.numberOfMovements, 0);
     pilotStats.set(key, ps);
+
   }
 
-  // Latest meter = the reading from the most recent flight in the range
-  // (rows are already sorted oldest -> newest), NOT the highest value seen.
-  let latestMeter = null;
-  for (let i = rows.length - 1; i >= 0 && latestMeter === null; i--) {
-    const meter = usesHours
-      ? coerceNumber(rows[i].flightTimeAfter, null)
-      : coerceNumber(rows[i].tachoEnd, null);
-    if (meter !== null) latestMeter = meter;
-  }
+  const lastFlightTime = getLastMeterReading(rows, "flightTimeAfter");
+  const lastTacho = getLastMeterReading(rows, "tachoEnd");
 
   const pilotBreakdown = Array.from(pilotStats.values())
-    .map(p => ({ ...p, hoursFlown: round2(p.hoursFlown) }))
-    .sort((a, b) => b.hoursFlown - a.hoursFlown || b.flights - a.flights);
+    .map(p => ({
+      ...p,
+      // Excel stores durations as fractions of a day. The [h]:mm number format
+      // displays accumulated durations without rolling over after 24 hours.
+      hoursFlown: p.minutesFlown / 1440
+    }))
+    .sort((a, b) =>
+      b.minutesFlown - a.minutesFlown || b.flights - a.flights
+    );
 
   return {
     aircraft,
     metric: usesHours ? "Flight Hours" : "Tacho Hours",
     flights: rows.length,
-    hoursFlown: round2(hoursFlown),
+    hoursFlown: minutesFlown / 1440,
+    minutesFlown,
     movements: totals.totalMovements,
     homeLandings: totals.totalLandingsKemble,
     landingsElsewhere: totals.totalLandingsOther,
@@ -502,7 +568,8 @@ function getAircraftOpsSummary(aircraft, rows) {
     surcharge: round2(totals.totalSurcharge),
     fuelCost: round2(totals.totalFuelCost),
     totalCost: round2(totals.totalLfcTotal),
-    latestMeter: latestMeter === null ? "" : round2(latestMeter),
+    lastFlightTime,
+    lastTacho,
     _pilotSet: pilots,
     _pilotBreakdown: pilotBreakdown
   };
@@ -511,7 +578,7 @@ function getAircraftOpsSummary(aircraft, rows) {
 const PILOT_COLUMNS = [
   { header: "Pilot", key: "pilot", width: 24, total: { totalsRowLabel: "Total" } },
   { header: "Flights", key: "flights", width: 9, format: "integer", total: { totalsRowFunction: "sum" } },
-  { header: "Hours Flown", key: "hoursFlown", width: 12, format: "decimal2", total: { totalsRowFunction: "sum" } },
+  { header: "Flight Time (h:mm)", key: "hoursFlown", width: 16, format: "duration", total: { totalsRowFunction: "sum" } },
   { header: "Instructional", key: "instructional", width: 13, format: "integer", total: { totalsRowFunction: "sum" } },
   { header: "Movements", key: "movements", width: 11, format: "integer", total: { totalsRowFunction: "sum" } }
 ];
@@ -520,7 +587,7 @@ const SUMMARY_COLUMNS = [
   { header: "Aircraft", key: "aircraft", width: 12, total: { totalsRowLabel: "Total" } },
   { header: "Service Metric", key: "metric", width: 14, total: { totalsRowLabel: "" } },
   { header: "Flights", key: "flights", width: 9, format: "integer", total: { totalsRowFunction: "sum" } },
-  { header: "Hours Flown", key: "hoursFlown", width: 12, format: "decimal2", total: { totalsRowFunction: "sum" } },
+  { header: "Flight Time (h:mm)", key: "hoursFlown", width: 16, format: "duration", total: { totalsRowFunction: "sum" } },
   { header: "Movements", key: "movements", width: 11, format: "integer", total: { totalsRowFunction: "sum" } },
   { header: "Home Landings", key: "homeLandings", width: 13, format: "integer", total: { totalsRowFunction: "sum" } },
   { header: "Landings Elsewhere", key: "landingsElsewhere", width: 16, format: "integer", total: { totalsRowFunction: "sum" } },
@@ -533,15 +600,33 @@ const SUMMARY_COLUMNS = [
   { header: "Surcharge", key: "surcharge", width: 11, format: "currency", total: { totalsRowFunction: "sum" } },
   { header: "Fuel Cost", key: "fuelCost", width: 11, format: "currency", total: { totalsRowFunction: "sum" } },
   { header: "Total Cost", key: "totalCost", width: 12, format: "currency", total: { totalsRowFunction: "sum" } },
-  { header: "Latest Meter", key: "latestMeter", width: 12, format: "decimal2", total: { totalsRowLabel: "" } }
+  { header: "Last Flight Time", key: "lastFlightTime", width: 15, format: "decimal2", total: { totalsRowLabel: "" } },
+  { header: "Last Tacho", key: "lastTacho", width: 12, format: "decimal2", total: { totalsRowLabel: "" } }
 ];
 
 function applyCellFormat(cell, format) {
   if (format === "currency") cell.numFmt = "£#,##0.00";
   if (format === "decimal") cell.numFmt = "0.0";
   if (format === "decimal2") cell.numFmt = "0.00";
+  if (format === "duration") cell.numFmt = "[h]:mm";
+  if (format === "hourMeter") cell.numFmt = "[h]:mm";
   if (format === "integer") cell.numFmt = "0";
   if (format === "date") cell.numFmt = "dd/mm/yyyy";
+}
+
+// Excel represents times and durations as fractions of a day. Flight-hour
+// meter readings are stored in DynamoDB as decimal hours, so divide by 24 only
+// when writing these display columns. The mapped row keeps its original value
+// for meter-delta calculations and summary logic.
+function getExportCellValue(row, column) {
+  const value = row[column.key];
+
+  if (column.format === "hourMeter") {
+    const decimalHours = coerceNumber(value, null);
+    return decimalHours === null ? "" : decimalHours / 24;
+  }
+
+  return value ?? "";
 }
 
 function applyDataFormatting(ws, firstDataRow, lastDataRow) {
@@ -580,8 +665,11 @@ const CONDENSED_COLUMNS = [
   { header: "Payer", key: "payer", width: 14 },
   { header: "Tacho Used", key: "tachoDifference", width: 12, format: "decimal", sumTotal: true },
   { header: "Movements", key: "numberOfMovements", width: 11, format: "integer", sumTotal: true },
+  { header: "From", key: "from", width: 12 },
+  { header: "To", key: "to", width: 12 },
   { header: "Paid Landings", key: "landingCost", width: 13, format: "currency", sumTotal: true },
   { header: "Hire Cost", key: "aircraftHireCost", width: 13, format: "currency", sumTotal: true },
+  { header: "Surcharge", key: "surchargeCost", width: 12, format: "currency", sumTotal: true },
   { header: "Total Cost", key: "totalCost", width: 13, format: "currency", sumTotal: true },
   { header: "Maint Trip", key: "maintenanceTrip", width: 11 },
   { header: "Away Fuel Cost", key: "fuelCostAway", width: 14, format: "currency" },
@@ -595,12 +683,12 @@ function addCondensedSheet(ws, aircraft, rows, fromDate, toDate) {
 
   const lastCol = excelColumnName(CONDENSED_COLUMNS.length);
 
-  ws.getCell("A1").value = `Condensed View - ${aircraft}`;
+  ws.getCell("A1").value = `Accounts Summary - ${aircraft}`;
   ws.getCell("A1").font = { size: 14, bold: true, color: { argb: "FFFFFFFF" } };
   ws.getCell("A1").fill = {
     type: "pattern",
     pattern: "solid",
-    fgColor: { argb: "FF6F42C1" }
+    fgColor: { argb: "FF0D6EFD" }
   };
   ws.mergeCells(`A1:${lastCol}1`);
 
@@ -625,7 +713,7 @@ function addCondensedSheet(ws, aircraft, rows, fromDate, toDate) {
       ref: `A${tableStartRow}`,
       headerRow: true,
       totalsRow: false,
-      style: { theme: "TableStyleMedium4", showRowStripes: true },
+      style: { theme: "TableStyleMedium2", showRowStripes: true },
       columns: CONDENSED_COLUMNS.map(c => ({ name: c.header })),
       rows: rows.map(r => CONDENSED_COLUMNS.map(c => r[c.key] ?? ""))
     });
@@ -743,7 +831,7 @@ function addSheet(ws, aircraft, rows, fromDate, toDate) {
         showRowStripes: true
       },
       columns: EXPORT_COLUMNS.map(c => ({ name: c.header })),
-      rows: rows.map(r => EXPORT_COLUMNS.map(c => r[c.key] ?? ""))
+      rows: rows.map(r => EXPORT_COLUMNS.map(c => getExportCellValue(r, c)))
     });
 
     applyDataFormatting(ws, firstDataRow, firstDataRow + rows.length - 1);
@@ -806,7 +894,7 @@ function addSummarySheet(workbook, groupedRows, fromDate, toDate) {
 
   const club = {
     flights: summaries.reduce((n, s) => n + s.flights, 0),
-    hoursFlown: round2(summaries.reduce((n, s) => n + s.hoursFlown, 0)),
+    minutesFlown: summaries.reduce((n, s) => n + s.minutesFlown, 0),
     movements: summaries.reduce((n, s) => n + s.movements, 0),
     homeLandings: summaries.reduce((n, s) => n + s.homeLandings, 0),
     instructional: summaries.reduce((n, s) => n + s.instructional, 0),
@@ -820,7 +908,7 @@ function addSummarySheet(workbook, groupedRows, fromDate, toDate) {
 
   const busiest = summaries
     .slice()
-    .sort((a, b) => b.hoursFlown - a.hoursFlown)[0];
+    .sort((a, b) => b.minutesFlown - a.minutesFlown)[0];
 
   // KPI strip adapts: club-wide when several aircraft are exported, otherwise
   // scoped to the one aircraft (a "busiest aircraft" line makes no sense there).
@@ -828,18 +916,29 @@ function addSummarySheet(workbook, groupedRows, fromDate, toDate) {
     ? [
         ["Aircraft", singleAircraft.aircraft],
         ["Total Flights", singleAircraft.flights],
-        ["Hours Flown", singleAircraft.hoursFlown.toFixed(2)],
+        ["Flight Time", formatDuration(singleAircraft.minutesFlown)],
         ["Total Movements", singleAircraft.movements],
         ["Home Landings", singleAircraft.homeLandings],
         ["Landings Elsewhere", singleAircraft.landingsElsewhere],
         ["Instructional Flights", singleAircraft.instructional],
         ["Distinct Pilots", singleAircraft.pilots],
-        ["Latest Meter", singleAircraft.latestMeter === "" ? "—" : singleAircraft.latestMeter.toFixed(2)],
+        [
+          "Last Flight Time",
+          singleAircraft.lastFlightTime === ""
+            ? "—"
+            : singleAircraft.lastFlightTime.toFixed(2)
+        ],
+        [
+          "Last Tacho",
+          singleAircraft.lastTacho === ""
+            ? "—"
+            : singleAircraft.lastTacho.toFixed(2)
+        ],
         ["Total Cost", `£${singleAircraft.totalCost.toFixed(2)}`]
       ]
     : [
         ["Total Flights", club.flights],
-        ["Hours Flown", club.hoursFlown.toFixed(2)],
+        ["Flight Time", formatDuration(club.minutesFlown)],
         ["Total Movements", club.movements],
         ["Home Landings", club.homeLandings],
         ["Instructional Flights", club.instructional],
@@ -847,12 +946,12 @@ function addSummarySheet(workbook, groupedRows, fromDate, toDate) {
         ["Aircraft Flown", club.aircraftFlown],
         ["Total Fuel (L)", club.fuel],
         ["Total Cost", `£${club.totalCost.toFixed(2)}`],
-        ["Busiest Aircraft", busiest && busiest.hoursFlown > 0
-          ? `${busiest.aircraft} (${busiest.hoursFlown.toFixed(2)} h)`
+        ["Busiest Aircraft", busiest && busiest.minutesFlown > 0
+          ? `${busiest.aircraft} (${formatDuration(busiest.minutesFlown)})`
           : "—"]
       ];
 
-  // KPI strip across rows 3-4, five per row.
+  // KPI strip starts at row 3, with five entries per row.
   kpis.forEach(([label, value], i) => {
     const row = 3 + Math.floor(i / 5);
     const col = excelColumnName((i % 5) * 2 + 1);
@@ -898,12 +997,12 @@ function addSummarySheet(workbook, groupedRows, fromDate, toDate) {
         const agg = pilotAgg.get(key) || {
           pilot: p.pilot,
           flights: 0,
-          hoursFlown: 0,
+          minutesFlown: 0,
           instructional: 0,
           movements: 0
         };
         agg.flights += p.flights;
-        agg.hoursFlown += p.hoursFlown;
+        agg.minutesFlown += p.minutesFlown;
         agg.instructional += p.instructional;
         agg.movements += p.movements;
         pilotAgg.set(key, agg);
@@ -911,8 +1010,10 @@ function addSummarySheet(workbook, groupedRows, fromDate, toDate) {
     });
 
     const pilotRows = Array.from(pilotAgg.values())
-      .map(p => ({ ...p, hoursFlown: round2(p.hoursFlown) }))
-      .sort((a, b) => b.hoursFlown - a.hoursFlown || b.flights - a.flights);
+      .map(p => ({ ...p, hoursFlown: p.minutesFlown / 1440 }))
+      .sort((a, b) =>
+        b.minutesFlown - a.minutesFlown || b.flights - a.flights
+      );
 
     if (pilotRows.length > 0) {
       const pilotTitleRow = totalsRow + 2;
@@ -1032,9 +1133,9 @@ export const handler = async (event) => {
 
     addSummarySheet(workbook, groupedRows, fromDate, toDate);
 
-    // Accounting-oriented condensed sheets first, then the full detail sheets.
+    // Accounting summaries first, then the full detail sheets.
     for (const aircraft of aircraftToExport) {
-      const cws = workbook.addWorksheet(safeSheetName(`Condensed - ${aircraft}`));
+      const cws = workbook.addWorksheet(safeSheetName(`Accounts Summary - ${aircraft}`));
       addCondensedSheet(cws, aircraft, groupedRows[aircraft], fromDate, toDate);
     }
 
