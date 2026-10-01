@@ -1,12 +1,14 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, ScanCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, QueryCommand } from "@aws-sdk/lib-dynamodb";
 
 const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
 const FLIGHTLOGS_TABLE = process.env.FLIGHTLOGS_TABLE || "EFM_FlightLogs";
+const FLIGHTLOGS_INDEX = process.env.FLIGHTLOGS_INDEX || "aircraft-createdAt-index";
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || "https://efmapp.co.uk";
 const AIRCRAFT = ["G-AZWS", "G-BPAF", "G-EDGI", "G-BULL"];
 const USES_FLIGHT_HOURS = new Set(["G-AZWS", "G-BULL"]);
+const RECENT_FLIGHTS_LIMIT = 25;
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
@@ -75,16 +77,6 @@ function rowTimestamp(item) {
   ]
     .map(value => String(value || ""))
     .join("|");
-}
-
-function aircraftRegistration(item) {
-  return firstText(item, [
-    "aircraft",
-    "Aircraft",
-    "registration",
-    "Registration",
-    "aircraftRegistration"
-  ]).toUpperCase();
 }
 
 function getStatusFromRows(aircraft, rows) {
@@ -160,21 +152,17 @@ function getStatusFromRows(aircraft, rows) {
   };
 }
 
-async function scanFlightLogs() {
-  const rows = [];
-  let ExclusiveStartKey;
+async function queryFlightLogs(aircraft) {
+  const result = await ddb.send(new QueryCommand({
+    TableName: FLIGHTLOGS_TABLE,
+    IndexName: FLIGHTLOGS_INDEX,
+    KeyConditionExpression: "aircraft = :aircraft",
+    ExpressionAttributeValues: { ":aircraft": aircraft },
+    ScanIndexForward: false,
+    Limit: RECENT_FLIGHTS_LIMIT
+  }));
 
-  do {
-    const result = await ddb.send(new ScanCommand({
-      TableName: FLIGHTLOGS_TABLE,
-      ExclusiveStartKey
-    }));
-
-    if (Array.isArray(result.Items)) rows.push(...result.Items);
-    ExclusiveStartKey = result.LastEvaluatedKey;
-  } while (ExclusiveStartKey);
-
-  return rows;
+  return Array.isArray(result.Items) ? result.Items : [];
 }
 
 export const handler = async event => {
@@ -186,18 +174,11 @@ export const handler = async event => {
     const userId = event.requestContext?.authorizer?.jwt?.claims?.sub;
     if (!userId) return response(401, { message: "Unauthenticated" });
 
-    // EFM_FlightLogs is keyed by the member/flight record rather than aircraft,
-    // so group the scan results by registration before calculating fleet status.
-    const rows = await scanFlightLogs();
-    const rowsByAircraft = new Map(AIRCRAFT.map(aircraft => [aircraft, []]));
-
-    for (const row of rows) {
-      const registration = aircraftRegistration(row);
-      rowsByAircraft.get(registration)?.push(row);
-    }
-
-    const aircraftStatus = AIRCRAFT.map(aircraft =>
-      getStatusFromRows(aircraft, rowsByAircraft.get(aircraft))
+    const rowsByAircraft = await Promise.all(
+      AIRCRAFT.map(aircraft => queryFlightLogs(aircraft))
+    );
+    const aircraftStatus = AIRCRAFT.map((aircraft, index) =>
+      getStatusFromRows(aircraft, rowsByAircraft[index])
     );
 
     return response(200, { aircraftStatus });
