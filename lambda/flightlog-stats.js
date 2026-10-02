@@ -14,7 +14,7 @@ const USER_TABLE = process.env.USER_TABLE || "UserProfiles";
 const ALLOWED_ORIGIN =
   process.env.ALLOWED_ORIGIN || "https://efmapp.co.uk";
 
-const AIRCRAFT_LIST = ["G-AZWS", "G-BPAF", "G-EDGI", "G-AVYL", "G-BULL"];
+const AIRCRAFT_LIST = ["G-AZWS", "G-BPAF", "G-EDGI", "G-BULL"];
 const WARRIOR_FLEET = ["G-BPAF", "G-EDGI", "G-AZWS"];
 
 const CORS_HEADERS = {
